@@ -50,6 +50,13 @@ var SwiftCODE = function() {
         });
     };
 
+    /**
+     * Return the collection of exercises and their data
+     */
+    self.getExercises = function() {
+        return self._exercises;
+    };
+
     self._initialize = function() {
         self._setupConfig();
         self._setupDb();
@@ -171,17 +178,24 @@ var SwiftCODE = function() {
     self._setupExercises = function() {
         self._exercises = {
             'javascript': {
+                name: 'JavaScript',
                 path: self.config.repo + 'exercises/javascript',
                 projectName: 'Underscore.js'
             },
             'python': {
+                name: 'Python',
                 path: self.config.repo + 'exercises/python',
                 projectName: 'Bottle'
             }
         };
 
-        _.forOwn(self._exercises, function(exercise) {
-            exercise.parts = self._getExerciseParts(exercise.path);
+        var randomExercise = function() {
+            return this.parts[Math.floor(Math.random() * this.parts.length)];
+        };
+
+        _.forOwn(self._exercises, function(lang) {
+            lang.randomExercise = randomExercise;
+            lang.parts = self._getExerciseParts(exercise.path);
         });
     };
 
