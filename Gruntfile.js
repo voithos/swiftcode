@@ -2,6 +2,8 @@
   'use strict';
 
   module.exports = function(grunt) {
+    var jsFiles = ['Gruntfile.js', 'public/**/*.js', '!public/js/libs/**/*.js',
+      '!public/js/plugins.js', 'routes.js', 'models.js', 'server.js'];
 
     grunt.initConfig({
       pkg: grunt.file.readJSON('package.json'),
@@ -9,11 +11,11 @@
         options: {
           newcap: false
         },
-        all: ['Gruntfile.js', 'public/**/*.js', 'routes/**/*.js', 'server.js']
+        all: jsFiles
       },
       watch: {
         test: {
-          files: ['Gruntfile.js', 'public/**/*.js', 'routes/**/*.js', 'server.js'],
+          files: jsFiles,
           tasks: ['usetheforce_on', 'test', 'usetheforce_off']
         }
       }
