@@ -1,8 +1,14 @@
 .navbar.navbar-inverse
     .container
         a.navbar-brand(href='/') SwiftCODE
-        ul.nav.navbar-nav.pull-right
+        ul.nav.navbar-nav
             li
                 a(href='/lobby') Lobby
             li
                 a(href='/help') Help
+        form.navbar-form.pull-right
+            .form-group
+                input.form-control(type='text', placeholder='Username')
+            .form-group
+                input.form-control(type='text', placeholder='Password')
+            button.btn(type='submit') Jack in

@@ -1,5 +1,16 @@
 extends layout
 
 block content
-    h1= title
-    p Welcome to #{title}
+    .container-narrow
+        .jumbotron
+            h1 How Fast Are You?
+            p.
+                SwiftCODE is a multiplayer typing speed test for programmers.
+                Just choose a username and password to begin!
+            form.form-signup
+                .form-group
+                    input.form-control(type='text', placeholder='Username', autofocus)
+                .form-group
+                    input.form-control(type='password', placeholder='Password')
+                button.btn.btn-large.btn-primary.btn-block(type='submit') Sign up
+
