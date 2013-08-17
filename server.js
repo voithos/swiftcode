@@ -2,7 +2,6 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var path = require('path');
 
 var everyauth = require('everyauth');
@@ -18,10 +17,11 @@ var SwiftConfig = function() {
     self.port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
     self.mongodb = {
-        host: process.env.OPENSHIFT_MONGODB_DB_HOST,
-        port: process.env.OPENSHIFT_MONGODB_DB_PORT,
-        username: process.env.OPENSHIFT_MONGODB_DB_USERNAME,
-        password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD
+        dbname: 'swiftcode',
+        host: process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',
+        port: process.env.OPENSHIFT_MONGODB_DB_PORT || 27017,
+        username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || 'admin',
+        password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || 'password'
     };
 };
 
@@ -69,6 +69,8 @@ var SwiftCODE = function() {
      */
     self._setupRoutes = function() {
         self.app.get('/', routes.index);
+        self.app.get('/lobby', routes.lobby);
+        self.app.get('/help', routes.help);
     };
 
     self._initialize();
