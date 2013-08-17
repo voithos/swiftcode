@@ -3,14 +3,19 @@ extends layout
 block content
     .container-narrow
         .jumbotron
-            h1 How Fast Are You?
+            h2 How Swift Are You?
             p.
                 SwiftCODE is a multiplayer typing speed test for programmers.
                 Just choose a username and password to begin!
-            form.form-signup
+            if error.length != 0
+                .alert.alert-danger
+                    button.close(type='button', data-dismiss='alert') x
+                    strong Oops! 
+                    = error
+            form.form-signup(action='/signup', method='POST')
                 .form-group
-                    input.form-control(type='text', placeholder='Username', autofocus)
+                    input.form-control(type='text', placeholder='Username', name='username', autofocus)
                 .form-group
-                    input.form-control(type='password', placeholder='Password')
+                    input.form-control(type='password', placeholder='Password', name='password')
                 button.btn.btn-large.btn-primary.btn-block(type='submit') Sign up
 

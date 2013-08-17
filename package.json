@@ -24,7 +24,10 @@
     "express": "~3.3.5",
     "jade": "~0.34.1",
     "mongoose": "~3.6.17",
-    "everyauth": "~0.4.5"
+    "passport": "~0.1.17",
+    "connect-flash": "~0.1.1",
+    "passport-local": "~0.1.6",
+    "bcrypt": "~0.7.6"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

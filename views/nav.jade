@@ -6,9 +6,9 @@
                 a(href='/lobby') Lobby
             li
                 a(href='/help') Help
-        form.navbar-form.pull-right
+        form.navbar-form.pull-right(action='/login', method='POST')
             .form-group
-                input.form-control(type='text', placeholder='Username')
+                input.form-control(type='text', placeholder='Username', name='username')
             .form-group
-                input.form-control(type='text', placeholder='Password')
-            button.btn(type='submit') Jack in
+                input.form-control(type='password', placeholder='Password', name='password')
+            button.btn(type='submit') Log in
