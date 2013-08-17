@@ -3,15 +3,21 @@
 var express = require('express');
 var path = require('path');
 
+// Routes and models
 var routes = require('./routes');
 var models = require('./models');
 
 var mongoose = require('mongoose');
 
+// Auth libs
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var ensureAuthenticated = require('connect-ensure-login').ensureAuthenticated;
 var flash = require('connect-flash');
 
+/**
+ * Configuration app for SwiftCODE
+ */
 var SwiftCODEConfig = function() {
     // Setup configuration from the environment
     var self = this;
@@ -89,6 +95,16 @@ var SwiftCODE = function() {
                 });
             });
         }));
+
+        passport.serializeUser(function(user, done) {
+            done(null, user.username);
+        });
+
+        passport.deserializeUser(function(username, done) {
+            models.User.findOne({ username: username }, function(err, user) {
+                done(null, user);
+            });
+        });
     };
 
     /**
@@ -104,12 +120,19 @@ var SwiftCODE = function() {
             self.app.use(express.bodyParser());
             self.app.use(express.methodOverride());
 
+            self.app.use(express.cookieParser());
+            self.app.use(express.session({ secret: 'temporarysecret', }));
+            self.app.use(flash());
+
             self.app.use(passport.initialize());
             self.app.use(passport.session());
 
-            self.app.use(express.cookieParser('temporarysecret'));
-            self.app.use(express.session());
-            self.app.use(flash());
+            self.app.use(function(req, res, next) {
+                res.locals({
+                    user: req.user
+                });
+                next();
+            });
 
             self.app.use(self.app.router);
             self.app.use(express.static(path.join(self.config.repo, 'public')));
@@ -124,6 +147,8 @@ var SwiftCODE = function() {
      * Setup routing table
      */
     self._setupRoutes = function() {
+        var authMiddleware = ensureAuthenticated('/');
+
         self.app.get('/', routes.index);
         self.app.post('/signup', routes.signup);
         self.app.post('/login', passport.authenticate('local', {
@@ -131,8 +156,12 @@ var SwiftCODE = function() {
             failureRedirect: '/',
             failureFlash: true
         }));
+        self.app.get('/logout', function(req, res) {
+            req.logout();
+            res.redirect('/');
+        });
 
-        self.app.get('/lobby', routes.lobby);
+        self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/help', routes.help);
     };
 

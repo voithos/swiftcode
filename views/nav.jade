@@ -6,9 +6,14 @@
                 a(href='/lobby') Lobby
             li
                 a(href='/help') Help
-        form.navbar-form.pull-right(action='/login', method='POST')
-            .form-group
-                input.form-control(type='text', placeholder='Username', name='username')
-            .form-group
-                input.form-control(type='password', placeholder='Password', name='password')
-            button.btn(type='submit') Log in
+        if !user
+            form.navbar-form.pull-right(action='/login', method='POST')
+                .form-group
+                    input.form-control(type='text', placeholder='Username', name='username', autofocus)
+                .form-group
+                    input.form-control(type='password', placeholder='Password', name='password')
+                button.btn(type='submit') Log in
+        else
+            ul.nav.navbar-nav.pull-right
+                li
+                    a(href='/logout') Log out
