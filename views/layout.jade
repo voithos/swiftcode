@@ -10,7 +10,6 @@ html
         include nav
         .container
             block content
-
         script.
             var oldieCheck = Boolean(document.getElementsByTagName('html')[0].className.match(/\soldie\s/g));
             if(!oldieCheck) {
@@ -18,7 +17,6 @@ html
             } else {
                 document.write('<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"><\/script>');
             }
-
         script.
             if(!window.jQuery) {
                 if(!oldieCheck) {

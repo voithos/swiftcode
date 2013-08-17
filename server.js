@@ -55,12 +55,15 @@ var SwiftCODE = function() {
         self.app.configure(function() {
             self.app.set('views', path.join(self.config.repo, 'views'));
             self.app.set('view engine', 'jade');
-            self.app.set('view options', { pretty: true });
             self.app.use(express.favicon());
             self.app.use(express.bodyParser());
             self.app.use(express.methodOverride());
             self.app.use(self.app.router);
             self.app.use(express.static(path.join(self.config.repo, 'public')));
+        });
+
+        self.app.configure('development', function() {
+            self.app.locals.pretty = true;
         });
     };
 
