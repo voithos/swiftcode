@@ -1,34 +1,37 @@
 {
-  "name": "OpenShift-Sample-App",
-  "version": "1.0.0",
-  "description": "OpenShift Sample Application",
+  "name": "SwiftCODE",
+  "version": "0.1.0",
+  "description": "Realtime typing speed game for coders",
   "keywords": [
-    "OpenShift",
-    "Node.js",
-    "application",
-    "openshift"
+    "typing",
+    "game",
+    "realtime"
   ],
   "author": {
-    "name": "OpenShift",
-    "email": "ramr@example.org",
-    "url":  "http://www.openshift.com/"
+    "name": "Zaven Muradyan",
+    "email": "megalivoithos@gmail.com"
   },
-  "homepage": "http://www.openshift.com/",
+  "homepage": "http://swiftcode-blackkite.rhcloud.com/",
   "repository": {
     "type": "git",
-    "url": "https://gitub.com/openshift/origin-server"
+    "url": "https://github.com/Pandacodium/Black-Kite"
   },
-
   "engines": {
     "node": ">= 0.6.0",
     "npm": ">= 1.0.0"
   },
-
   "dependencies": {
+    "express": "~3.3.5",
+    "jade": "~0.34.1",
+    "mongoose": "~3.6.17",
+    "everyauth": "~0.4.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-watch": "~0.5.2"
+  },
   "bundleDependencies": [],
-
   "private": true,
   "main": "server.js"
 }
