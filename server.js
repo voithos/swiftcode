@@ -2,6 +2,8 @@
 
 var express = require('express');
 var path = require('path');
+var _ = require('lodash');
+var fs = require('fs');
 
 // Routes and models
 var routes = require('./routes');
@@ -54,6 +56,7 @@ var SwiftCODE = function() {
         self._setupAuth();
         self._setupApp();
         self._setupRoutes();
+        self._setupExercises();
     };
 
     self._setupConfig = function() {
@@ -97,11 +100,11 @@ var SwiftCODE = function() {
         }));
 
         passport.serializeUser(function(user, done) {
-            done(null, user.username);
+            done(null, user.id);
         });
 
-        passport.deserializeUser(function(username, done) {
-            models.User.findOne({ username: username }, function(err, user) {
+        passport.deserializeUser(function(id, done) {
+            models.User.findById(id, function(err, user) {
                 done(null, user);
             });
         });
@@ -165,11 +168,34 @@ var SwiftCODE = function() {
         self.app.get('/help', routes.help);
     };
 
+    self._setupExercises = function() {
+        self._exercises = {
+            'javascript': {
+                path: self.config.repo + 'exercises/javascript',
+                projectName: 'Underscore.js'
+            },
+            'python': {
+                path: self.config.repo + 'exercises/python',
+                projectName: 'Bottle'
+            }
+        };
+
+        _.forOwn(self._exercises, function(exercise) {
+            exercise.parts = self._getExerciseParts(exercise.path);
+        });
+    };
+
+    self._getExerciseParts = function(epath) {
+        return _.map(fs.readdirSync(epath), function(file) {
+            return fs.readFileSync(path.join(epath, file)).toString('utf-8');
+        });
+    };
+
     self._initialize();
 };
 
 
 if (require.main === module) {
-    var app = new SwiftCODE();
+    var app = module.exports = new SwiftCODE();
     app.listen();
 }

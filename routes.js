@@ -1,4 +1,5 @@
-var models = require('./models');
+var app = require('./server'),
+    models = require('./models');
 
 /*
  * GET home page.
