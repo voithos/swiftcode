@@ -1,6 +1,8 @@
 extends layout
 
 block scripts
+    script(src='/js/libs/knockout-2.3.0.min.js')
+    script(src='/socket.io/socket.io.js')
     script(src='/js/lobby.js')
 
 block content
@@ -21,70 +23,17 @@ block content
                                         th Players
                                         th Status
                                         th
-                                    tbody
+                                    tbody(data-bind='foreach: games')
                                         tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
+                                            td.game-row(data-bind='text: num')
+                                            td.game-row(data-bind='text: lang')
                                             td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
+                                                span(data-bind='text: players')
+                                                /
+                                                span(data-bind='text: maxPlayers')
+                                            td.game-row(data-bind='text: status, css: statusCss')
                                             td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
-                                        tr
-                                            td.game-row 1
-                                            td.game-row JavaScript
-                                            td.game-row 2/4
-                                            td.game-row Waiting
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small Join
+                                                button.btn.btn-primary.btn-small(data-bind='visible: isJoinable') Join
             .col-lg-4
                 .well
                     fieldset.languages

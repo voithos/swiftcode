@@ -1,6 +1,8 @@
 #!/bin/env node
 
 var express = require('express');
+var io = require('socket.io');
+var http = require('http');
 
 var app;
 module.exports.getApp = function() {
@@ -51,9 +53,13 @@ var SwiftCODE = function() {
      * Listen on the configured port and IP
      */
     self.listen = function() {
-        self.app.listen(self.config.port, self.config.ipaddress, function() {
-            console.log('Listening on ' + self.config.ipaddress + ':' + self.config.port);
-        });
+        self.server = http.createServer(self.app);
+        self.io = io.listen(self.server);
+        self.io.set('log level', 1);
+        self.server.listen(self.config.port, self.config.ipaddress);
+        console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
+
+        self._setupSockets();
     };
 
     /**
@@ -181,6 +187,20 @@ var SwiftCODE = function() {
 
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/help', routes.help);
+    };
+
+    /**
+     * Setup the realtime sockets
+     */
+    self._setupSockets = function() {
+        var lobby = self.io.of('/lobby')
+        .on('connection', function(socket) {
+            socket.emit('test', { hello: 'world' });
+            socket.on('test', function(data) {
+                console.log('incoming');
+                console.log(data);
+            });
+        });
     };
 
     self._setupExercises = function() {
