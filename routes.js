@@ -1,4 +1,4 @@
-var app = require('./server'),
+var server = require('./server'),
     models = require('./models');
 
 /*
@@ -18,7 +18,8 @@ exports.index = function(req, res) {
 
 exports.lobby = function(req, res) {
     res.render('lobby', {
-        title: 'Lobby'
+        title: 'Lobby',
+        exercises: server.getApp().getExercises()
     });
 };
 

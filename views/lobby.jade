@@ -1,5 +1,94 @@
 extends layout
 
+block scripts
+    script(src='/js/lobby.js')
+
 block content
-    h1= title
-    p Welcome to #{title}
+    .container
+        .row
+            .col-lg-1
+            .col-lg-6
+                .well
+                    fieldset
+                        legend Join Game
+                        .panel.panel-primary.lobby
+                            .panel-heading Lobby
+                            .panel-body
+                                table.table.table-striped.table-hover
+                                    thead
+                                        th #
+                                        th Language
+                                        th Players
+                                        th Status
+                                        th
+                                    tbody
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+                                        tr
+                                            td.game-row 1
+                                            td.game-row JavaScript
+                                            td.game-row 2/4
+                                            td.game-row Waiting
+                                            td.game-row
+                                                button.btn.btn-primary.btn-small Join
+            .col-lg-4
+                .well
+                    fieldset.languages
+                        legend New Game
+                        each ex in exercises
+                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-lang=ex.key)= ex.name + ' (' + ex.projectName + ')'
+            .col-lg-1

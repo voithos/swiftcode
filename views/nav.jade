@@ -2,9 +2,9 @@
     .container
         a.navbar-brand(href='/') SwiftCODE
         ul.nav.navbar-nav
-            li
+            li(class= path=='/lobby' ? 'active' : '')
                 a(href='/lobby') Lobby
-            li
+            li(class= path=='/help' ? 'active' : '')
                 a(href='/help') Help
         if !user
             form.navbar-form.pull-right(action='/login', method='POST')

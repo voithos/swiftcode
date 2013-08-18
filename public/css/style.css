@@ -52,3 +52,17 @@
     padding: 15px;
     margin: 0 auto;
 }
+
+/* Lobby page */
+.lobby {
+    margin-bottom: 0;
+}
+
+.lobby .panel-body {
+    height: 450px;
+    overflow-y: scroll;
+}
+
+.lobby .game-row {
+    vertical-align: middle;
+}

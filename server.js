@@ -1,6 +1,12 @@
 #!/bin/env node
 
 var express = require('express');
+
+var app;
+module.exports.getApp = function() {
+    return app;
+};
+
 var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
@@ -54,7 +60,7 @@ var SwiftCODE = function() {
      * Return the collection of exercises and their data
      */
     self.getExercises = function() {
-        return self._exercises;
+        return _.sortBy(self._exercises, 'order');
     };
 
     self._initialize = function() {
@@ -137,9 +143,11 @@ var SwiftCODE = function() {
             self.app.use(passport.initialize());
             self.app.use(passport.session());
 
+            // Template default available attributes
             self.app.use(function(req, res, next) {
                 res.locals({
-                    user: req.user
+                    user: req.user,
+                    path: req.path
                 });
                 next();
             });
@@ -178,14 +186,25 @@ var SwiftCODE = function() {
     self._setupExercises = function() {
         self._exercises = {
             'javascript': {
+                order: 0,
+                key: 'javascript',
                 name: 'JavaScript',
                 path: self.config.repo + 'exercises/javascript',
                 projectName: 'Underscore.js'
             },
             'python': {
+                order: 1,
+                key: 'python',
                 name: 'Python',
                 path: self.config.repo + 'exercises/python',
                 projectName: 'Bottle'
+            },
+            'c-sharp': {
+                order: 4,
+                key: 'c-sharp',
+                name: 'C#',
+                path: self.config.repo + 'exercises/c-sharp',
+                projectName: 'Signalr'
             }
         };
 
@@ -195,7 +214,7 @@ var SwiftCODE = function() {
 
         _.forOwn(self._exercises, function(lang) {
             lang.randomExercise = randomExercise;
-            lang.parts = self._getExerciseParts(exercise.path);
+            lang.parts = self._getExerciseParts(lang.path);
         });
     };
 
@@ -208,8 +227,7 @@ var SwiftCODE = function() {
     self._initialize();
 };
 
-
 if (require.main === module) {
-    var app = module.exports = new SwiftCODE();
+    app = new SwiftCODE();
     app.listen();
 }
