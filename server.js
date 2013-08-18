@@ -286,6 +286,25 @@ var SwiftCODE = function() {
                 });
             });
 
+            socket.on('ingame:ping', function(data) {
+                models.Game.findById(data.gameId, function(err, game) {
+                    if (err) {
+                        console.log('ingame:ping error'); return;
+                    }
+                    if (game) {
+                        game.updateGameStatus(function(err, modified, game) {
+                            if (err) {
+                                console.log('ingame:ping error'); return;
+                            }
+                            if (modified) {
+                                lobby.emit('games:update', game);
+                            }
+                            socket.emit('ingame:ping:res', { game: game });
+                        });
+                    }
+                });
+            });
+
             socket.on('ingame:exit', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {

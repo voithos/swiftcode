@@ -6,6 +6,7 @@ block styles
 block scripts
     script(src='/js/libs/knockout-2.3.0.min.js')
     script(src='/js/libs/highlight.min.js')
+    script(src='/js/libs/moment-2.1.0.min.js')
     script(src='/socket.io/socket.io.js')
     script(src='/js/game.js')
 
@@ -16,11 +17,15 @@ block content
             .col-lg-4
                 .panel.panel-danger
                     .panel-heading
-                    .panel-body(data-bind="template: 'controlPanelTemplate'")
+                    .panel-body.control-panel(data-bind="template: 'controlPanelTemplate'")
                 script(id='controlPanelTemplate', type='text/html')
-                    h3(data-bind='text: game.gameStatus')
-                    span(data-bind='if: game.countdownRunning')
-                        span(data-bind='text: game.countdown')
+                    .row
+                        .col-lg-9
+                            h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
+                        .col-lg-3
+                            div(data-bind='if: game.countdownRunning')
+                                div.countdown-parent(data-bind='ifnot: game.started')
+                                    span.countdown.badge(data-bind='text: game.countdown')
             .col-lg-4
         .row
             .col-lg-1

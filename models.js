@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     bcrypt = require('bcrypt'),
     _ = require('lodash'),
+    moment = require('moment'),
     SALT_WORK_FACTOR = 10;
 
 var UserSchema = new Schema({
@@ -111,6 +112,8 @@ var GameSchema = new Schema({
     statusText: { type: String },
     isJoinable: { type: Boolean, default: true },
     isComplete: { type: Boolean, default: false },
+    starting: { type: Boolean, default: false },
+    started: { type: Boolean, default: false },
     startTime: { type: Date },
     creator: { type: Schema.ObjectId, ref: 'UserSchema' },
     winner: { type: Schema.ObjectId, ref: 'UserSchema' },
@@ -137,6 +140,49 @@ GameSchema.methods.setStatus = function(status) {
     };
     this.status = status;
     this.statusText = bindings[status];
+};
+
+GameSchema.methods.updateGameStatus = function(callback) {
+    var game = this;
+    var modified = false;
+    if (game.starting) {
+        if (game.numPlayers < 2) {
+            game.starting = false;
+            game.startTime = undefined;
+            game.isJoinable = true;
+            modified = true;
+        } else {
+            var timeLeft = moment(game.startTime).diff(moment());
+            if (game.isJoinable) {
+                if (timeLeft < 5000) {
+                    game.isJoinable = false;
+                    modified = true;
+                }
+            }
+            if (!game.isJoinable) {
+                if (timeLeft < 0) {
+                    game.started = true;
+                    game.setStatus('ingame');
+                    modified = true;
+                }
+            }
+        }
+    } else {
+        if (game.numPlayers > 1) {
+            game.starting = true;
+            game.startTime = moment().add(15, 'seconds').toDate();
+            modified = true;
+        }
+    }
+
+    if (modified) {
+        game.save(function(err) {
+            if (err) return callback('error saving user');
+            return callback(null, modified, game);
+        });
+    } else {
+        return callback(null, modified, game);
+    }
 };
 
 var User = mongoose.model('User', UserSchema);

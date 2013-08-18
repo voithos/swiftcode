@@ -93,6 +93,24 @@
 }
 
 /* Game page */
+.control-panel-go {
+    margin: 0 auto;
+}
+
+.control-panel .status {
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.control-panel .countdown-parent {
+    line-height: 48px;
+}
+
+.control-panel .countdown {
+    font-size: 25px;
+}
+
 .code-char.opponent1 {
     background-color: #3498db;
     /* outline: 1px solid #3498db; */
