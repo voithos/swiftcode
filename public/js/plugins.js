@@ -10,3 +10,7 @@ var getQualifiedHost = function() {
     return location.protocol + '//' + location.hostname +
         (location.port ? ':' + location.port : '');
 };
+
+var redirect = function(page) {
+    location.href = getQualifiedHost() + page;
+};

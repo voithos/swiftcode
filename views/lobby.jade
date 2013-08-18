@@ -15,8 +15,15 @@ block content
                         legend Join Game
                         .panel.panel-primary.lobby
                             .panel-heading Lobby
-                            .panel-body
+                            .panel-body(data-bind="template: 'lobbyTemplate'")
+                            script(id='lobbyTemplate', type='text/html')
                                 table.table.table-striped.table-hover
+                                    colgroup
+                                        col(width='40px')
+                                        col(width='140px')
+                                        col(width='100px')
+                                        col(width='110px')
+                                        col(width='90px')
                                     thead
                                         th #
                                         th Language
@@ -24,20 +31,23 @@ block content
                                         th Status
                                         th
                                     tbody(data-bind='foreach: games')
-                                        tr
-                                            td.game-row(data-bind='text: num')
-                                            td.game-row(data-bind='text: lang')
-                                            td.game-row
-                                                span(data-bind='text: players')
+                                        tr.game-row
+                                            td(data-bind='text: num')
+                                            td(data-bind='text: langName')
+                                            td
+                                                span(data-bind='text: numPlayers')
                                                 /
                                                 span(data-bind='text: maxPlayers')
-                                            td.game-row(data-bind='text: status, css: statusCss')
-                                            td.game-row
-                                                button.btn.btn-primary.btn-small(data-bind='visible: isJoinable') Join
+                                            td(data-bind='text: statusText, css: statusCss')
+                                            td
+                                                button.btn.btn-primary.btn-small(data-bind='visible: isJoinable, click: join') Join
+                                    tbody(data-bind='if: games().length == 0')
+                                        tr.game-row.no-games
+                                            td(colspan='5') There are no available games! Make a new one.
             .col-lg-4
                 .well
                     fieldset.languages
                         legend New Game
                         each ex in exercises
-                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-lang=ex.key)= ex.name + ' (' + ex.projectName + ')'
+                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-bind="click: newGame.bind($data, '#{ex.key}')")= ex.name + ' (' + ex.projectName + ')'
             .col-lg-1

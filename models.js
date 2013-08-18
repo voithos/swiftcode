@@ -1,14 +1,20 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     bcrypt = require('bcrypt'),
+    _ = require('lodash'),
     SALT_WORK_FACTOR = 10;
 
-var userSchema = new Schema({
+var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    bestTime: { type: Number },
+    bestSpeed: { type: Number },
+    gamesWon: { type: Number },
+    totalGames: { type: Number },
+    currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
 });
 
-userSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next) {
     var user = this;
 
     if (!user.isModified('password')) {
@@ -28,7 +34,7 @@ userSchema.pre('save', function(next) {
     });
 });
 
-userSchema.methods.comparePassword = function(candidate, callback) {
+UserSchema.methods.comparePassword = function(candidate, callback) {
     bcrypt.compare(candidate, this.password, function(err, isMatch) {
         if (err) {
             return callback(err);
@@ -37,4 +43,103 @@ userSchema.methods.comparePassword = function(candidate, callback) {
     });
 };
 
-module.exports.User = mongoose.model('User', userSchema);
+UserSchema.methods.joinGame = function(game, callback) {
+    var user = this;
+    user.currentGame = game._id;
+    game.players.push(user._id);
+    game.numPlayers += 1;
+
+    game.save(function(err) {
+        if (err) return callback('error saving game');
+        user.save(function(err) {
+            if (err) return callback('error saving user');
+            callback(null, game);
+        });
+    });
+};
+
+UserSchema.methods.createGame = function(opts, callback) {
+    var user = this;
+    var game = new Game();
+    _.forOwn(opts, function(v, k) {
+        if (k in game) {
+            game[k] = v;
+        }
+    });
+
+    game.setStatus('waiting');
+    game.isJoinable = true;
+    game.isComplete = false;
+    game.creator = user._id;
+
+    user.joinGame(game, callback);
+};
+
+UserSchema.methods.quitCurrentGame = function(callback) {
+    var user = this;
+    if (user.currentGame) {
+        Game.findById(user.currentGame, function(err, game) {
+            if (err) return callback('error retrieving game');
+            if (game) {
+                game.players.remove(user._id);
+                game.numPlayers -= 1;
+                if (game.numPlayers <= 0) {
+                    game.isComplete = true;
+                }
+                game.save(function(err) {
+                    if (err) return callback('error saving game');
+                    user.currentGame = undefined;
+                    user.save(function(err) {
+                        if (err) return callback('error saving user');
+                        callback(null, game);
+                    });
+                });
+            }
+        });
+    } else {
+        callback();
+    }
+};
+
+var GameSchema = new Schema({
+    lang: { type: String, required: true },
+    langName: { type: String },
+    numPlayers: { type: Number, min: 0, default: 0 },
+    maxPlayers: { type: Number, min: 0 },
+    status: { type: String },
+    statusText: { type: String },
+    isJoinable: { type: Boolean, default: true },
+    isComplete: { type: Boolean, default: false },
+    startTime: { type: Date },
+    creator: { type: Schema.ObjectId, ref: 'UserSchema' },
+    winner: { type: Schema.ObjectId, ref: 'UserSchema' },
+    winnerTime: { type: Number, min: 0 },
+    winnerSpeed: { type: Number, min: 0 },
+    players: [Schema.ObjectId]
+});
+
+GameSchema.pre('save', function(next) {
+    var game = this;
+
+    if (game.isModified('numPlayers')) {
+        if (game.numPlayers == game.maxPlayers) {
+            game.isJoinable = false;
+        }
+    }
+    return next();
+});
+
+GameSchema.methods.setStatus = function(status) {
+    var bindings = {
+        'waiting': 'Waiting',
+        'ingame': 'In game'
+    };
+    this.status = status;
+    this.statusText = bindings[status];
+};
+
+var User = mongoose.model('User', UserSchema);
+var Game = mongoose.model('Game', GameSchema);
+
+module.exports.User = User;
+module.exports.Game = Game;

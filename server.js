@@ -90,6 +90,13 @@ var SwiftCODE = function() {
             user: self.config.mongodb.username,
             pass: self.config.mongodb.password
         });
+
+        // On startup, set all previous games to complete
+        models.Game.update({ isComplete: false },
+                           { isComplete: true, numPlayers: 0, players: [], isJoinable: false },
+                           function() {
+                               console.log('games reset');
+                           });
     };
 
     /**
@@ -186,6 +193,7 @@ var SwiftCODE = function() {
         });
 
         self.app.get('/lobby', authMiddleware, routes.lobby);
+        self.app.get('/game', authMiddleware, routes.game);
         self.app.get('/help', routes.help);
     };
 
@@ -195,10 +203,81 @@ var SwiftCODE = function() {
     self._setupSockets = function() {
         var lobby = self.io.of('/lobby')
         .on('connection', function(socket) {
-            socket.emit('test', { hello: 'world' });
-            socket.on('test', function(data) {
-                console.log('incoming');
-                console.log(data);
+            socket.on('games:fetch', function(data) {
+                models.Game.find({ isComplete: false }, function(err, docs) {
+                    socket.emit('games:fetch:res', docs);
+                });
+            });
+
+            socket.on('games:join', function(data) {
+                models.User.findById(data.player, function(err, user) {
+                    if (err) {
+                        console.log('games:join error'); return;
+                    }
+                    models.Game.findById(data.game, function(err, game) {
+                        if (err) {
+                            console.log('games:join error'); return;
+                        }
+                        if (game.isJoinable) {
+                            user.joinGame(game, function(err, game) {
+                                if (err) {
+                                    console.log('games:join error'); return;
+                                }
+                                socket.emit('games:join:res', { success: true, game: game });
+                                socket.broadcast.emit('games:update', game);
+                            });
+                        } else {
+                            socket.emit('games:join:res', { success: false });
+                        }
+                    });
+                });
+            });
+
+            socket.on('games:createnew', function(data) {
+                var exercises = self._exercises;
+                if (data.key in exercises) {
+                    var lang = exercises[data.key];
+
+                    models.User.findById(data.player, function(err, user) {
+                        user.createGame({
+                            lang: lang.key,
+                            langName: lang.name,
+                            maxPlayers: 4
+                        }, function(err, game) {
+                            if (err) {
+                                console.log('games:createnew error'); return;
+                            }
+                            socket.emit('games:createnew:res', { success: true, game: game });
+                            socket.broadcast.emit('games:new', game);
+                        });
+                    });
+                } else {
+                    console.log('No such game type');
+                }
+            });
+        });
+
+        var game = self.io.of('/game')
+        .on('connection', function(socket) {
+            socket.on('ingame:exit', function(data) {
+                models.User.findById(data.player, function(err, user) {
+                    if (err) {
+                        console.log('ingame:exit error'); return;
+                    }
+                    user.quitCurrentGame(function(err, game) {
+                        if (err) {
+                            console.log('ingame:exit error'); return;
+                        }
+
+                        if (game) {
+                            if (game.isComplete) {
+                                lobby.emit('games:remove', { _id: game._id });
+                            } else {
+                                lobby.emit('games:update', game);
+                            }
+                        }
+                    });
+                });
             });
         });
     };

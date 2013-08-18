@@ -28,6 +28,17 @@ exports.lobby = function(req, res) {
     });
 };
 
+
+/*
+ * GET game page.
+ */
+
+exports.game = function(req, res) {
+    res.render('game', {
+        title: 'Game'
+    });
+};
+
 /*
  * GET help page.
  */

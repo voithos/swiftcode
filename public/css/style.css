@@ -81,5 +81,13 @@
 }
 
 .lobby .game-row {
+    height: 50px;
+}
+
+.lobby .game-row td {
     vertical-align: middle;
+}
+
+.lobby .game-row.no-games {
+    text-align: center;
 }
