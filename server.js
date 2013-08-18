@@ -239,6 +239,10 @@ var SwiftCODE = function() {
     };
 
     self._getExerciseParts = function(epath) {
+        if (!fs.existsSync(epath)) {
+            return [];
+        }
+
         return _.map(fs.readdirSync(epath), function(file) {
             return fs.readFileSync(path.join(epath, file)).toString('utf-8');
         });
