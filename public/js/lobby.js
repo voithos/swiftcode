@@ -40,7 +40,7 @@
         }.bind(this);
     };
 
-    var viewModel = window.vm = {
+    var viewModel = {
         games: ko.observableArray(),
         newGame: function(key) {
             console.log('emit games:createnew');

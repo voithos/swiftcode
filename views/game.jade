@@ -1,10 +1,32 @@
 extends layout
 
+block styles
+    link(rel='stylesheet', href='/css/tomorrow.css')
+
 block scripts
     script(src='/js/libs/knockout-2.3.0.min.js')
+    script(src='/js/libs/highlight.min.js')
     script(src='/socket.io/socket.io.js')
     script(src='/js/game.js')
 
 block content
     .container
-        Main game part
+        .row
+            .col-lg-4
+            .col-lg-4
+                .panel.panel-danger
+                    .panel-heading
+                    .panel-body(data-bind="template: 'controlPanelTemplate'")
+                script(id='controlPanelTemplate', type='text/html')
+                    h3(data-bind='text: game.gameStatus')
+                    span(data-bind='if: game.countdownRunning')
+                        span(data-bind='text: game.countdown')
+            .col-lg-4
+        .row
+            .col-lg-1
+            .col-lg-10
+                pre(data-bind="template: 'gamecodeTemplate'")
+                script(id='gamecodeTemplate', type='text/html')
+                    code#gamecode(data-bind='text: game.gamecode')
+            .col-lg-1
+

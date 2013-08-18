@@ -104,6 +104,7 @@ UserSchema.methods.quitCurrentGame = function(callback) {
 var GameSchema = new Schema({
     lang: { type: String, required: true },
     langName: { type: String },
+    partFile: { type: String },
     numPlayers: { type: Number, min: 0, default: 0 },
     maxPlayers: { type: Number, min: 0 },
     status: { type: String },

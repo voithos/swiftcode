@@ -91,3 +91,28 @@
 .lobby .game-row.no-games {
     text-align: center;
 }
+
+/* Game page */
+.code-char.opponent1 {
+    background-color: #3498db;
+    /* outline: 1px solid #3498db; */
+    color: #ffffff;
+}
+
+.code-char.opponent2 {
+    background-color: #f39c12;
+    /* outline: 1px solid #f39c12; */
+    color: #ffffff;
+}
+
+.code-char.opponent3 {
+    background-color: #e74c3c;
+    /* outline: 1px solid #e74c3c; */
+    color: #ffffff;
+}
+
+.code-char.player {
+    background-color: #1AC7A4;
+    /* outline: 1px solid #16B696; */
+    color: #ffffff;
+}

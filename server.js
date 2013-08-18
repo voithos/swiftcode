@@ -248,7 +248,8 @@ var SwiftCODE = function() {
                         user.createGame({
                             lang: lang.key,
                             langName: lang.name,
-                            maxPlayers: 4
+                            maxPlayers: 4,
+                            partFile: lang.randomExercise().partFile
                         }, function(err, game) {
                             if (err) {
                                 console.log('games:createnew error'); return;
@@ -258,13 +259,33 @@ var SwiftCODE = function() {
                         });
                     });
                 } else {
-                    console.log('No such game type');
+                    console.log('No such game type: ' + data.key);
                 }
             });
         });
 
         var game = self.io.of('/game')
         .on('connection', function(socket) {
+            socket.on('ingame:ready', function(data) {
+                models.User.findById(data.player, function(err, user) {
+                    if (err) {
+                        console.log('ingame:ready error'); return;
+                    }
+                    if (user) {
+                        models.Game.findById(user.currentGame, function(err, game) {
+                            if (game) {
+                                if (err) {
+                                    console.log('ingame:ready error'); return;
+                                }
+                                // Join a room
+                                socket.join('game-' + game.id);
+                                socket.emit('ingame:ready:res', { game: game, gameCode: self._getGameCode(game) });
+                            }
+                        });
+                    }
+                });
+            });
+
             socket.on('ingame:exit', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
@@ -319,7 +340,8 @@ var SwiftCODE = function() {
 
         _.forOwn(self._exercises, function(lang) {
             lang.randomExercise = randomExercise;
-            lang.parts = self._getExerciseParts(lang.path);
+            lang.partsMap = self._getExerciseParts(lang.path);
+            lang.parts = _.sortBy(_.values(lang.partsMap), 'partFile');
         });
     };
 
@@ -328,9 +350,27 @@ var SwiftCODE = function() {
             return [];
         }
 
-        return _.map(fs.readdirSync(epath), function(file) {
-            return fs.readFileSync(path.join(epath, file)).toString('utf-8');
-        });
+        return _.zipObject(_.map(fs.readdirSync(epath), function(file) {
+            return [file, {
+                partFile: file,
+                code: fs.readFileSync(path.join(epath, file)).toString('utf-8')
+            }];
+        }));
+    };
+
+    self._getGameCode = function(game) {
+        var exercises = self._exercises;
+        if (game.lang in exercises) {
+            var lang = exercises[game.lang];
+
+            if (game.partFile in lang.partsMap) {
+                return lang.partsMap[game.partFile].code;
+            } else {
+                console.log('No such part file: ' + game.partFile);
+            }
+        } else {
+            console.log('No such game type: ' + game.lang);
+        }
     };
 
     self._initialize();
