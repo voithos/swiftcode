@@ -46,6 +46,23 @@
     }
 }
 
+.logo {
+    padding: 15px;
+}
+
+.logo .inverse {
+    position: relative;
+    display: inline-block;
+    background-color: #000000;
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 14px;
+}
+
+.logo:hover .inverse {
+    background-color: #ffffff;
+}
+
 /* Index page */
 .form-signup {
     max-width: 330px;
