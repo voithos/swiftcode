@@ -1,5 +1,5 @@
 (function() {
-    var socket = io.connect(getQualifiedHost() + '/lobby');
+    var socket = io.connect(getSocketUrl() + '/lobby');
 
     var gameNum = 1;
     var Game = function(opts) {

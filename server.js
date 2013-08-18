@@ -32,6 +32,8 @@ var SwiftCODEConfig = function() {
     // Setup configuration from the environment
     var self = this;
 
+    // Setup a flag indicating if we're in OpenShift or not
+    self.openshift = !!process.env.OPENSHIFT_APP_DNS;
     self.repo = process.env.OPENSHIFT_REPO_DIR || '';
 
     self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
@@ -56,6 +58,9 @@ var SwiftCODE = function() {
         self.server = http.createServer(self.app);
         self.io = io.listen(self.server);
         self.io.set('log level', 1);
+        if (self.config.openshift) {
+            self.io.set('transports', ['websocket']);
+        }
         self.server.listen(self.config.port, self.config.ipaddress);
         console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
 
@@ -160,7 +165,8 @@ var SwiftCODE = function() {
             self.app.use(function(req, res, next) {
                 res.locals({
                     user: req.user,
-                    path: req.path
+                    path: req.path,
+                    openshift: self.config.openshift
                 });
                 next();
             });
