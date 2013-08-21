@@ -74,6 +74,8 @@
         if (game.starting) {
             viewModel.game.gameStatus('Get ready... ');
             viewModel.game.countdown(moment(game.startTime).diff(moment(), 'seconds') + 1);
+        } else {
+            viewModel.game.gameStatus('Waiting for players...');
         }
 
         if (game.started) {
