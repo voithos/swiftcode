@@ -34,7 +34,7 @@ var SwiftCODEConfig = function() {
 
     // Setup a flag indicating if we're in OpenShift or not
     self.openshift = !!process.env.OPENSHIFT_APP_DNS;
-    self.repo = process.env.OPENSHIFT_REPO_DIR || '';
+    self.repo = process.env.OPENSHIFT_REPO_DIR || './';
 
     self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
     self.port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
@@ -150,7 +150,7 @@ var SwiftCODE = function() {
             self.app.set('views', path.join(self.config.repo, 'views'));
             self.app.set('view engine', 'jade');
 
-            self.app.use(express.favicon());
+            self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico')));
             self.app.use(express.bodyParser());
             self.app.use(express.methodOverride());
 
@@ -171,7 +171,6 @@ var SwiftCODE = function() {
                 next();
             });
 
-            self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico')));
             self.app.use(self.app.router);
             self.app.use(express.static(path.join(self.config.repo, 'public')));
         });
