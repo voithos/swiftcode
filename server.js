@@ -171,6 +171,7 @@ var SwiftCODE = function() {
                 next();
             });
 
+            self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico');
             self.app.use(self.app.router);
             self.app.use(express.static(path.join(self.config.repo, 'public')));
         });
