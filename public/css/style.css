@@ -59,6 +59,10 @@
     text-align: center;
 }
 
+.parsley-error-list {
+    display: none !important;
+}
+
 /* Index page */
 .form-signup {
     max-width: 330px;

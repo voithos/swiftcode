@@ -1,3 +1,18 @@
+// Initiate parsley validation
+$(document).ready(function() {
+    $('.form-parsley').each(function(i, elem) {
+        $(elem).parsley({
+            successClass: 'has-success',
+            errorClass: 'has-error',
+            errors: {
+                classHandler: function(el) {
+                    return $(el).closest('.form-group');
+                }
+            }
+        });
+    });
+});
+
 var getQualifiedUrl = function() {
     return location.protocol + '//' + location.hostname +
         (location.port ? ':' + location.port : '');

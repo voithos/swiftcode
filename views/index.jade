@@ -12,10 +12,10 @@ block content
                     button.close(type='button', data-dismiss='alert') x
                     strong Oops! 
                     = error
-            form.form-signup(action='/signup', method='POST')
+            form.form-signup.form-parsley(action='/signup', method='POST')
                 .form-group
-                    input.form-control(type='text', placeholder='Username', name='username')
+                    input.form-control(type='text', placeholder='Username', name='username', data-required='true')
                 .form-group
-                    input.form-control(type='password', placeholder='Password', name='password')
+                    input.form-control(type='password', placeholder='Password', name='password', data-required='true')
                 button.btn.btn-large.btn-primary.btn-block(type='submit') Sign up
 

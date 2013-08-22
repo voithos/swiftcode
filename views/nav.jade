@@ -9,11 +9,11 @@
             li(class= path=='/help' ? 'active' : '')
                 a(href='/help') Help
         if !user
-            form.navbar-form.pull-right(action='/login', method='POST')
+            form.navbar-form.pull-right.form-parsley(action='/login', method='POST')
                 .form-group
-                    input.form-control(type='text', placeholder='Username', name='username', autofocus)
+                    input.form-control(type='text', placeholder='Username', name='username', autofocus, data-required='true')
                 .form-group
-                    input.form-control(type='password', placeholder='Password', name='password')
+                    input.form-control(type='password', placeholder='Password', name='password', data-required='true')
                 button.btn(type='submit') Log in
         else
             ul.nav.navbar-nav.pull-right
