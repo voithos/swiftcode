@@ -21,19 +21,28 @@
         -webkit-box-shadow: none;
         box-shadow: none;
     }
-}
-@media (min-width: 768px) {
+
     .navbar-form .form-group {
         display: inline-block;
         margin-bottom: 0;
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: 3px;
+        margin-right: 3px;
         vertical-align: middle;
     }
-}
-@media (min-width: 768px) {
+
+    .navbar-form .form-group.has-succes,
+    .navbar-form .form-group.has-error {
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+
     .navbar-form .form-control {
         display: inline-block;
+        padding: 10px 15px;
+    }
+
+    .navbar-form button {
+        margin: 0 5px;
     }
 }
 
