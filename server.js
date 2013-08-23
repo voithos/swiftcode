@@ -4,11 +4,6 @@ var express = require('express');
 var io = require('socket.io');
 var http = require('http');
 
-var app;
-module.exports.getApp = function() {
-    return app;
-};
-
 var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
@@ -22,8 +17,18 @@ var mongoose = require('mongoose');
 // Auth libs
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var ensureAuthenticated = require('connect-ensure-login').ensureAuthenticated;
 var flash = require('connect-flash');
+
+var ensureAuthenticated = function(url, admin) {
+    return function(req, res, next) {
+        if (!req.isAuthenticated || !req.isAuthenticated()) {
+            return res.redirect(url);
+        } else if (admin && (!req.user || !req.user.isAdmin)) {
+            return res.redirect(url);
+        }
+        next();
+    };
+};
 
 /**
  * Configuration app for SwiftCODE
@@ -67,20 +72,12 @@ var SwiftCODE = function() {
         self._setupSockets();
     };
 
-    /**
-     * Return the collection of exercises and their data
-     */
-    self.getExercises = function() {
-        return _.sortBy(self._exercises, 'order');
-    };
-
     self._initialize = function() {
         self._setupConfig();
         self._setupDb();
         self._setupAuth();
         self._setupApp();
         self._setupRoutes();
-        self._setupExercises();
     };
 
     self._setupConfig = function() {
@@ -185,6 +182,7 @@ var SwiftCODE = function() {
      */
     self._setupRoutes = function() {
         var authMiddleware = ensureAuthenticated('/');
+        var adminMiddleware = ensureAuthenticated('/', true);
 
         self.app.get('/', routes.index);
         self.app.post('/signup', routes.signup);
@@ -200,6 +198,8 @@ var SwiftCODE = function() {
 
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/game', authMiddleware, routes.game);
+        self.app.get('/admin', adminMiddleware, routes.admin);
+        self.app.post('/addlang', adminMiddleware, routes.addlang);
         self.app.get('/help', routes.help);
     };
 
@@ -240,27 +240,26 @@ var SwiftCODE = function() {
             });
 
             socket.on('games:createnew', function(data) {
-                var exercises = self._exercises;
-                if (data.key in exercises) {
-                    var lang = exercises[data.key];
-
-                    models.User.findById(data.player, function(err, user) {
-                        user.createGame({
-                            lang: lang.key,
-                            langName: lang.name,
-                            maxPlayers: 4,
-                            partFile: lang.randomExercise().partFile
-                        }, function(err, game) {
-                            if (err) {
-                                console.log('games:createnew error'); return;
-                            }
-                            socket.emit('games:createnew:res', { success: true, game: game });
-                            socket.broadcast.emit('games:new', game);
+                models.Lang.findOne({ key: data.key }, function(err, lang) {
+                    if (lang) {
+                        models.User.findById(data.player, function(err, user) {
+                            user.createGame({
+                                lang: lang.key,
+                                langName: lang.name,
+                                maxPlayers: 4,
+                                exerciseName: lang.randomExercise().exerciseName
+                            }, function(err, game) {
+                                if (err) {
+                                    console.log('games:createnew error'); return;
+                                }
+                                socket.emit('games:createnew:res', { success: true, game: game });
+                                socket.broadcast.emit('games:new', game);
+                            });
                         });
-                    });
-                } else {
-                    console.log('No such game type: ' + data.key);
-                }
+                    } else {
+                        console.log('No such game type: ' + data.key);
+                    }
+                });
             });
         });
 
@@ -277,9 +276,15 @@ var SwiftCODE = function() {
                                 if (err) {
                                     console.log('ingame:ready error'); return;
                                 }
-                                // Join a room
-                                socket.join('game-' + game.id);
-                                socket.emit('ingame:ready:res', { game: game, gameCode: self._getGameCode(game) });
+                                models.Lang.findOne({ key: game.lang, 'exercises.exerciseName': game.exerciseName }, { 'exercises.code': 1, 'exercises.typeables': 1 }, function(err, lang) {
+                                    if (lang && lang.exercises.length > 0) {
+                                        // Join a room
+                                        socket.join('game-' + game.id);
+                                        socket.emit('ingame:ready:res', { game: game, exercise: _.first(lang.exercises) });
+                                    } else {
+                                        console.log('lang and exercise not found');
+                                    }
+                                });
                             }
                         });
                     }
@@ -326,70 +331,6 @@ var SwiftCODE = function() {
                 });
             });
         });
-    };
-
-    self._setupExercises = function() {
-        self._exercises = {
-            'javascript': {
-                order: 0,
-                key: 'javascript',
-                name: 'JavaScript',
-                path: self.config.repo + 'exercises/javascript',
-                projectName: 'Underscore.js'
-            },
-            'python': {
-                order: 1,
-                key: 'python',
-                name: 'Python',
-                path: self.config.repo + 'exercises/python',
-                projectName: 'Bottle'
-            },
-            'c-sharp': {
-                order: 4,
-                key: 'c-sharp',
-                name: 'C#',
-                path: self.config.repo + 'exercises/c-sharp',
-                projectName: 'Signalr'
-            }
-        };
-
-        var randomExercise = function() {
-            return this.parts[Math.floor(Math.random() * this.parts.length)];
-        };
-
-        _.forOwn(self._exercises, function(lang) {
-            lang.randomExercise = randomExercise;
-            lang.partsMap = self._getExerciseParts(lang.path);
-            lang.parts = _.sortBy(_.values(lang.partsMap), 'partFile');
-        });
-    };
-
-    self._getExerciseParts = function(epath) {
-        if (!fs.existsSync(epath)) {
-            return [];
-        }
-
-        return _.zipObject(_.map(fs.readdirSync(epath), function(file) {
-            return [file, {
-                partFile: file,
-                code: fs.readFileSync(path.join(epath, file)).toString('utf-8')
-            }];
-        }));
-    };
-
-    self._getGameCode = function(game) {
-        var exercises = self._exercises;
-        if (game.lang in exercises) {
-            var lang = exercises[game.lang];
-
-            if (game.partFile in lang.partsMap) {
-                return lang.partsMap[game.partFile].code;
-            } else {
-                console.log('No such part file: ' + game.partFile);
-            }
-        } else {
-            console.log('No such game type: ' + game.lang);
-        }
     };
 
     self._initialize();

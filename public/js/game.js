@@ -23,6 +23,7 @@
     ko.applyBindings(viewModel);
 
     var game = null;
+    var exercise = null;
 
     var bindCodeCharacters = function() {
         var pattern = '<span class="code-char">$&</span>';
@@ -59,7 +60,8 @@
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
         game = data.game;
-        viewModel.game.gamecode(data.gameCode);
+        exercise = data.exercise;
+        viewModel.game.gamecode(data.exercise.code);
 
         hljs.initHighlighting();
         bindCodeCharacters();

@@ -3,11 +3,14 @@ var mongoose = require('mongoose'),
     bcrypt = require('bcrypt'),
     _ = require('lodash'),
     moment = require('moment'),
+    hljs = require('highlight.js'),
+    cheerio = require('cheerio'),
     SALT_WORK_FACTOR = 10;
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
     password: { type: String, required: true },
+    isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
     gamesWon: { type: Number },
@@ -102,10 +105,69 @@ UserSchema.methods.quitCurrentGame = function(callback) {
     }
 };
 
+var LangSchema = new Schema({
+    isInitialized: { type: Boolean },
+    key: { type: String },
+    name: { type: String },
+    projectName: { type: String },
+    order: { type: Number },
+    exercises: [{
+        exerciseName: { type: String },
+        code: { type: String },
+        highlitCode: { type: String },
+        commentlessCode: { type: String },
+        typeables: { type: Number }
+    }]
+});
+
+LangSchema.pre('save', function(next) {
+    var lang = this;
+
+    if (!lang.isInitialized) {
+        lang.normalizeNewlines();
+        lang.countTypeables();
+        lang.isInitialized = true;
+    }
+
+    next();
+});
+
+LangSchema.methods.normalizeNewlines = function() {
+    var lang = this;
+    _.each(lang.exercises, function(exercise) {
+        exercise.code = exercise.code.replace(/\r\n|\n\r|\r|\n/g, '\n');
+    });
+};
+
+LangSchema.methods.countTypeables = function() {
+    var lang = this;
+    _.each(lang.exercises, function(exercise) {
+        // Highlight.js doesn't always get it right with autodetection
+        var highlight = (lang.key in hljs.LANGUAGES) ?
+                        hljs.highlight(lang.key, exercise.code, true) :
+                        hljs.highlightAuto(exercise.code);
+
+        exercise.highlitCode = highlight.value;
+
+        // Remove comments because we don't want the player to type out
+        // a 500 word explanation for some obscure piece of code
+        var $ = cheerio.load(exercise.highlitCode);
+        $('.comment').remove();
+
+        exercise.commentlessCode = $.root().text();
+        var trimmedCode = exercise.commentlessCode.replace(/(^[ \t]+)|([ \t]+$)/g, '').trim();
+        exercise.typeables = trimmedCode.length;
+    });
+};
+
+LangSchema.methods.randomExercise = function() {
+    return this.exercises[Math.floor(Math.random() * this.exercises.length)];
+};
+
 var GameSchema = new Schema({
     lang: { type: String, required: true },
     langName: { type: String },
-    partFile: { type: String },
+    exerciseName: { type: String },
     numPlayers: { type: Number, min: 0, default: 0 },
     maxPlayers: { type: Number, min: 0 },
     status: { type: String },
@@ -186,7 +248,9 @@ GameSchema.methods.updateGameStatus = function(callback) {
 };
 
 var User = mongoose.model('User', UserSchema);
+var Lang = mongoose.model('Lang', LangSchema);
 var Game = mongoose.model('Game', GameSchema);
 
 module.exports.User = User;
+module.exports.Lang = Lang;
 module.exports.Game = Game;

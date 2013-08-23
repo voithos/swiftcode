@@ -1,0 +1,45 @@
+extends layout
+
+block scripts
+    script(src='/js/libs/knockout-2.3.0.min.js')
+    script(src='/js/admin.js')
+
+block content
+    form.form-horizontal(action='/addlang', method='POST', role='form')
+        fieldset
+            legend New Language
+            .form-group
+                label.col-lg-2.control-label(for='keyInput') Key
+                .col-lg-4
+                    input.form-control(id='keyInput', type='text', name='key', data-required='true')
+            .form-group
+                label.col-lg-2.control-label(for='nameInput') Language Name
+                .col-lg-4
+                    input.form-control(id='nameInput', type='text', name='name', data-required='true')
+            .form-group
+                label.col-lg-2.control-label(for='projectNameInput') Project Name
+                .col-lg-4
+                    input.form-control(id='projectNameInput', type='text', name='projectName', data-required='true')
+            .form-group
+                label.col-lg-2.control-label(for='orderInput') Order
+                .col-lg-4
+                    input.form-control(id='orderInput', type='text', name='order', data-required='true')
+
+            fieldset.code-samples
+                legend Exercises
+                div(data-bind="template: { name: 'exercisesTemplate', foreach: exercises }")
+                script(id='exercisesTemplate', type='text/html')
+                    .form-group
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'exerciseNameInput' + $index() }") Exercise Name
+                        .col-lg-4
+                            input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $index() }, value: 'exercise' + $index()", type='text', name='exerciseName', data-required='true')
+                    .form-group
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'codeInput' + $index() }") Code
+                        .col-lg-8
+                            textarea.form-control(data-bind="attr: { 'id': 'codeInput' + $index() }", name='code', rows='10', data-required='true')
+
+            .form-group
+                .col-lg-2
+                .col-lg-8
+                    button.btn.btn-large(type='button', data-bind='click: addExercise') Add Exercise
+                    button.btn.btn-large.btn-primary(type='submit') Submit

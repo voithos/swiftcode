@@ -1,5 +1,6 @@
-var server = require('./server'),
-    models = require('./models');
+var _ = require('lodash');
+var hljs = require('highlight.js');
+var models = require('./models');
 
 /*
  * GET home page.
@@ -22,9 +23,14 @@ exports.index = function(req, res) {
  */
 
 exports.lobby = function(req, res) {
-    res.render('lobby', {
-        title: 'Lobby',
-        exercises: server.getApp().getExercises()
+    models.Lang.find({}, 'key name', function(err, docs) {
+        if (err) {
+            console.log('Langs not found'); return;
+        }
+        res.render('lobby', {
+            title: 'Lobby',
+            langs: docs
+        });
     });
 };
 
@@ -50,7 +56,7 @@ exports.help = function(req, res) {
 };
 
 /*
- * POST signup page.
+ * POST signup.
  */
 
 exports.signup = function(req, res) {
@@ -71,6 +77,54 @@ exports.signup = function(req, res) {
                 req.flash('error', 'That username is already in use.');
                 res.redirect('/');
             }
+        });
+    }
+};
+
+/*
+ * GET admin page.
+ */
+
+exports.admin = function(req, res) {
+    res.render('admin', {
+        title: 'Admin'
+    });
+};
+
+/*
+ * POST addlang.
+ */
+
+exports.addlang = function(req, res) {
+    var done = function() {
+        res.redirect('/admin');
+    };
+
+    var key = req.body.key,
+        name = req.body.name,
+        projectName = req.body.projectName,
+        order = req.body.order,
+        exerciseName = req.body.exerciseName,
+        code = req.body.code;
+
+    if (_.all([key, name, projectName, order, exerciseName, code]) &&
+        exerciseName.length === code.length) {
+        var lang = new models.Lang({
+            key: key,
+            name: name,
+            projectName: projectName,
+            order: order
+        });
+
+        _.each(_.zip(exerciseName, code), function(zipped) {
+            lang.exercises.push({
+                exerciseName: zipped[0],
+                code: zipped[1]
+            });
+        });
+
+        lang.save(function(err) {
+            done();
         });
     }
 };

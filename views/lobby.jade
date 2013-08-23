@@ -48,6 +48,6 @@ block content
                 .well
                     fieldset.languages
                         legend New Game
-                        each ex in exercises
-                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-bind="click: newGame.bind($data, '#{ex.key}')")= ex.name + ' (' + ex.projectName + ')'
+                        each l in langs
+                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
             .col-lg-1
