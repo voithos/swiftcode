@@ -14,6 +14,7 @@
         this.countdownRunning = ko.observable(false);
         this.started = ko.observable(false);
         this.gamecode = ko.observable('');
+        this.langCss = ko.observable('');
     };
 
     var viewModel = {
@@ -62,6 +63,7 @@
         game = data.game;
         exercise = data.exercise;
         viewModel.game.gamecode(data.exercise.code);
+        viewModel.game.langCss('language-' + data.game.lang);
 
         hljs.initHighlighting();
         bindCodeCharacters();

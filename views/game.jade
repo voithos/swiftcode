@@ -32,6 +32,6 @@ block content
             .col-lg-10
                 pre(data-bind="template: 'gamecodeTemplate'")
                 script(id='gamecodeTemplate', type='text/html')
-                    code#gamecode(data-bind='text: game.gamecode')
+                    code#gamecode(data-bind='text: game.gamecode, css: game.langCss')
             .col-lg-1
 
