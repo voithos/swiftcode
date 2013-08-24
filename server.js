@@ -315,19 +315,21 @@ var SwiftCODE = function() {
                     if (err) {
                         console.log('ingame:exit error'); return;
                     }
-                    user.quitCurrentGame(function(err, game) {
-                        if (err) {
-                            console.log('ingame:exit error'); return;
-                        }
-
-                        if (game) {
-                            if (game.isComplete) {
-                                lobby.emit('games:remove', { _id: game._id });
-                            } else {
-                                lobby.emit('games:update', game);
+                    if (user) {
+                        user.quitCurrentGame(function(err, game) {
+                            if (err) {
+                                console.log('ingame:exit error'); return;
                             }
-                        }
-                    });
+
+                            if (game) {
+                                if (game.isComplete) {
+                                    lobby.emit('games:remove', { _id: game._id });
+                                } else {
+                                    lobby.emit('games:update', game);
+                                }
+                            }
+                        });
+                    }
                 });
             });
         });
