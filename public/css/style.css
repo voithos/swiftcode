@@ -87,7 +87,7 @@
 
 .lobby .panel-body {
     height: 400px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .lobby .game-row {
@@ -143,4 +143,16 @@
     background-color: #1AC7A4;
     /* outline: 1px solid #16B696; */
     color: #ffffff;
+}
+
+.comment {
+    opacity: 0.7;
+}
+
+.code-char.untyped {
+    opacity: 0.7;
+}
+
+.code-char.typed {
+    opacity: 1;
 }

@@ -116,6 +116,7 @@ var LangSchema = new Schema({
         code: { type: String },
         highlitCode: { type: String },
         commentlessCode: { type: String },
+        typeableCode: { type: String },
         typeables: { type: Number }
     }]
 });
@@ -142,6 +143,8 @@ LangSchema.methods.normalizeNewlines = function() {
 LangSchema.methods.countTypeables = function() {
     var lang = this;
     _.each(lang.exercises, function(exercise) {
+        exercise.code = exercise.code.replace(/\w+$/g, '');
+
         // Highlight.js doesn't always get it right with autodetection
         var highlight = (lang.key in hljs.LANGUAGES) ?
                         hljs.highlight(lang.key, exercise.code, true) :
@@ -155,8 +158,9 @@ LangSchema.methods.countTypeables = function() {
         $('.comment').remove();
 
         exercise.commentlessCode = $.root().text();
-        var trimmedCode = exercise.commentlessCode.replace(/(^[ \t]+)|([ \t]+$)/g, '').trim();
-        exercise.typeables = trimmedCode.length;
+        exercise.typeableCode = exercise.commentlessCode.replace(/(^[ \t]+)|([ \t]+$)/gm, '')
+                                .replace(/\n+/g, '\n').trim() + '\n';
+        exercise.typeables = exercise.typeableCode.length;
     });
 };
 

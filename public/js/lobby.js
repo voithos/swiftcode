@@ -1,6 +1,7 @@
 (function() {
     var socket = io.connect(getSocketUrl() + '/lobby');
 
+    // TODO: Rethink the gameNum concept
     var gameNum = 1;
     var Game = function(opts) {
         this._id = opts._id;
@@ -40,6 +41,9 @@
         }.bind(this);
     };
 
+    // TODO: Add loading icon of some kind, also 'loaded' observable to avoid
+    // the flash of 'There are no games!' while we're receiving data from
+    // the websocket
     var viewModel = {
         games: ko.observableArray(),
         newGame: function(key) {

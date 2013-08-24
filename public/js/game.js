@@ -23,23 +23,90 @@
 
     ko.applyBindings(viewModel);
 
+    var $gamecode = null;
+
     var game = null;
     var exercise = null;
+    var currentPos = 0;
+    var $currentChar = null;
+
+    var isTextNode = function(elem) {
+        return elem.nodeType === 3;
+    };
 
     var bindCodeCharacters = function() {
-        var pattern = '<span class="code-char">$&</span>';
-        $('#gamecode').contents().each(function() {
+        var searchPattern = /(.)([ \t]*\n\s*)|([ \t]*\n\s*)(.)|(.)/g;
+        var newlinePattern = /^[ \t]*\n\s*$/g;
+        var returnSymbol = '<span class="code-char return-char">&#9166;</span>';
+
+        var replacer = function(str, $1, $2, $3, $4, $5) {
+            $1 = $1 || '';
+            $2 = $2 || '';
+            $3 = $3 || '';
+            $4 = $4 || '';
+            $5 = $5 || '';
+
+            // If newline groups matched anything, add the
+            // return symbol to the match
+            if ($2) {
+                $2 = returnSymbol + $2;
+            }
+            if ($3) {
+                $3 = returnSymbol + $3;
+            }
+            return $3 + '<span class="code-char">' + $1 + $4 + $5 + '</span>' + $2;
+        };
+
+        $gamecode = $('#gamecode');
+
+        var nonWhitespaceFound = false;
+        var $contents = $gamecode.contents();
+        $contents.each(function(i) {
             var $this = $(this);
-            // Strip comments
-            if (!$this.hasClass('comment')) {
-                // NodeType 3 === Text Node
-                if (this.nodeType === 3) {
-                    $this.replaceWith($this.text().replace(/(\w)/g, pattern));
+
+            if ($this.hasClass('comment')) {
+                return;
+            }
+
+            var text = $this.text(),
+                parts, prefix = '', addon = '';
+            if (isTextNode(this)) {
+                if (nonWhitespaceFound) {
+                    if (i > 0 && $contents.eq(i - 1).hasClass('comment')) {
+                        parts = (/(\s+)((?:.|\n)*)$/g).exec(text);
+                        if (parts) {
+                            text = parts[2];
+                            prefix = parts[1];
+                        }
+                    }
+                    if (text.match(newlinePattern)) {
+                        $this.replaceWith(returnSymbol + text);
+                        return;
+                    }
+                    if (i < $contents.length - 1 && $contents.eq(i + 1).hasClass('comment')) {
+                        parts = (/^((?:.|\n)*)([ \t]+)$/g).exec(text);
+                        if (parts) {
+                            text = parts[1];
+                            addon = returnSymbol + parts[2];
+                        }
+                    }
+                    $this.replaceWith(prefix + text.replace(searchPattern, replacer) + addon);
+                    prefix = '';
+                    addon = '';
                 } else {
-                    $this.html($this.text().replace(/(\w)/g, pattern));
+                    if (text.trim().length === 0) {
+                        return;
+                    }
+                    $this.replaceWith(text.replace(searchPattern, replacer));
+                    nonWhitespaceFound = true;
                 }
+            } else {
+                $this.html(text.replace(searchPattern, replacer));
+                nonWhitespaceFound = true;
             }
         });
+
+        $gamecode.find('.code-char').addClass('untyped');
     };
 
     var pingId = null;
@@ -49,6 +116,7 @@
     };
 
     var fullyStarted = false;
+    var fullyStarting = false;
     var startGame = function() {
         if (fullyStarted) {
             return;
@@ -57,6 +125,27 @@
         viewModel.game.gameStatusCss('text-info control-panel-go');
         fullyStarted = true;
     };
+
+    var setStarting = function() {
+        if (fullyStarting) {
+            return;
+        }
+        viewModel.game.gameStatus('Get ready... ');
+    };
+
+    var resetStarting = function() {
+    };
+
+    var wrapFullyStarted = function(fn) {
+        return function() {
+            if (fullyStarted) {
+                fn.apply(this, arguments);
+            }
+        };
+    };
+
+    // Bind key events
+    
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
@@ -76,8 +165,13 @@
         viewModel.game.countdownRunning(game.starting);
         viewModel.game.started(game.started);
         if (game.starting) {
-            viewModel.game.gameStatus('Get ready... ');
+            setStarting();
             viewModel.game.countdown(moment(game.startTime).diff(moment(), 'seconds') + 1);
+
+            var millisecondsLeft = moment(game.startTime).diff(moment());
+            if (millisecondsLeft < 1000) {
+                setTimeout(startGame, millisecondsLeft);
+            }
         } else {
             viewModel.game.gameStatus('Waiting for players...');
         }

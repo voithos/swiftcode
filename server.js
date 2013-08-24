@@ -276,7 +276,7 @@ var SwiftCODE = function() {
                                 if (err) {
                                     console.log('ingame:ready error'); return;
                                 }
-                                models.Lang.findOne({ key: game.lang, 'exercises.exerciseName': game.exerciseName }, { 'exercises.code': 1, 'exercises.typeables': 1 }, function(err, lang) {
+                                models.Lang.findOne({ key: game.lang, 'exercises.exerciseName': game.exerciseName }, { 'exercises.code': 1, 'exercises.typeableCode': 1, 'exercises.typeables': 1 }, function(err, lang) {
                                     if (lang && lang.exercises.length > 0) {
                                         // Join a room
                                         socket.join('game-' + game.id);
