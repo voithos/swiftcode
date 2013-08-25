@@ -26,3 +26,5 @@ var getSocketUrl = function() {
 var redirect = function(page) {
     location.href = getQualifiedUrl() + page;
 };
+
+var swiftcode = {};

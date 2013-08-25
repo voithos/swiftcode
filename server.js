@@ -247,7 +247,7 @@ var SwiftCODE = function() {
                                 lang: lang.key,
                                 langName: lang.name,
                                 maxPlayers: 4,
-                                exerciseName: lang.randomExercise().exerciseName
+                                exercise: lang.randomExercise()
                             }, function(err, game) {
                                 if (err) {
                                     console.log('games:createnew error'); return;
@@ -276,11 +276,11 @@ var SwiftCODE = function() {
                                 if (err) {
                                     console.log('ingame:ready error'); return;
                                 }
-                                models.Lang.findOne({ key: game.lang, 'exercises.exerciseName': game.exerciseName }, { 'exercises.code': 1, 'exercises.typeableCode': 1, 'exercises.typeables': 1 }, function(err, lang) {
-                                    if (lang && lang.exercises.length > 0) {
+                                models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
+                                    if (exercise) {
                                         // Join a room
                                         socket.join('game-' + game.id);
-                                        socket.emit('ingame:ready:res', { game: game, exercise: _.first(lang.exercises) });
+                                        socket.emit('ingame:ready:res', { game: game, exercise: exercise });
                                     } else {
                                         console.log('lang and exercise not found');
                                     }

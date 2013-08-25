@@ -145,6 +145,16 @@
     color: #ffffff;
 }
 
+.code-char.mistake {
+    background-color: #df2e1b;
+    color: #ffffff;
+}
+
+.code-char.player.mistaken {
+    background-color: #7f9293;
+    color: #ffffff;
+}
+
 .comment {
     opacity: 0.7;
 }
@@ -155,4 +165,21 @@
 
 .code-char.typed {
     opacity: 1;
+}
+
+.code-char.return-char {
+    text-align: center;
+    display: inline-block;
+    width: 20px;
+}
+
+.code-char.return-char:before {
+    content: '\23CE';
+}
+
+.code-char.backspace-char {
+}
+
+.code-char.backspace-char:before {
+    content: '\232B';
 }

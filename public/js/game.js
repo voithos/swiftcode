@@ -37,7 +37,7 @@
     var bindCodeCharacters = function() {
         var searchPattern = /(.)([ \t]*\n\s*)|([ \t]*\n\s*)(.)|(.)/g;
         var newlinePattern = /^[ \t]*\n\s*$/g;
-        var returnSymbol = '<span class="code-char return-char">&#9166;</span>';
+        var returnSymbol = '<span class="code-char return-char"></span>';
 
         var replacer = function(str, $1, $2, $3, $4, $5) {
             $1 = $1 || '';
@@ -90,6 +90,10 @@
                             addon = returnSymbol + parts[2];
                         }
                     }
+                    if (i === $contents.length - 1 && !text.match(/[^\s][ \t]*\n/)) {
+                        addon = returnSymbol;
+                    }
+
                     $this.replaceWith(prefix + text.replace(searchPattern, replacer) + addon);
                     prefix = '';
                     addon = '';
@@ -151,6 +155,8 @@
         console.log('received ingame:ready:res');
         game = data.game;
         exercise = data.exercise;
+        swiftcode.game = data.game;
+        swiftcode.exercise = data.exercise;
         viewModel.game.gamecode(data.exercise.code);
         viewModel.game.langCss('language-' + data.game.lang);
 

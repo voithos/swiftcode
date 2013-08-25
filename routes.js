@@ -116,15 +116,26 @@ exports.addlang = function(req, res) {
             order: order
         });
 
+        var exercises = [];
+
         _.each(_.zip(exerciseName, code), function(zipped) {
-            lang.exercises.push({
+            exercises.push({
                 exerciseName: zipped[0],
                 code: zipped[1]
             });
         });
 
-        lang.save(function(err) {
-            done();
+        models.Exercise.create(exercises, function(err) {
+            if (err) {
+                console.log('addlang error');
+            }
+            _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
+                lang.exercises.push(exercise._id);
+            });
+
+            lang.save(function(err) {
+                done();
+            });
         });
     }
 };
