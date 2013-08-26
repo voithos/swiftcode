@@ -149,7 +149,16 @@
     };
 
     // Bind key events
-    
+    var keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    keys = keys.concat(_.map(keys, function(k) { return k.toUpperCase(); }));
+    keys = keys.concat(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+    keys = keys.concat(['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}', '\\', '|', '\'', '"', ';', ':', '/', '?', '.', '>', ',', '<']);
+    keys = keys.concat(['backspace', 'enter', 'space']);
+
+    Mousetrap.bind(keys, function(key) {
+        key.preventDefault();
+        console.log(key);
+    });
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
