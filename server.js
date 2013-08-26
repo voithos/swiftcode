@@ -96,7 +96,10 @@ var SwiftCODE = function() {
         // On startup, set all previous games to complete
         models.Game.update({ isComplete: false },
                            { isComplete: true, numPlayers: 0, players: [], isJoinable: false },
-                           function() {
+                           function(err) {
+                               if (err) {
+                                   console.log(err);
+                               }
                                console.log('games reset');
                            });
     };
@@ -108,6 +111,7 @@ var SwiftCODE = function() {
         passport.use(new LocalStrategy(function(username, password, done) {
             models.User.findOne({ username: username }, function(err, user) {
                 if (err) {
+                    console.log(err);
                     return done(err);
                 }
                 // Respond with a message if no such user exists
@@ -117,6 +121,7 @@ var SwiftCODE = function() {
                 // Otherwise check the password
                 user.comparePassword(password, function(err, isMatch) {
                     if (err) {
+                        console.log(err);
                         return done(err);
                     }
                     if (!isMatch) {
@@ -218,15 +223,18 @@ var SwiftCODE = function() {
             socket.on('games:join', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
+                        console.log(err);
                         console.log('games:join error'); return;
                     }
                     models.Game.findById(data.game, function(err, game) {
                         if (err) {
+                            console.log(err);
                             console.log('games:join error'); return;
                         }
                         if (game.isJoinable) {
                             user.joinGame(game, function(err, game) {
                                 if (err) {
+                                    console.log(err);
                                     console.log('games:join error'); return;
                                 }
                                 socket.emit('games:join:res', { success: true, game: game });
@@ -250,6 +258,7 @@ var SwiftCODE = function() {
                                 exercise: lang.randomExercise()
                             }, function(err, game) {
                                 if (err) {
+                                    console.log(err);
                                     console.log('games:createnew error'); return;
                                 }
                                 socket.emit('games:createnew:res', { success: true, game: game });
@@ -268,12 +277,14 @@ var SwiftCODE = function() {
             socket.on('ingame:ready', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
+                        console.log(err);
                         console.log('ingame:ready error'); return;
                     }
                     if (user) {
                         models.Game.findById(user.currentGame, function(err, game) {
                             if (game) {
                                 if (err) {
+                                    console.log(err);
                                     console.log('ingame:ready error'); return;
                                 }
                                 models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
@@ -294,11 +305,13 @@ var SwiftCODE = function() {
             socket.on('ingame:ping', function(data) {
                 models.Game.findById(data.gameId, function(err, game) {
                     if (err) {
+                        console.log(err);
                         console.log('ingame:ping error'); return;
                     }
                     if (game) {
                         game.updateGameStatus(function(err, modified, game) {
                             if (err) {
+                                console.log(err);
                                 console.log('ingame:ping error'); return;
                             }
                             if (modified) {
@@ -313,11 +326,13 @@ var SwiftCODE = function() {
             socket.on('ingame:exit', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
+                        console.log(err);
                         console.log('ingame:exit error'); return;
                     }
                     if (user) {
                         user.quitCurrentGame(function(err, game) {
                             if (err) {
+                                console.log(err);
                                 console.log('ingame:exit error'); return;
                             }
 

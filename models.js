@@ -26,10 +26,12 @@ UserSchema.pre('save', function(next) {
     }
     bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
         if (err) {
+            console.log(err);
             return next(err);
         }
         bcrypt.hash(user.password, salt, function(err, hash) {
             if (err) {
+                console.log(err);
                 return next(err);
             }
             user.password = hash;
@@ -41,6 +43,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.methods.comparePassword = function(candidate, callback) {
     bcrypt.compare(candidate, this.password, function(err, isMatch) {
         if (err) {
+            console.log(err);
             return callback(err);
         }
         callback(null, isMatch);
@@ -54,9 +57,15 @@ UserSchema.methods.joinGame = function(game, callback) {
     game.numPlayers += 1;
 
     game.save(function(err) {
-        if (err) return callback('error saving game');
+        if (err) {
+            console.log(err);
+            return callback('error saving game');
+        }
         user.save(function(err) {
-            if (err) return callback('error saving user');
+            if (err) {
+                console.log(err);
+                return callback('error saving user');
+            }
             callback(null, game);
         });
     });
@@ -83,7 +92,10 @@ UserSchema.methods.quitCurrentGame = function(callback) {
     var user = this;
     if (user.currentGame) {
         Game.findById(user.currentGame, function(err, game) {
-            if (err) return callback('error retrieving game');
+            if (err) {
+                console.log(err);
+                return callback('error retrieving game');
+            }
             if (game) {
                 game.players.remove(user._id);
                 game.numPlayers -= 1;
@@ -91,10 +103,16 @@ UserSchema.methods.quitCurrentGame = function(callback) {
                     game.isComplete = true;
                 }
                 game.save(function(err) {
-                    if (err) return callback('error saving game');
+                    if (err) {
+                        console.log(err);
+                        return callback('error saving game');
+                    }
                     user.currentGame = undefined;
                     user.save(function(err) {
-                        if (err) return callback('error saving user');
+                        if (err) {
+                            console.log(err);
+                            return callback('error saving user');
+                        }
                         callback(null, game);
                     });
                 });
@@ -241,7 +259,10 @@ GameSchema.methods.updateGameStatus = function(callback) {
 
     if (modified) {
         game.save(function(err) {
-            if (err) return callback('error saving user');
+            if (err) {
+                console.log(err);
+                return callback('error saving user');
+            }
             return callback(null, modified, game);
         });
     } else {

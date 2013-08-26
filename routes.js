@@ -25,6 +25,7 @@ exports.index = function(req, res) {
 exports.lobby = function(req, res) {
     models.Lang.find({}, 'key name', function(err, docs) {
         if (err) {
+            console.log(err);
             console.log('Langs not found'); return;
         }
         res.render('lobby', {
@@ -127,6 +128,7 @@ exports.addlang = function(req, res) {
 
         models.Exercise.create(exercises, function(err) {
             if (err) {
+                console.log(err);
                 console.log('addlang error');
             }
             _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
