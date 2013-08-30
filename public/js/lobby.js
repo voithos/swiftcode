@@ -1,6 +1,13 @@
 (function() {
     var socket = io.connect(getSocketUrl() + '/lobby');
 
+    $(document).ready(function() {
+        $('.panel-body').slimScroll({
+            color: '#2c3e50',
+            height: '400px'
+        });
+    });
+
     // TODO: Rethink the gameNum concept
     var gameNum = 1;
     var Game = function(opts) {

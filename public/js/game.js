@@ -3,6 +3,7 @@
 
     var socket = io.connect(getSocketUrl() + '/game');
 
+    // TODO: Remove this in favor of server-side socket.io disconnect event
     window.onbeforeunload = function() {
         socket.emit('ingame:exit', { player: user._id });
     };

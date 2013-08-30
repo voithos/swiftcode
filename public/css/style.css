@@ -87,7 +87,6 @@
 
 .lobby .panel-body {
     height: 400px;
-    overflow-y: auto;
 }
 
 .lobby .game-row {
@@ -119,6 +118,10 @@
 
 .control-panel .countdown {
     font-size: 25px;
+}
+
+.code-char.mistake-path {
+    color: #df2e1b;
 }
 
 .code-char.opponent1 {

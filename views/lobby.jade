@@ -40,7 +40,7 @@ block content
                                                 span(data-bind='text: maxPlayers')
                                             td(data-bind='text: statusText, css: statusCss')
                                             td
-                                                button.btn.btn-primary.btn-small(data-bind='visible: isJoinable, click: join') Join
+                                                button.btn.btn-success.btn-sm(data-bind='visible: isJoinable, click: join') Join
                                     tbody(data-bind='if: games().length == 0')
                                         tr.game-row.no-games
                                             td(colspan='5') There are no available games! Make a new one.
@@ -49,5 +49,5 @@ block content
                     fieldset.languages
                         legend New Game
                         each l in langs
-                            button.lang.btn.btn-danger.btn-lg.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
+                            button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
             .col-lg-1
