@@ -98,8 +98,8 @@ UserSchema.methods.quitCurrentGame = function(callback) {
             }
             if (game) {
                 game.players.remove(user._id);
-                game.numPlayers -= 1;
-                if (game.numPlayers <= 0) {
+                game.numPlayers = game.numPlayers <= 0 ? 0 : game.numPlayers - 1;
+                if (game.numPlayers === 0) {
                     game.isComplete = true;
                 }
                 game.save(function(err) {
