@@ -146,16 +146,23 @@ var ExerciseSchema = new Schema({
     typeables: { type: Number }
 });
 
+var NON_TYPEABLES = ['comment', 'template_comment', 'diff', 'javadoc', 'phpdoc'];
+var NON_TYPEABLE_CLASSES = _.map(NON_TYPEABLES, function(c) { return '.' + c; }).join(',');
+
 ExerciseSchema.pre('save', function(next) {
     var exercise = this;
-
     if (!exercise.isInitialized) {
-        exercise.normalizeNewlines();
-        exercise.countTypeables();
-        exercise.isInitialized = true;
+        exercise.initialize();
     }
     next();
 });
+
+ExerciseSchema.methods.initialize = function() {
+    var exercise = this;
+    exercise.normalizeNewlines();
+    exercise.countTypeables();
+    exercise.isInitialized = true;
+};
 
 ExerciseSchema.methods.normalizeNewlines = function() {
     var exercise = this;
@@ -176,7 +183,7 @@ ExerciseSchema.methods.countTypeables = function() {
     // Remove comments because we don't want the player to type out
     // a 500 word explanation for some obscure piece of code
     var $ = cheerio.load(exercise.highlitCode);
-    $('.comment').remove();
+    $(NON_TYPEABLE_CLASSES).remove();
 
     exercise.commentlessCode = $.root().text();
     exercise.typeableCode = exercise.commentlessCode.replace(/(^[ \t]+)|([ \t]+$)/gm, '')
@@ -279,3 +286,6 @@ module.exports.User = User;
 module.exports.Lang = Lang;
 module.exports.Exercise = Exercise;
 module.exports.Game = Game;
+
+module.exports.NON_TYPEABLES = NON_TYPEABLES;
+module.exports.NON_TYPEABLE_CLASSES = NON_TYPEABLE_CLASSES;

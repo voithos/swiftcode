@@ -27,6 +27,7 @@
 
     var game = null;
     var exercise = null;
+    var nonTypeables = null;
     var currentPos = 0;
     var $currentChar = null;
 
@@ -64,7 +65,7 @@
         $contents.each(function(i) {
             var $this = $(this);
 
-            if ($this.hasClass('comment')) {
+            if ($this.is(nonTypeables)) {
                 return;
             }
 
@@ -72,7 +73,7 @@
                 parts, prefix = '', addon = '';
             if (isTextNode(this)) {
                 if (nonWhitespaceFound) {
-                    if (i > 0 && $contents.eq(i - 1).hasClass('comment')) {
+                    if (i > 0 && $contents.eq(i - 1).is(nonTypeables)) {
                         parts = (/(\s+)((?:.|\n)*)$/g).exec(text);
                         if (parts) {
                             text = parts[2];
@@ -83,14 +84,14 @@
                         $this.replaceWith(returnSymbol + text);
                         return;
                     }
-                    if (i < $contents.length - 1 && $contents.eq(i + 1).hasClass('comment')) {
+                    if (i < $contents.length - 1 && $contents.eq(i + 1).is(nonTypeables)) {
                         parts = (/^((?:.|\n)*)([ \t]+)$/g).exec(text);
                         if (parts) {
                             text = parts[1];
                             addon = returnSymbol + parts[2];
                         }
                     }
-                    if (i === $contents.length - 1 && !text.match(/[^\s][ \t]*\n/)) {
+                    if (i === $contents.length - 1 && !text.match(/[^\s][ \t]*\n\s*$/)) {
                         addon = returnSymbol;
                     }
 
@@ -157,13 +158,13 @@
 
     Mousetrap.bind(keys, function(key) {
         key.preventDefault();
-        console.log(key);
     });
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
         game = data.game;
         exercise = data.exercise;
+        nonTypeables = data.nonTypeables;
         swiftcode.game = data.game;
         swiftcode.exercise = data.exercise;
         viewModel.game.gamecode(data.exercise.code);

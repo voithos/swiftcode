@@ -292,7 +292,11 @@ var SwiftCODE = function() {
                                     if (exercise) {
                                         // Join a room
                                         socket.join('game-' + game.id);
-                                        socket.emit('ingame:ready:res', { game: game, exercise: exercise });
+                                        socket.emit('ingame:ready:res', {
+                                            game: game,
+                                            exercise: exercise,
+                                            nonTypeables: models.NON_TYPEABLE_CLASSES
+                                        });
                                     } else {
                                         console.log('lang and exercise not found');
                                     }
