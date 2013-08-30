@@ -5,9 +5,18 @@ block scripts
     script(src='/js/admin.js')
 
 block content
-    form.form-horizontal(action='/addlang', method='POST', role='form')
+    form.form-horizontal(action='/admin/add-lang', method='POST', role='form')
         fieldset
             legend New Language
+            .row
+                .col-lg-10
+                .col-lg-2
+                    button.btn.btn-info.btn-xs(type='button', data-bind='click: reinitExercises') Reinitialize Exercises
+                .alert-container(data-bind="template: { name: 'alertTemplate', if: showAlert }")
+                script(id='alertTemplate', type='text/html')
+                    .reinit-alert.alert.fade.in.col-lg-6.col-lg-push-3(data-bind='css: alertCss')
+                        button.close(type='button', data-bind='click: hideAlert') x
+                        span(data-bind='text: alertMessage')
             .form-group
                 label.col-lg-2.control-label(for='keyInput') Key
                 .col-lg-4

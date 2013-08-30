@@ -92,10 +92,10 @@ exports.admin = function(req, res) {
 };
 
 /*
- * POST addlang.
+ * POST admin/add-lang.
  */
 
-exports.addlang = function(req, res) {
+exports.addLang = function(req, res) {
     var done = function() {
         res.redirect('/admin');
     };
@@ -128,7 +128,8 @@ exports.addlang = function(req, res) {
         models.Exercise.create(exercises, function(err) {
             if (err) {
                 console.log(err);
-                console.log('addlang error');
+                console.log('addLang error');
+                done();
             }
             _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
                 lang.exercises.push(exercise._id);
@@ -139,4 +140,43 @@ exports.addlang = function(req, res) {
             });
         });
     }
+};
+
+/*
+ * POST admin/reinit-exercises.
+ */
+
+exports.reinitExercises = function(req, res) {
+    var done = function(err) {
+        var result = { success: true };
+        if (err) {
+            result.success = false;
+        }
+        res.write(JSON.stringify(result));
+        res.end();
+    };
+
+    models.Exercise.find({}, function(err, exercises) {
+        if (err) {
+            console.log(err);
+            console.log('reinitLang error');
+            done(err);
+        }
+        var total = exercises.length,
+            saveCount = 0;
+
+        _.each(exercises, function(exercise) {
+            exercise.initialize();
+            exercise.save(function(err, saved) {
+                if (err) {
+                    console.log(err);
+                    console.log('reinitLang error');
+                }
+                saveCount++;
+                if (saveCount === total) {
+                    done();
+                }
+            });
+        });
+    });
 };

@@ -204,7 +204,8 @@ var SwiftCODE = function() {
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/game', authMiddleware, routes.game);
         self.app.get('/admin', adminMiddleware, routes.admin);
-        self.app.post('/addlang', adminMiddleware, routes.addlang);
+        self.app.post('/admin/add-lang', adminMiddleware, routes.addLang);
+        self.app.post('/admin/reinit-exercises', adminMiddleware, routes.reinitExercises);
         self.app.get('/help', routes.help);
     };
 
