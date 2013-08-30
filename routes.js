@@ -120,6 +120,7 @@ exports.addLang = function(req, res) {
 
         _.each(_.zip(exerciseName, code), function(zipped) {
             exercises.push({
+                lang: key,
                 exerciseName: zipped[0],
                 code: zipped[1]
             });
