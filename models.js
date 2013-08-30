@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
     bcrypt = require('bcrypt'),
     _ = require('lodash'),
     moment = require('moment'),
-    hljs = require('highlight.js'),
+    hljs = require('./highlight.js'),
     cheerio = require('cheerio'),
     SALT_WORK_FACTOR = 10;
 
