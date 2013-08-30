@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var hljs = require('highlight.js');
 var models = require('./models');
 
 /*
