@@ -7,6 +7,20 @@ $(document).ready(function() {
             errors: {
                 classHandler: function(el) {
                     return $(el).closest('.form-group');
+                },
+                errorsWrapper: '',
+                errorsElem: '',
+                errorHandler: function(elem, message) {
+                    var $elem = $(elem);
+                    $elem.tooltip({
+                        trigger: 'manual',
+                        title: message
+                    });
+                    $elem.tooltip('show');
+                },
+                validHandler: function(elem) {
+                    var $elem = $(elem);
+                    $elem.tooltip('destroy');
                 }
             }
         });

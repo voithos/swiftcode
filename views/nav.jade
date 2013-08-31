@@ -11,9 +11,9 @@
         if !user
             form.navbar-form.pull-right.form-parsley(action='/login', method='POST')
                 .form-group
-                    input.form-control(type='text', placeholder='Username', name='username', autofocus, data-required='true')
+                    input.form-control(type='text', placeholder='Username', name='username', autofocus, data-required='true', data-rangelength='[2, 32]', data-placement='bottom')
                 .form-group
-                    input.form-control(type='password', placeholder='Password', name='password', data-required='true')
+                    input.form-control(type='password', placeholder='Password', name='password', data-required='true', data-minlength='8', data-placement='bottom')
                 button.btn(type='submit') Log in
         else
             ul.nav.navbar-nav.pull-right

@@ -60,25 +60,38 @@ exports.help = function(req, res) {
  */
 
 exports.signup = function(req, res) {
+    var reportError = function(msg) {
+        req.flash('error', msg);
+        return res.redirect('/');
+    };
     var username = req.body.username,
         password = req.body.password;
 
-    if (username && password) {
-        models.User.findOne({ username: username }, function(err, user) {
-            // Create a new user if none exists
-            if (!user) {
-                user = new models.User({ username: username, password: password });
-                user.save(function(err, saved) {
-                    req.logIn(user, function(err) {
-                        return res.redirect('/lobby');
-                    });
-                });
-            } else {
-                req.flash('error', 'That username is already in use.');
-                res.redirect('/');
-            }
-        });
+    if (!username || !password) {
+        return reportError('Both username and password are required.');
+    } else if (username.length < 2 || username.length > 32) {
+        return reportError('The username must be between 2 and 32 characters long.');
+    } else if (password.length < 8) {
+        return reportError('The password must be at least 8 characters long.');
     }
+
+    models.User.findOne({ username: username }, function(err, user) {
+        if (err) {
+            console.log(err);
+            return reportError('An error occurred on the server.');
+        }
+        // Create a new user if none exists
+        if (!user) {
+            user = new models.User({ username: username, password: password });
+            user.save(function(err, saved) {
+                req.logIn(user, function(err) {
+                    return res.redirect('/lobby');
+                });
+            });
+        } else {
+            return reportError('That username is already in use.');
+        }
+    });
 };
 
 /*
