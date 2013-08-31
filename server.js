@@ -95,7 +95,8 @@ var SwiftCODE = function() {
 
         // On startup, set all previous games to complete
         models.Game.update({ isComplete: false },
-                           { isComplete: true, numPlayers: 0, players: [], isJoinable: false },
+                           { isComplete: true, numPlayers: 0, players: [], isJoinable: false, wasReset: true },
+                           { multi: true },
                            function(err) {
                                if (err) {
                                    console.log(err);

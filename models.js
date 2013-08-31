@@ -208,7 +208,8 @@ var GameSchema = new Schema({
     winner: { type: Schema.ObjectId, ref: 'UserSchema' },
     winnerTime: { type: Number, min: 0 },
     winnerSpeed: { type: Number, min: 0 },
-    players: [Schema.ObjectId]
+    players: [Schema.ObjectId],
+    wasReset: { type: Boolean, default: false }
 });
 
 GameSchema.pre('save', function(next) {
