@@ -17,5 +17,11 @@
                 button.btn(type='submit') Log in
         else
             ul.nav.navbar-nav.pull-right
-                li
-                    a(href='/logout') Log out
+                li.dropdown
+                    a.dropdown-toggle(href='#', data-toggle='dropdown')= user.username
+                        //- The below is an empty space after the username
+                        | 
+                        b.caret
+                    ul.dropdown-menu
+                        li
+                            a(href='/logout') Log out
