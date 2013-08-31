@@ -213,6 +213,8 @@ var SwiftCODE = function() {
      * Setup the realtime sockets
      */
     self._setupSockets = function() {
+        // TODO: Rearchitect the lobby/game connections to remove possibility
+        // of dangling games
         var lobby = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
@@ -276,34 +278,36 @@ var SwiftCODE = function() {
         var game = self.io.of('/game')
         .on('connection', function(socket) {
             socket.on('ingame:ready', function(data) {
-                models.User.findById(data.player, function(err, user) {
-                    if (err) {
-                        console.log(err);
-                        console.log('ingame:ready error'); return;
-                    }
-                    if (user) {
-                        models.Game.findById(user.currentGame, function(err, game) {
-                            if (game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('ingame:ready error'); return;
-                                }
-                                models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
-                                    if (exercise) {
-                                        // Join a room
-                                        socket.join('game-' + game.id);
-                                        socket.emit('ingame:ready:res', {
-                                            game: game,
-                                            exercise: exercise,
-                                            nonTypeables: models.NON_TYPEABLE_CLASSES
-                                        });
-                                    } else {
-                                        console.log('lang and exercise not found');
+                socket.set('player', data.player, function() {
+                    models.User.findById(data.player, function(err, user) {
+                        if (err) {
+                            console.log(err);
+                            console.log('ingame:ready error'); return;
+                        }
+                        if (user) {
+                            models.Game.findById(user.currentGame, function(err, game) {
+                                if (game) {
+                                    if (err) {
+                                        console.log(err);
+                                        console.log('ingame:ready error'); return;
                                     }
-                                });
-                            }
-                        });
-                    }
+                                    models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
+                                        if (exercise) {
+                                            // Join a room
+                                            socket.join('game-' + game.id);
+                                            socket.emit('ingame:ready:res', {
+                                                game: game,
+                                                exercise: exercise,
+                                                nonTypeables: models.NON_TYPEABLE_CLASSES
+                                            });
+                                        } else {
+                                            console.log('lang and exercise not found');
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
             });
 
@@ -328,28 +332,34 @@ var SwiftCODE = function() {
                 });
             });
 
-            socket.on('ingame:exit', function(data) {
-                models.User.findById(data.player, function(err, user) {
+            socket.on('disconnect', function() {
+                socket.get('player', function(err, player) {
                     if (err) {
                         console.log(err);
-                        console.log('ingame:exit error'); return;
+                        return;
                     }
-                    if (user) {
-                        user.quitCurrentGame(function(err, game) {
-                            if (err) {
-                                console.log(err);
-                                console.log('ingame:exit error'); return;
-                            }
-
-                            if (game) {
-                                if (game.isComplete) {
-                                    lobby.emit('games:remove', { _id: game._id });
-                                } else {
-                                    lobby.emit('games:update', game);
+                    models.User.findById(player, function(err, user) {
+                        if (err) {
+                            console.log(err);
+                            console.log('ingame:exit error'); return;
+                        }
+                        if (user) {
+                            user.quitCurrentGame(function(err, game) {
+                                if (err) {
+                                    console.log(err);
+                                    console.log('ingame:exit error'); return;
                                 }
-                            }
-                        });
-                    }
+
+                                if (game) {
+                                    if (game.isComplete) {
+                                        lobby.emit('games:remove', { _id: game._id });
+                                    } else {
+                                        lobby.emit('games:update', game);
+                                    }
+                                }
+                            });
+                        }
+                    });
                 });
             });
         });
