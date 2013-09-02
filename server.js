@@ -8,9 +8,9 @@ var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
 
-// Routes and models
 var routes = require('./routes');
 var models = require('./models');
+var sockets = require('./sockets');
 
 var mongoose = require('mongoose');
 
@@ -61,15 +61,18 @@ var SwiftCODE = function() {
      */
     self.listen = function() {
         self.server = http.createServer(self.app);
-        self.io = io.listen(self.server);
-        self.io.set('log level', 1);
-        if (self.config.openshift) {
-            self.io.set('transports', ['websocket']);
-        }
-        self.server.listen(self.config.port, self.config.ipaddress);
-        console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
 
-        self._setupSockets();
+        // Socket.IO server needs to listen in the same block as the HTTP
+        // server, or you'll get listen EACCES errors (due to Node's context
+        // switching?)
+        self.io = io.listen(self.server);
+        self.server.listen(self.config.port, self.config.ipaddress);
+        self.sockets.listen(self.io);
+
+        if (self.config.openshift) {
+            self.sockets.configureForOpenShift();
+        }
+        console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
     };
 
     self._initialize = function() {
@@ -78,6 +81,7 @@ var SwiftCODE = function() {
         self._setupAuth();
         self._setupApp();
         self._setupRoutes();
+        self._setupSockets();
     };
 
     self._setupConfig = function() {
@@ -190,8 +194,6 @@ var SwiftCODE = function() {
         var authMiddleware = ensureAuthenticated('/');
         var adminMiddleware = ensureAuthenticated('/', true);
 
-        self.app.get('/', routes.index);
-        self.app.post('/signup', routes.signup);
         self.app.post('/login', passport.authenticate('local', {
             successRedirect: '/lobby',
             failureRedirect: '/',
@@ -202,6 +204,9 @@ var SwiftCODE = function() {
             res.redirect('/');
         });
 
+
+        self.app.get('/', routes.index);
+        self.app.post('/signup', routes.signup);
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/game', authMiddleware, routes.game);
         self.app.get('/admin', adminMiddleware, routes.admin);
@@ -214,156 +219,7 @@ var SwiftCODE = function() {
      * Setup the realtime sockets
      */
     self._setupSockets = function() {
-        // TODO: Rearchitect the lobby/game connections to remove possibility
-        // of dangling games
-        var lobby = self.io.of('/lobby')
-        .on('connection', function(socket) {
-            socket.on('games:fetch', function(data) {
-                models.Game.find({ isComplete: false }, function(err, docs) {
-                    socket.emit('games:fetch:res', docs);
-                });
-            });
-
-            socket.on('games:join', function(data) {
-                models.User.findById(data.player, function(err, user) {
-                    if (err) {
-                        console.log(err);
-                        console.log('games:join error'); return;
-                    }
-                    models.Game.findById(data.game, function(err, game) {
-                        if (err) {
-                            console.log(err);
-                            console.log('games:join error'); return;
-                        }
-                        if (game.isJoinable) {
-                            user.joinGame(game, function(err, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('games:join error'); return;
-                                }
-                                socket.emit('games:join:res', { success: true, game: game });
-                                socket.broadcast.emit('games:update', game);
-                            });
-                        } else {
-                            socket.emit('games:join:res', { success: false });
-                        }
-                    });
-                });
-            });
-
-            socket.on('games:createnew', function(data) {
-                models.Lang.findOne({ key: data.key }, function(err, lang) {
-                    if (lang) {
-                        models.User.findById(data.player, function(err, user) {
-                            user.createGame({
-                                lang: lang.key,
-                                langName: lang.name,
-                                maxPlayers: 4,
-                                exercise: lang.randomExercise()
-                            }, function(err, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('games:createnew error'); return;
-                                }
-                                socket.emit('games:createnew:res', { success: true, game: game });
-                                socket.broadcast.emit('games:new', game);
-                            });
-                        });
-                    } else {
-                        console.log('No such game type: ' + data.key);
-                    }
-                });
-            });
-        });
-
-        var game = self.io.of('/game')
-        .on('connection', function(socket) {
-            socket.on('ingame:ready', function(data) {
-                socket.set('player', data.player, function() {
-                    models.User.findById(data.player, function(err, user) {
-                        if (err) {
-                            console.log(err);
-                            console.log('ingame:ready error'); return;
-                        }
-                        if (user) {
-                            models.Game.findById(user.currentGame, function(err, game) {
-                                if (game) {
-                                    if (err) {
-                                        console.log(err);
-                                        console.log('ingame:ready error'); return;
-                                    }
-                                    models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
-                                        if (exercise) {
-                                            // Join a room
-                                            socket.join('game-' + game.id);
-                                            socket.emit('ingame:ready:res', {
-                                                game: game,
-                                                exercise: exercise,
-                                                nonTypeables: models.NON_TYPEABLE_CLASSES
-                                            });
-                                        } else {
-                                            console.log('lang and exercise not found');
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                });
-            });
-
-            socket.on('ingame:ping', function(data) {
-                models.Game.findById(data.gameId, function(err, game) {
-                    if (err) {
-                        console.log(err);
-                        console.log('ingame:ping error'); return;
-                    }
-                    if (game) {
-                        game.updateGameStatus(function(err, modified, game) {
-                            if (err) {
-                                console.log(err);
-                                console.log('ingame:ping error'); return;
-                            }
-                            if (modified) {
-                                lobby.emit('games:update', game);
-                            }
-                            socket.emit('ingame:ping:res', { game: game });
-                        });
-                    }
-                });
-            });
-
-            socket.on('disconnect', function() {
-                socket.get('player', function(err, player) {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                    models.User.findById(player, function(err, user) {
-                        if (err) {
-                            console.log(err);
-                            console.log('ingame:exit error'); return;
-                        }
-                        if (user) {
-                            user.quitCurrentGame(function(err, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('ingame:exit error'); return;
-                                }
-
-                                if (game) {
-                                    if (game.isComplete) {
-                                        lobby.emit('games:remove', { _id: game._id });
-                                    } else {
-                                        lobby.emit('games:update', game);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                });
-            });
-        });
+        self.sockets = new sockets();
     };
 
     self._initialize();

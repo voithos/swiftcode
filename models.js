@@ -1,11 +1,13 @@
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    bcrypt = require('bcrypt'),
-    _ = require('lodash'),
-    moment = require('moment'),
-    hljs = require('./highlight.js'),
-    cheerio = require('cheerio'),
-    SALT_WORK_FACTOR = 10;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var bcrypt = require('bcrypt');
+var SALT_WORK_FACTOR = 10;
+var _ = require('lodash');
+var moment = require('moment');
+var hljs = require('./highlight.js');
+var cheerio = require('cheerio');
+
+var enet = require('./eventnet');
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
@@ -18,6 +20,7 @@ var UserSchema = new Schema({
     currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
 });
 
+// TODO: Look into using async library to avoid the spaghetti nesting
 UserSchema.pre('save', function(next) {
     var user = this;
 
@@ -52,6 +55,17 @@ UserSchema.methods.comparePassword = function(candidate, callback) {
 
 UserSchema.methods.joinGame = function(game, callback) {
     var user = this;
+
+    if (!game.isJoinable) {
+        return callback('game is not joinable', false);
+    }
+
+    // A player cannot player against himself
+    if (!game.isNew && _.contains(game.players, user._id)) {
+        return callback('cannot play against self', false);
+    }
+
+    var wasNew = game.isNew;
     user.currentGame = game._id;
     game.players.push(user._id);
     game.numPlayers += 1;
@@ -59,14 +73,20 @@ UserSchema.methods.joinGame = function(game, callback) {
     game.save(function(err) {
         if (err) {
             console.log(err);
-            return callback('error saving game');
+            return callback('error saving game', false);
+        }
+        if (wasNew) {
+            enet.emit('games:new', game);
+        } else {
+            enet.emit('games:update', game);
         }
         user.save(function(err) {
             if (err) {
                 console.log(err);
-                return callback('error saving user');
+                return callback('error saving user', false);
             }
-            callback(null, game);
+            enet.emit('users:update', user);
+            callback(null, true, game);
         });
     });
 };
@@ -107,6 +127,12 @@ UserSchema.methods.quitCurrentGame = function(callback) {
                         console.log(err);
                         return callback('error saving game');
                     }
+                    if (game.isComplete) {
+                        enet.emit('games:remove', game);
+                    } else {
+                        enet.emit('games:update', game);
+                    }
+
                     user.currentGame = undefined;
                     user.save(function(err) {
                         if (err) {
@@ -271,6 +297,7 @@ GameSchema.methods.updateGameStatus = function(callback) {
                 console.log(err);
                 return callback('error saving user');
             }
+            enet.emit('games:update', game);
             return callback(null, modified, game);
         });
     } else {
