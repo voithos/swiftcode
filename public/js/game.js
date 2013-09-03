@@ -102,7 +102,10 @@
                     nonWhitespaceFound = true;
                 }
             } else {
-                $this.html(text.replace(searchPattern, replacer));
+                var oldClass = $this.attr('class');
+                var $newContent = $(text.replace(searchPattern, replacer));
+                $this.replaceWith($newContent);
+                $newContent.addClass(oldClass);
                 nonWhitespaceFound = true;
             }
         });
