@@ -24,6 +24,8 @@
     var game = null;
     var exercise = null;
     var nonTypeables = null;
+
+    var code = null;
     var currentPos = 0;
     var $currentChar = null;
 
@@ -135,9 +137,18 @@
             return;
         }
         viewModel.game.gameStatus('Get ready... ');
+
+        if (!$currentChar) {
+            $currentChar = $gamecode.find('.code-char').first();
+            $currentChar.addClass('player');
+        }
     };
 
     var resetStarting = function() {
+        if ($currentChar) {
+            $currentChar.removeClass('player');
+            $currentChar = null;
+        }
     };
 
     var wrapFullyStarted = function(fn) {
@@ -153,16 +164,41 @@
     keys = keys.concat(_.map(keys, function(k) { return k.toUpperCase(); }));
     keys = keys.concat(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
     keys = keys.concat(['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}', '\\', '|', '\'', '"', ';', ':', '/', '?', '.', '>', ',', '<']);
-    keys = keys.concat(['backspace', 'enter', 'space']);
+    keys = keys.concat(['enter', 'space', 'shift+space']);
 
-    Mousetrap.bind(keys, function(key) {
-        key.preventDefault();
-    });
+    Mousetrap.bind(keys, wrapFullyStarted(function(e, key) {
+        e.preventDefault();
+
+        log(key);
+
+        key = key === 'space' ? ' ' :
+              key === 'shift+space' ? ' ' :
+              key === 'enter' ? '\n' :
+              key;
+
+        if (key === code.charAt(currentPos)) {
+            // TODO: Add completion detection
+            currentPos++;
+            $currentChar.removeClass('player untyped');
+            $currentChar.addClass('typed');
+
+            $currentChar = $currentChar.nextAll('.code-char').first();
+            $currentChar.addClass('player');
+        }
+        // TODO: Add incorrect key handling
+    }));
+
+    Mousetrap.bind('backspace', wrapFullyStarted(function(e, key) {
+        e.preventDefault();
+        // TODO: Add backspace handling
+    }));
+
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
         game = data.game;
         exercise = data.exercise;
+        code = data.exercise.typeableCode;
         nonTypeables = data.nonTypeables;
         swiftcode.game = data.game;
         swiftcode.exercise = data.exercise;
@@ -189,6 +225,7 @@
             }
         } else {
             viewModel.game.gameStatus('Waiting for players...');
+            resetStarting();
         }
 
         if (game.started) {
