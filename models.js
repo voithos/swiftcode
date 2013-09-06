@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
-var SALT_WORK_FACTOR = 10;
 var _ = require('lodash');
 var moment = require('moment');
 var hljs = require('./highlight.js');
@@ -9,14 +8,23 @@ var cheerio = require('cheerio');
 
 var enet = require('./eventnet');
 
+// Constant configs
+var SALT_WORK_FACTOR = 10;
+var GAME_TIME_JOIN_CUTOFF_MS = 5000;
+var GAME_SINGLE_PLAYER_WAIT_TIME = 10;
+var GAME_MULTI_PLAYER_WAIT_TIME = 15;
+
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
-    gamesWon: { type: Number },
+    averageTime: { type: Number },
+    averageSpeed: { type: Number },
     totalGames: { type: Number },
+    totalMultiplayerGames: { type: Number },
+    gamesWon: { type: Number },
     currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
 });
 
@@ -56,29 +64,15 @@ UserSchema.methods.comparePassword = function(candidate, callback) {
 UserSchema.methods.joinGame = function(game, callback) {
     var user = this;
 
-    if (!game.isJoinable) {
-        return callback('game is not joinable', false);
+    if (!game.checkJoinable(user._id)) {
+        return callback('game is not joinable by this user', false);
     }
 
-    // A player cannot play against himself
-    if (!game.isNew && _.contains(game.players, user._id)) {
-        return callback('cannot play against self', false);
-    }
-
-    var wasNew = game.isNew;
     user.currentGame = game._id;
-    game.players.push(user._id);
-    game.numPlayers += 1;
-
-    game.save(function(err) {
+    game.addPlayer(user._id, function(err) {
         if (err) {
             console.log(err);
-            return callback('error saving game', false);
-        }
-        if (wasNew) {
-            enet.emit('games:new', game);
-        } else {
-            enet.emit('games:update', game);
+            return callback('error joining game', false);
         }
         user.save(function(err) {
             if (err) {
@@ -100,16 +94,10 @@ UserSchema.methods.createGame = function(opts, callback) {
     }
 
     var game = new Game();
-    _.forOwn(opts, function(v, k) {
-        if (k in game) {
-            game[k] = v;
-        }
-    });
+    _.extend(game, opts);
 
-    game.setStatus('waiting');
-    game.isJoinable = true;
-    game.isComplete = false;
     game.creator = user._id;
+    game.beginMultiPlayer();
 
     return user.joinGame(game, callback);
 };
@@ -123,22 +111,11 @@ UserSchema.methods.quitCurrentGame = function(callback) {
                 return callback('error retrieving game');
             }
             if (game) {
-                game.players.remove(user._id);
-                game.numPlayers = game.numPlayers <= 0 ? 0 : game.numPlayers - 1;
-                if (game.numPlayers === 0) {
-                    game.isComplete = true;
-                }
-                game.save(function(err) {
+                game.removePlayer(user._id, function(err) {
                     if (err) {
                         console.log(err);
-                        return callback('error saving game');
+                        return callback(err);
                     }
-                    if (game.isComplete) {
-                        enet.emit('games:remove', game);
-                    } else {
-                        enet.emit('games:update', game);
-                    }
-
                     user.currentGame = undefined;
                     user.save(function(err) {
                         if (err) {
@@ -242,13 +219,15 @@ ExerciseSchema.methods.countTypeables = function() {
 var GameSchema = new Schema({
     lang: { type: String, required: true },
     langName: { type: String },
-    exercise: { type: Schema.ObjectId },
+    exercise: { type: Schema.ObjectId, ref: 'ExerciseSchema' },
+    isSinglePlayer: { type: Boolean, default: false },
     numPlayers: { type: Number, min: 0, default: 0 },
     maxPlayers: { type: Number, min: 0 },
     status: { type: String },
     statusText: { type: String },
     isJoinable: { type: Boolean, default: true },
     isComplete: { type: Boolean, default: false },
+    isViewable: { type: Boolean, default: true },
     starting: { type: Boolean, default: false },
     started: { type: Boolean, default: false },
     startTime: { type: Date },
@@ -257,19 +236,105 @@ var GameSchema = new Schema({
     winnerTime: { type: Number, min: 0 },
     winnerSpeed: { type: Number, min: 0 },
     players: [Schema.ObjectId],
+    startingPlayers: [Schema.ObjectId],
     wasReset: { type: Boolean, default: false }
 });
 
 GameSchema.pre('save', function(next) {
     var game = this;
 
-    if (game.isModified('numPlayers')) {
-        if (game.numPlayers == game.maxPlayers) {
-            game.isJoinable = false;
-        }
+    if (game.isNew || game.isModified()) {
+        game.setGameStatus();
     }
     return next();
 });
+
+GameSchema.methods.beginSinglePlayer = function() {
+    var game = this;
+    game.setStatus('waiting');
+    game.isJoinable = false;
+    game.isComplete = false;
+    game.isSinglePlayer = true;
+};
+
+GameSchema.methods.beginMultiPlayer = function() {
+    var game = this;
+    game.setStatus('waiting');
+    game.isJoinable = true;
+    game.isComplete = false;
+    game.isSinglePlayer = false;
+};
+
+GameSchema.methods.updateGameStatus = function(callback) {
+    var game = this;
+    game.setGameStatus();
+    game.save(function(err, game) {
+        if (err) {
+            console.log(err);
+            return callback('error saving user');
+        }
+        enet.emit('games:update', game);
+        return callback(null, game);
+    });
+};
+
+GameSchema.methods.setGameStatus = function() {
+    var game = this;
+
+    if (game.numPlayers === game.maxPlayers) {
+        game.isJoinable = false;
+    }
+
+    if (game.isSinglePlayer) {
+        game.setGameStatusSinglePlayer();
+    } else {
+        game.setGameStatusMultiPlayer();
+    }
+};
+
+GameSchema.methods.setGameStatusSinglePlayer = function() {
+    var game = this;
+    if (!game.starting) {
+        game.starting = true;
+        game.startTime = moment().add(GAME_SINGLE_PLAYER_WAIT_TIME, 'seconds').toDate();
+    } else {
+        game.updateTime();
+    }
+};
+
+GameSchema.methods.setGameStatusMultiPlayer = function() {
+    var game = this;
+
+    if (!game.starting) {
+        if (game.numPlayers > 1) {
+            game.starting = true;
+            game.startTime = moment().add(GAME_MULTI_PLAYER_WAIT_TIME, 'seconds').toDate();
+        }
+    } else {
+        // Starting interrupt condition
+        if (game.numPlayers < 2) {
+            game.starting = false;
+            game.startTime = undefined;
+            game.isJoinable = true;
+        } else {
+            game.updateTime();
+        }
+    }
+};
+
+GameSchema.methods.updateTime = function() {
+    var game = this;
+    var timeLeft = moment(game.startTime).diff(moment());
+    if (game.isJoinable) {
+        if (timeLeft < GAME_TIME_JOIN_CUTOFF_MS) {
+            game.isJoinable = false;
+        }
+    } else if (timeLeft < 0) {
+        if (timeLeft < 0) {
+            game.start();
+        }
+    }
+};
 
 GameSchema.methods.setStatus = function(status) {
     var bindings = {
@@ -280,51 +345,69 @@ GameSchema.methods.setStatus = function(status) {
     this.statusText = bindings[status];
 };
 
-GameSchema.methods.updateGameStatus = function(callback) {
+GameSchema.methods.checkJoinable = function(player) {
     var game = this;
-    var modified = false;
-    if (game.starting) {
-        if (game.numPlayers < 2) {
-            game.starting = false;
-            game.startTime = undefined;
-            game.isJoinable = true;
-            modified = true;
+    return game.isJoinable && !_.contains(game.players, player);
+};
+
+GameSchema.methods.addPlayer = function(player, callback) {
+    var game = this;
+
+    var wasNew = game.isNew;
+    game.players.push(player);
+    game.numPlayers += 1;
+
+    game.save(function(err, game) {
+        if (err) {
+            console.log(err);
+            return callback('error saving game', false);
+        }
+        if (wasNew) {
+            enet.emit('games:new', game);
         } else {
-            var timeLeft = moment(game.startTime).diff(moment());
-            if (game.isJoinable) {
-                if (timeLeft < 5000) {
-                    game.isJoinable = false;
-                    modified = true;
-                }
-            }
-            if (!game.isJoinable) {
-                if (timeLeft < 0) {
-                    game.started = true;
-                    game.setStatus('ingame');
-                    modified = true;
-                }
-            }
+            enet.emit('games:update', game);
         }
-    } else {
-        if (game.numPlayers > 1) {
-            game.starting = true;
-            game.startTime = moment().add(15, 'seconds').toDate();
-            modified = true;
-        }
+
+        return callback(null, game);
+    });
+};
+
+GameSchema.methods.removePlayer = function(player, callback) {
+    var game = this;
+    game.players.remove(player);
+    game.numPlayers = game.numPlayers <= 0 ? 0 : game.numPlayers - 1;
+
+    if (game.numPlayers === 0) {
+        game.finish();
     }
 
-    if (modified) {
-        game.save(function(err) {
-            if (err) {
-                console.log(err);
-                return callback('error saving user');
-            }
+    game.save(function(err) {
+        if (err) {
+            console.log(err);
+            return callback('error saving game');
+        }
+        if (game.isComplete) {
+            enet.emit('games:remove', game);
+        } else {
             enet.emit('games:update', game);
-            return callback(null, modified, game);
-        });
-    } else {
-        return callback(null, modified, game);
-    }
+        }
+
+        return callback(null, game);
+    });
+};
+
+GameSchema.methods.start = function() {
+    var game = this;
+    game.started = true;
+    game.startingPlayers = game.players.slice();
+    game.setStatus('ingame');
+};
+
+GameSchema.methods.finish = function() {
+    var game = this;
+    game.isComplete = true;
+    game.isViewable = false;
+    game.isJoinable = false;
 };
 
 GameSchema.statics.resetIncomplete = function() {

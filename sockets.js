@@ -26,7 +26,7 @@ var SwiftCODESockets = function() {
         var lobby = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
-                models.Game.find({ isComplete: false }, function(err, docs) {
+                models.Game.find({ isViewable: true }, function(err, docs) {
                     socket.emit('games:fetch:res', docs);
                 });
             });
@@ -120,7 +120,7 @@ var SwiftCODESockets = function() {
                         console.log('ingame:ping error'); return;
                     }
                     if (game) {
-                        game.updateGameStatus(function(err, modified, game) {
+                        game.updateGameStatus(function(err, game) {
                             if (err) {
                                 console.log(err);
                                 console.log('ingame:ping error'); return;
