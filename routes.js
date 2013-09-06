@@ -40,6 +40,10 @@ exports.lobby = function(req, res) {
  */
 
 exports.game = function(req, res) {
+    if (!req.user.currentGame) {
+        return res.redirect('/lobby');
+    }
+
     res.render('game', {
         title: 'Game'
     });
