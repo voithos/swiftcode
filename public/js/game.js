@@ -115,12 +115,18 @@
         $gamecode.find('.code-char').addClass('untyped');
     };
 
+    // TODO: Try different method? Using char -> element mapping,
+    // collapse chars into single string, modify the string, and normalize
+    // it to typeables
+
     var pingId = null;
     var pingWaiting = function() {
         socket.emit('ingame:ping', { gameId: game._id });
         pingId = setTimeout(pingWaiting, 500);
     };
 
+    // TODO: Add T-minus countdown, and running time clock
+    // TODO: Fix timing; don't wait for ping, set a timeout
     var fullyStarted = false;
     var fullyStarting = false;
     var startGame = function() {
