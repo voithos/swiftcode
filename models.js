@@ -155,6 +155,22 @@ UserSchema.methods.quitCurrentGame = function(callback) {
     }
 };
 
+UserSchema.statics.resetCurrentGames = function() {
+    var users = this;
+    users.update({
+        currentGame: { $exists: true }
+    }, {
+        $unset: { currentGame: true }
+    }, {
+        multi: true
+    }, function(err) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('users reset');
+    });
+};
+
 var LangSchema = new Schema({
     key: { type: String },
     name: { type: String },
@@ -309,6 +325,27 @@ GameSchema.methods.updateGameStatus = function(callback) {
     } else {
         return callback(null, modified, game);
     }
+};
+
+GameSchema.statics.resetIncomplete = function() {
+    var games = this;
+    games.update({
+        $or: [{ isComplete: false }, { isViewable: true }]
+    }, {
+        isComplete: true,
+        isViewable: false,
+        numPlayers: 0,
+        players: [],
+        isJoinable: false,
+        wasReset: true
+    }, {
+        multi: true
+    }, function(err) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('games reset');
+    });
 };
 
 var User = mongoose.model('User', UserSchema);

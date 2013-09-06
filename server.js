@@ -97,16 +97,8 @@ var SwiftCODE = function() {
             pass: self.config.mongodb.password
         });
 
-        // On startup, set all previous games to complete
-        models.Game.update({ isComplete: false },
-                           { isComplete: true, numPlayers: 0, players: [], isJoinable: false, wasReset: true },
-                           { multi: true },
-                           function(err) {
-                               if (err) {
-                                   console.log(err);
-                               }
-                               console.log('games reset');
-                           });
+        models.Game.resetIncomplete();
+        models.User.resetCurrentGames();
     };
 
     /**
