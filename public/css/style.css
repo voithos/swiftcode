@@ -170,10 +170,15 @@
     text-align: center;
     display: inline-block;
     width: 20px;
+    visibility: hidden;
 }
 
 .code-char.return-char:before {
     content: '\23CE';
+}
+
+.code-char.return-char.player {
+    visibility: visible;
 }
 
 .code-char.backspace-char {
