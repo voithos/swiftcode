@@ -60,7 +60,6 @@ var SwiftCODESockets = function() {
                             user.createGame({
                                 lang: lang.key,
                                 langName: lang.name,
-                                maxPlayers: 4,
                                 exercise: lang.randomExercise()
                             }, function(err, success, game) {
                                 if (err) {

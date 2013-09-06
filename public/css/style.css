@@ -108,12 +108,16 @@
     margin-bottom: 10px;
 }
 
-.control-panel .countdown-parent {
+.control-panel .timer-parent {
     line-height: 48px;
 }
 
-.control-panel .countdown {
+.control-panel .timer {
     font-size: 25px;
+}
+
+#gamecode {
+    font-family: 'Source Code Pro', monospace;
 }
 
 .code-char.mistake-path {

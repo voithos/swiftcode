@@ -34,5 +34,6 @@
         }
     };
 
+    swiftcode.viewModel = viewModel;
     ko.applyBindings(viewModel);
 })();

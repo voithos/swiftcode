@@ -6,8 +6,9 @@
     var GameState = function() {
         this.gameStatus = ko.observable('Waiting for players...');
         this.gameStatusCss = ko.observable('');
-        this.countdown = ko.observable(0);
-        this.countdownRunning = ko.observable(false);
+        this.timer = ko.observable('');
+        this.timerCss = ko.observable('');
+        this.timerRunning = ko.observable(false);
         this.started = ko.observable(false);
         this.gamecode = ko.observable('');
         this.langCss = ko.observable('');
@@ -17,6 +18,7 @@
         game: new GameState()
     };
 
+    swiftcode.viewModel = viewModel;
     ko.applyBindings(viewModel);
 
     var $gamecode = null;
@@ -25,6 +27,7 @@
     var exercise = null;
     var nonTypeables = null;
 
+    var time = null;
     var code = null;
     var currentPos = 0;
     var $currentChar = null;
@@ -128,7 +131,6 @@
     // TODO: Add T-minus countdown, and running time clock
     // TODO: Fix timing; don't wait for ping, set a timeout
     var fullyStarted = false;
-    var fullyStarting = false;
     var startGame = function() {
         if (fullyStarted) {
             return;
@@ -139,22 +141,47 @@
     };
 
     var setStarting = function() {
-        if (fullyStarting) {
+        if (fullyStarted) {
             return;
         }
         viewModel.game.gameStatus('Get ready... ');
 
+        updateTime();
         if (!$currentChar) {
             $currentChar = $gamecode.find('.code-char').first();
             $currentChar.addClass('player');
         }
     };
 
+    var timeId = null;
+    var updateTime = function() {
+        if (game.starting) {
+            time = moment().diff(game.startTime);
+            var t = moment.duration(time);
+            var minutes = t.minutes();
+            var seconds = t.seconds();
+            seconds = time < 0 ? -seconds + 1 : seconds;
+
+            viewModel.game.timer(sprintf('%s%d:%02d',
+                time < 0 ? 'T-' : '', minutes, seconds));
+            viewModel.game.timerCss(time < 0 ? 'label-warning' : 'label-info');
+
+            if (time > -1000 && time < 0) {
+                setTimeout(startGame, -time);
+            }
+
+            timeId = setTimeout(updateTime, 100);
+        }
+    };
+
     var resetStarting = function() {
+        viewModel.game.gameStatus('Waiting for players...');
         if ($currentChar) {
             $currentChar.removeClass('player');
             $currentChar = null;
         }
+
+        clearTimeout(timeId);
     };
 
     var wrapFullyStarted = function(fn) {
@@ -170,16 +197,15 @@
     keys = keys.concat(_.map(keys, function(k) { return k.toUpperCase(); }));
     keys = keys.concat(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
     keys = keys.concat(['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}', '\\', '|', '\'', '"', ';', ':', '/', '?', '.', '>', ',', '<']);
-    keys = keys.concat(['enter', 'space', 'shift+space']);
+    keys = keys.concat(['enter', 'space', 'shift+space', 'shift+enter']);
 
     Mousetrap.bind(keys, wrapFullyStarted(function(e, key) {
         e.preventDefault();
 
         log(key);
 
-        key = key === 'space' ? ' ' :
-              key === 'shift+space' ? ' ' :
-              key === 'enter' ? '\n' :
+        key = _.contains(['space', 'shift+space'], key) ? ' ' :
+              _.contains(['enter', 'shift+enter'], key) ? '\n' :
               key;
 
         if (key === code.charAt(currentPos)) {
@@ -219,24 +245,16 @@
     socket.on('ingame:ping:res', function(data) {
         console.log('received ingame:ping:res');
         game = data.game;
-        viewModel.game.countdownRunning(game.starting);
+        viewModel.game.timerRunning(game.starting || game.started);
         viewModel.game.started(game.started);
-        if (game.starting) {
-            setStarting();
-            viewModel.game.countdown(moment(game.startTime).diff(moment(), 'seconds') + 1);
-
-            var millisecondsLeft = moment(game.startTime).diff(moment());
-            if (millisecondsLeft < 1000) {
-                setTimeout(startGame, millisecondsLeft);
-            }
-        } else {
-            viewModel.game.gameStatus('Waiting for players...');
-            resetStarting();
-        }
 
         if (game.started) {
             clearTimeout(pingId);
             startGame();
+        } else if (game.starting) {
+            setStarting();
+        } else {
+            resetStarting();
         }
     });
 

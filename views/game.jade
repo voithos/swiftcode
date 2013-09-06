@@ -2,6 +2,7 @@ extends layout
 
 block styles
     link(rel='stylesheet', href='/css/github.css')
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,700', type='text/css')
 
 block scripts
     script(src='/js/libs/knockout-2.3.0.min.js')
@@ -21,12 +22,12 @@ block content
                     .panel-body.control-panel(data-bind="template: 'controlPanelTemplate'")
                 script(id='controlPanelTemplate', type='text/html')
                     .row
-                        .col-lg-9
+                        .col-lg-7
                             h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
-                        .col-lg-3
-                            div(data-bind='if: game.countdownRunning')
-                                div.countdown-parent(data-bind='ifnot: game.started')
-                                    span.countdown.badge(data-bind='text: game.countdown')
+                        .col-lg-5
+                            div(data-bind='if: game.timerRunning')
+                                div.timer-parent
+                                    span.timer.label(data-bind='text: game.timer, css: game.timerCss')
             .col-lg-4
         .row
             .col-lg-1
@@ -35,4 +36,3 @@ block content
                 script(id='gamecodeTemplate', type='text/html')
                     code#gamecode(data-bind='text: game.gamecode, css: game.langCss')
             .col-lg-1
-

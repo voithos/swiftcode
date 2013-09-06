@@ -11,8 +11,9 @@ var enet = require('./eventnet');
 // Constant configs
 var SALT_WORK_FACTOR = 10;
 var GAME_TIME_JOIN_CUTOFF_MS = 5000;
-var GAME_SINGLE_PLAYER_WAIT_TIME = 10;
-var GAME_MULTI_PLAYER_WAIT_TIME = 15;
+var GAME_SINGLE_PLAYER_WAIT_TIME = 6;
+var GAME_MULTI_PLAYER_WAIT_TIME = 16;
+var GAME_DEFAULT_MAX_PLAYERS = 4;
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
@@ -97,7 +98,11 @@ UserSchema.methods.createGame = function(opts, callback) {
     _.extend(game, opts);
 
     game.creator = user._id;
-    game.beginMultiPlayer();
+    if (game.isSinglePlayer) {
+        game.beginSinglePlayer();
+    } else {
+        game.beginMultiPlayer();
+    }
 
     return user.joinGame(game, callback);
 };
@@ -222,7 +227,7 @@ var GameSchema = new Schema({
     exercise: { type: Schema.ObjectId, ref: 'ExerciseSchema' },
     isSinglePlayer: { type: Boolean, default: false },
     numPlayers: { type: Number, min: 0, default: 0 },
-    maxPlayers: { type: Number, min: 0 },
+    maxPlayers: { type: Number, min: 0, default: GAME_DEFAULT_MAX_PLAYERS },
     status: { type: String },
     statusText: { type: String },
     isJoinable: { type: Boolean, default: true },
@@ -254,7 +259,7 @@ GameSchema.methods.beginSinglePlayer = function() {
     game.setStatus('waiting');
     game.isJoinable = false;
     game.isComplete = false;
-    game.isSinglePlayer = true;
+    game.maxPlayers = 1;
 };
 
 GameSchema.methods.beginMultiPlayer = function() {
@@ -305,12 +310,9 @@ GameSchema.methods.setGameStatusSinglePlayer = function() {
 GameSchema.methods.setGameStatusMultiPlayer = function() {
     var game = this;
 
-    if (!game.starting) {
-        if (game.numPlayers > 1) {
-            game.starting = true;
-            game.startTime = moment().add(GAME_MULTI_PLAYER_WAIT_TIME, 'seconds').toDate();
-        }
-    } else {
+    if (game.started) {
+        game.updateTime();
+    } else if (game.starting) {
         // Starting interrupt condition
         if (game.numPlayers < 2) {
             game.starting = false;
@@ -319,13 +321,18 @@ GameSchema.methods.setGameStatusMultiPlayer = function() {
         } else {
             game.updateTime();
         }
+    } else {
+        if (game.numPlayers > 1) {
+            game.starting = true;
+            game.startTime = moment().add(GAME_MULTI_PLAYER_WAIT_TIME, 'seconds').toDate();
+        }
     }
 };
 
 GameSchema.methods.updateTime = function() {
     var game = this;
     var timeLeft = moment(game.startTime).diff(moment());
-    if (game.isJoinable) {
+    if (game.isJoinable && !game.started) {
         if (timeLeft < GAME_TIME_JOIN_CUTOFF_MS) {
             game.isJoinable = false;
         }
@@ -347,7 +354,7 @@ GameSchema.methods.setStatus = function(status) {
 
 GameSchema.methods.checkJoinable = function(player) {
     var game = this;
-    return game.isJoinable && !_.contains(game.players, player);
+    return (game.isJoinable || game.isSinglePlayer) && !_.contains(game.players, player);
 };
 
 GameSchema.methods.addPlayer = function(player, callback) {
@@ -401,6 +408,7 @@ GameSchema.methods.start = function() {
     game.started = true;
     game.startingPlayers = game.players.slice();
     game.setStatus('ingame');
+    game.isJoinable = false;
 };
 
 GameSchema.methods.finish = function() {
