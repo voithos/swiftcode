@@ -60,7 +60,7 @@ UserSchema.methods.joinGame = function(game, callback) {
         return callback('game is not joinable', false);
     }
 
-    // A player cannot player against himself
+    // A player cannot play against himself
     if (!game.isNew && _.contains(game.players, user._id)) {
         return callback('cannot play against self', false);
     }
@@ -86,13 +86,19 @@ UserSchema.methods.joinGame = function(game, callback) {
                 return callback('error saving user', false);
             }
             enet.emit('users:update', user);
-            callback(null, true, game);
+            return callback(null, true, game);
         });
     });
 };
 
 UserSchema.methods.createGame = function(opts, callback) {
     var user = this;
+
+    // User cannot create a game when he is already in one
+    if (user.currentGame) {
+        return callback('already in a game', false);
+    }
+
     var game = new Game();
     _.forOwn(opts, function(v, k) {
         if (k in game) {
@@ -105,7 +111,7 @@ UserSchema.methods.createGame = function(opts, callback) {
     game.isComplete = false;
     game.creator = user._id;
 
-    user.joinGame(game, callback);
+    return user.joinGame(game, callback);
 };
 
 UserSchema.methods.quitCurrentGame = function(callback) {
@@ -139,13 +145,13 @@ UserSchema.methods.quitCurrentGame = function(callback) {
                             console.log(err);
                             return callback('error saving user');
                         }
-                        callback(null, game);
+                        return callback(null, game);
                     });
                 });
             }
         });
     } else {
-        callback();
+        return callback();
     }
 };
 
