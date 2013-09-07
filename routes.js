@@ -163,6 +163,8 @@ exports.addLang = function(req, res) {
                 done();
             });
         });
+    } else {
+        done();
     }
 };
 
