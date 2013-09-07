@@ -1,5 +1,8 @@
 extends layout
 
+block styles
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,700', type='text/css')
+
 block scripts
     script(src='/js/libs/knockout-2.3.0.min.js')
     script(src='/js/admin.js')
@@ -56,8 +59,8 @@ block content
                             input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $index() }, value: 'exercise' + $index()", type='text', name='exerciseName', data-required='true', data-placement='right')
                     .form-group.form-group-tooltip
                         label.col-lg-2.control-label(data-bind="attr: { 'for': 'codeInput' + $index() }") Code
-                        .col-lg-8
-                            textarea.form-control(data-bind="attr: { 'id': 'codeInput' + $index() }", name='code', rows='10', data-required='true', data-placement='right')
+                        .col-lg-10
+                            textarea.form-control.code(data-bind="attr: { 'id': 'codeInput' + $index() }", name='code', rows='10', data-required='true', data-placement='right')
 
             .form-group
                 .col-lg-2
