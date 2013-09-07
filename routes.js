@@ -120,16 +120,22 @@ exports.addLang = function(req, res) {
     var key = req.body.key,
         name = req.body.name,
         projectName = req.body.projectName,
+        projectUrl = req.body.projectUrl,
+        projectCodeUrl = req.body.projectCodeUrl,
+        projectLicenseUrl = req.body.projectLicenseUrl,
         order = req.body.order,
         exerciseName = req.body.exerciseName,
         code = req.body.code;
 
-    if (_.all([key, name, projectName, order, exerciseName, code]) &&
+    if (_.all([key, name, projectName, projectUrl, projectCodeUrl, projectLicenseUrl, order, exerciseName, code]) &&
         exerciseName.length === code.length) {
         var lang = new models.Lang({
             key: key,
             name: name,
             projectName: projectName,
+            projectUrl: projectUrl,
+            projectCodeUrl: projectCodeUrl,
+            projectLicenseUrl: projectLicenseUrl,
             order: order
         });
 

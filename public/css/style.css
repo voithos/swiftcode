@@ -204,3 +204,9 @@
 .code-char.backspace-char:before {
     content: '\232B';
 }
+
+/* Admin Page */
+.form-group-tooltip input,
+.form-group-tooltip textarea {
+    max-width: 70%;
+}
