@@ -156,15 +156,21 @@ var SwiftCODESockets = function() {
         });
 
         enet.on('games:new', function(game) {
-            lobby.emit('games:new', game);
+            if (game.isViewable) {
+                lobby.emit('games:new', game);
+            }
         });
 
         enet.on('games:update', function(game) {
-            lobby.emit('games:update', game);
+            if (game.isViewable) {
+                lobby.emit('games:update', game);
+            }
         });
 
         enet.on('games:remove', function(game) {
-            lobby.emit('games:remove', game);
+            if (game.isViewable) {
+                lobby.emit('games:remove', game);
+            }
         });
     };
 };

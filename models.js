@@ -250,6 +250,7 @@ var GameSchema = new Schema({
     wasReset: { type: Boolean, default: false }
 });
 
+// TODO: Avoid emitting the games:update event so much; only when necessary
 GameSchema.pre('save', function(next) {
     var game = this;
 
@@ -263,6 +264,7 @@ GameSchema.methods.beginSinglePlayer = function() {
     var game = this;
     game.setStatus('waiting');
     game.isJoinable = false;
+    game.isViewable = false;
     game.isComplete = false;
     game.maxPlayers = 1;
 };
@@ -271,6 +273,7 @@ GameSchema.methods.beginMultiPlayer = function() {
     var game = this;
     game.setStatus('waiting');
     game.isJoinable = true;
+    game.isViewable = true;
     game.isComplete = false;
     game.isSinglePlayer = false;
 };
