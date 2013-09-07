@@ -128,8 +128,6 @@
         pingId = setTimeout(pingWaiting, 500);
     };
 
-    // TODO: Add T-minus countdown, and running time clock
-    // TODO: Fix timing; don't wait for ping, set a timeout
     var fullyStarted = false;
     var startGame = function() {
         if (fullyStarted) {
