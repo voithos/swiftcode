@@ -60,7 +60,8 @@ var SwiftCODESockets = function() {
                             user.createGame({
                                 lang: lang.key,
                                 langName: lang.name,
-                                exercise: lang.randomExercise()
+                                exercise: lang.randomExercise(),
+                                isSinglePlayer: data.gameType === 'single'
                             }, function(err, success, game) {
                                 if (err) {
                                     console.log(err);

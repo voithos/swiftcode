@@ -53,9 +53,19 @@
     // the websocket
     var viewModel = {
         games: ko.observableArray(),
+        newGameType: ko.observable(''),
+        setGameType: function(gameType) {
+            this.newGameType(gameType);
+            $('.gametype-container').hide('slide', { direction: 'left' });
+            $('.lang-container').show('slide', { direction: 'right' });
+        },
         newGame: function(key) {
             console.log('emit games:createnew');
-            socket.emit('games:createnew', { key: key, player: user._id });
+            socket.emit('games:createnew', {
+                key: key,
+                player: user._id,
+                gameType: this.newGameType()
+            });
         }
     };
 

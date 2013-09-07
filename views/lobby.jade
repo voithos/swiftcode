@@ -45,9 +45,18 @@ block content
                                         tr.game-row.no-games
                                             td(colspan='5') There are no available games! Make a new one.
             .col-lg-4
-                .well
-                    fieldset.languages
-                        legend New Game
-                        each l in langs
-                            button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
+                .slide-panel-container
+                    .slide-panel.gametype-container
+                        .well
+                            fieldset.languages
+                                legend New Game
+                                button.btn.btn-info.btn-block(type='button', data-bind="click: setGameType.bind($root, 'single')") Single-player
+                                button.btn.btn-info.btn-block(type='button', data-bind="click: setGameType.bind($root, 'multi')") Multiplayer
+                    .slide-panel.lang-container
+                        .well
+                            fieldset.languages
+                                legend Choose Language
+                                each l in langs
+                                    button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
+                .clearfix
             .col-lg-1

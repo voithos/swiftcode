@@ -97,6 +97,19 @@
     text-align: center;
 }
 
+.slide-panel-container {
+    position: relative;
+}
+
+.slide-panel {
+    position: absolute;
+    width: 100%;
+}
+
+.lang-container {
+    display: none;
+}
+
 /* Game page */
 .control-panel-go {
     margin: 0 auto;
