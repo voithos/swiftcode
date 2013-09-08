@@ -32,95 +32,177 @@
     var currentPos = 0;
     var $currentChar = null;
 
-    var isTextNode = function(elem) {
-        return elem.nodeType === 3;
-    };
-
+    /**
+     * Extract game code, manipulate references, remove non-typeables,
+     * and wrap each character is a specific span tag
+     */
     var bindCodeCharacters = function() {
-        var searchPattern = /(.)([ \t]*\n\s*)|([ \t]*\n\s*)(.)|(.)/g;
-        var newlinePattern = /^[ \t]*\n\s*$/g;
-        var returnSymbol = '<span class="code-char return-char"></span>';
-
-        var replacer = function(str, $1, $2, $3, $4, $5) {
-            $1 = $1 || '';
-            $2 = $2 || '';
-            $3 = $3 || '';
-            $4 = $4 || '';
-            $5 = $5 || '';
-
-            // If newline groups matched anything, add the
-            // return symbol to the match
-            if ($2) {
-                $2 = returnSymbol + $2;
-            }
-            if ($3) {
-                $3 = returnSymbol + $3;
-            }
-            return $3 + '<span class="code-char">' + $1 + $4 + $5 + '</span>' + $2;
-        };
-
         $gamecode = $('#gamecode');
 
-        var nonWhitespaceFound = false;
+        var codemap = [];
         var $contents = $gamecode.contents();
-        $contents.each(function(i) {
-            var $this = $(this);
 
-            if ($this.is(nonTypeables)) {
+        // Loop through contents of code, and add all non-comment
+        // blocks into the codemap, keeping track of their positions
+        // and elements
+        _.each($contents, function(elem, elIdx) {
+            var $elem = $(elem);
+
+            if ($elem.is(nonTypeables)) {
                 return;
             }
 
-            var text = $this.text(),
-                parts, prefix = '', addon = '';
-            if (isTextNode(this)) {
-                if (nonWhitespaceFound) {
-                    if (i > 0 && $contents.eq(i - 1).is(nonTypeables)) {
-                        parts = (/(\s+)((?:.|\n)*)$/g).exec(text);
-                        if (parts) {
-                            text = parts[2];
-                            prefix = parts[1];
-                        }
-                    }
-                    if (text.match(newlinePattern)) {
-                        $this.replaceWith(returnSymbol + text);
-                        return;
-                    }
-                    if (i < $contents.length - 1 && $contents.eq(i + 1).is(nonTypeables)) {
-                        parts = (/^((?:.|\n)*)([ \t]+)$/g).exec(text);
-                        if (parts) {
-                            text = parts[1];
-                            addon = returnSymbol + parts[2];
-                        }
-                    }
-                    if (i === $contents.length - 1 && !text.match(/[^\s][ \t]*\n\s*$/)) {
-                        addon = returnSymbol;
-                    }
+            var text = $elem.text();
+            _.each(text, function(s, i) {
+                codemap.push({
+                    char: s,
+                    idx: i,
+                    elIdx: elIdx,
+                    el: $elem
+                });
+            });
+        });
 
-                    $this.replaceWith(prefix + text.replace(searchPattern, replacer) + addon);
-                    prefix = '';
-                    addon = '';
-                } else {
-                    if (text.trim().length === 0) {
-                        return;
+        /**
+         * Reusable filter methods that keeps track of indices
+         * marked for removal, with custom criteria functions
+         */
+        var iterativeFilter = function(collection, state, loopFn) {
+            var indices = {};
+            var addSection = function(lastIdx, curIdx) {
+                var start = lastIdx + 1,
+                    howMany = curIdx - start;
+
+                if (howMany > 0) {
+                    for (var i = start; i < start + howMany; i++) {
+                        indices[i] = true;
                     }
-                    $this.replaceWith(text.replace(searchPattern, replacer));
-                    nonWhitespaceFound = true;
                 }
+            };
+
+            _.each(collection, function(piece, i) {
+                loopFn.call(state, piece, i, addSection);
+            });
+
+            // Remove the collected indices
+            return _.filter(collection, function(piece, i) {
+                return !indices[i];
+            });
+        };
+
+        // Loop through the codemap and remove occurrences of leading and
+        // trailing whitespace
+        codemap = iterativeFilter(codemap, {
+            leadingSearch: true,
+            trailingSearch: false,
+            lastNewline: -1,
+            lastTypeable: -1,
+            setMode: function(mode) {
+                this.leadingSearch = mode === 'leading';
+                this.trailingSearch = mode === 'trailing';
+            }
+        }, function(piece, i, addSection) {
+            if (piece.char === ' ' || piece.char === '\t') {
+                // Skip over
+                return;
+            } else if (piece.char === '\n') {
+                // New line
+                if (this.trailingSearch) {
+                    this.setMode('leading');
+                    addSection(this.lastTypeable, i);
+                }
+                this.lastNewline = i;
             } else {
-                var oldClass = $this.attr('class');
-                var $newContent = $(text.replace(searchPattern, replacer));
-                $this.replaceWith($newContent);
-                $newContent.addClass(oldClass);
-                nonWhitespaceFound = true;
+                // Typeable
+                if (this.leadingSearch) {
+                    this.setMode('trailing');
+                    addSection(this.lastNewline, i);
+                }
+                this.lastTypeable = i;
             }
         });
 
+        // Finally, remove contiguous blocks of newline+whitespace,
+        // as well as globally leading whitespace
+        codemap = iterativeFilter(codemap, {
+            firstTypeableFound: false,
+            newlineFound: false,
+            typeableFound: false,
+            lastRelevantNewline: -1,
+            setFound: function(found) {
+                this.newlineFound = found === 'newline';
+                this.typeableFound = found === 'typeable';
+                if (found === 'typeable') {
+                    this.firstTypeableFound = true;
+                }
+            }
+        }, function(piece, i, addSection) {
+            if (piece.char === ' ' || piece.char === '\t') {
+                // Skip over
+                return;
+            } else if (piece.char === '\n') {
+                // Newline
+                if (this.firstTypeableFound && !this.newlineFound) {
+                    this.lastRelevantNewline = i;
+                }
+                this.setFound('newline');
+            } else {
+                // Typeable
+                if (this.newlineFound) {
+                    addSection(this.lastRelevantNewline, i);
+                }
+                this.setFound('typeable');
+            }
+        });
+
+        var isTextNode = function(el) {
+            return el.get(0).nodeType === 3;
+        };
+
+        // Group remaining code chars by original element, and loop through
+        // every element group and replace the element's text content with the
+        // wrapped code chars
+        var groupedCodemap = _.groupBy(codemap, function(piece) { return piece.elIdx; });
+        _.each(groupedCodemap, function(codeGroup) {
+            var $elem = codeGroup[0].el,
+                text = $elem.text();
+
+            var collapseCodeGroup = function(codeGroup, text) {
+                var chunks = [],
+                    idx = 0;
+
+                _.each(codeGroup, function(piece) {
+                    chunks.push(text.slice(idx, piece.idx));
+                    idx = piece.idx + 1;
+
+                    if (piece.char === '\n') {
+                        chunks.push('<span class="code-char return-char"></span>\n');
+                    } else {
+                        chunks.push('<span class="code-char">' + piece.char + '</span>');
+                    }
+                });
+
+                chunks.push(text.slice(idx, text.length));
+                return chunks.join('');
+            };
+
+            if (isTextNode($elem)) {
+                $elem.replaceWith(collapseCodeGroup(codeGroup, text));
+            } else {
+                // Re-add highlighting classes to the new spans
+                var oldClass = $elem.attr('class');
+                var $newContent = $(collapseCodeGroup(codeGroup, text));
+                $elem.replaceWith($newContent);
+                $newContent.addClass(oldClass);
+            }
+        });
+
+        // Attach boundcode
+        swiftcode.boundCode = _.map(codemap, function(piece) { return piece.char; }).join('');
+
+        // Set all code characters to untyped
         $gamecode.find('.code-char').addClass('untyped');
     };
-
-    // TODO: Try different method? Using char -> element mapping,
-    // collapse chars into single string, modify the string, and normalize
-    // it to typeables
 
     var pingId = null;
     var pingWaiting = function() {

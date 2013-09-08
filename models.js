@@ -206,7 +206,7 @@ ExerciseSchema.methods.normalizeNewlines = function() {
 
 ExerciseSchema.methods.countTypeables = function() {
     var exercise = this;
-    exercise.code = exercise.code.replace(/\s+$/g, '');
+    exercise.code = exercise.code.replace(/(^\n+)|(\s+$)/g, '') + '\n';
 
     // Highlight.js doesn't always get it right with autodetection
     var highlight = (exercise.lang in hljs.LANGUAGES) ?
