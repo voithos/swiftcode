@@ -150,7 +150,11 @@ var SwiftCODE = function() {
             self.app.set('view engine', 'jade');
 
             self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico')));
-            self.app.use(express.bodyParser());
+            self.app.use(express.json());
+
+            // Do not use bodyParser, which include express.multipart, which
+            // has a problem with creating tmp files on every request
+            self.app.use(express.urlencoded());
             self.app.use(express.methodOverride());
 
             self.app.use(express.cookieParser());

@@ -112,6 +112,7 @@ exports.admin = function(req, res) {
  * POST admin/add-lang.
  */
 
+// TODO: Add a .flash() for the results
 exports.addLang = function(req, res) {
     var done = function() {
         res.redirect('/admin');
