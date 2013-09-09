@@ -27,10 +27,110 @@
     var exercise = null;
     var nonTypeables = null;
 
-    var time = null;
-    var code = null;
-    var currentPos = 0;
-    var $currentChar = null;
+    /**
+     * Represents a player or opponent's cursor
+     */
+    var CodeCursor = function(playerName, cursor, code, fn) {
+        this.playerName = playerName;
+        this.cursor = cursor;
+        this.code = code;
+        this.pos = 0;
+        this.isMistaken = false;
+        this.mistakePathLength = 0;
+        this.numMistakes = 0;
+        this.mistakePositions = [];
+
+        this.onGameComplete = fn || function() {};
+
+        this.cursor.addClass(this.playerName);
+    };
+
+    CodeCursor.prototype.processKey = function(key) {
+        if (this.isMistaken) {
+            this.mistakePathKey();
+        } else if (key === this.code.charAt(this.pos)) {
+            this.correctKey();
+        } else {
+            this.incorrectKey();
+        }
+    };
+
+    CodeCursor.prototype.advanceCursor = function(curClass, trailingClass) {
+        this.pos++;
+        this.cursor.removeClass('untyped').removeClass(curClass);
+        this.cursor.addClass('typed').addClass(trailingClass);
+
+        this.cursor = this.cursor.nextAll('.code-char').first();
+        this.cursor.addClass(curClass);
+    };
+
+    CodeCursor.prototype.retreatCursor = function(curClass, trailingClass) {
+        this.pos--;
+        this.mistakePathLength--;
+
+        this.cursor.removeClass(curClass);
+        this.cursor = this.cursor.prevAll('.code-char').first();
+
+        this.cursor.removeClass('typed').removeClass(trailingClass);
+        this.cursor.addClass('untyped').addClass(curClass);
+    };
+
+    CodeCursor.prototype.correctKey = function() {
+        this.advanceCursor(this.playerName);
+
+        if (this.pos === this.code.length) {
+            this.onGameComplete();
+        }
+    };
+
+    CodeCursor.prototype.incorrectKey = function() {
+        // We must *not* be at the final character of the code if we want to
+        // create a mistake path, so check for it
+        if (this.pos < this.code.length - 1) {
+            this.isMistaken = true;
+            this.numMistakes++;
+            this.mistakePositions.push(this.pos);
+            this.advanceCursor(this.playerName, 'mistake');
+            this.mistakePathLength++;
+        }
+        // But we do want to highlight a mistake, even if we're at the end
+        // of the code
+        this.cursor.addClass('mistaken');
+    };
+
+    CodeCursor.prototype.mistakePathKey = function() {
+        if (this.pos < this.code.length - 1) {
+            if (this.mistakePathLength < 10) {
+                this.advanceCursor(this.playerName + ' mistaken', 'mistake-path');
+                this.mistakePathLength++;
+            }
+        }
+    };
+
+    CodeCursor.prototype.backspaceKey = function() {
+        if (this.isMistaken) {
+            this.retreatCursor(this.playerName + ' mistaken', 'mistake-path mistake');
+
+            if (this.mistakePathLength === 0) {
+                this.isMistaken = false;
+                this.cursor.removeClass('mistaken');
+            }
+        }
+    };
+
+    CodeCursor.prototype.destroy = function() {
+        this.cursor.removeClass(this.playerName);
+    };
+
+
+    /**
+     * Current game state
+     */
+    var state = swiftcode.state = {
+        time: null,
+        code: null,
+        playerCursor: null
+    };
 
     /**
      * Extract game code, manipulate references, remove non-typeables,
@@ -227,27 +327,32 @@
         viewModel.game.gameStatus('Get ready... ');
 
         updateTime();
-        if (!$currentChar) {
-            $currentChar = $gamecode.find('.code-char').first();
-            $currentChar.addClass('player');
+        if (!state.playerCursor) {
+            state.playerCursor = new CodeCursor('player', $gamecode.find('.code-char').first(), state.code, completeGame);
         }
     };
 
+    var completeGame = function() {
+        game.isComplete = true;
+        clearTimeout(timeId);
+    };
+
+
     var timeId = null;
     var updateTime = function() {
-        if (game.starting) {
-            time = moment().diff(game.startTime);
-            var t = moment.duration(time);
+        if (game.starting && !game.isComplete) {
+            state.time = moment().diff(game.startTime);
+            var t = moment.duration(state.time);
             var minutes = t.minutes();
             var seconds = t.seconds();
-            seconds = time < 0 ? -seconds + 1 : seconds;
+            seconds = state.time < 0 ? -seconds + 1 : seconds;
 
             viewModel.game.timer(sprintf('%s%d:%02d',
-                time < 0 ? 'T-' : '', minutes, seconds));
-            viewModel.game.timerCss(time < 0 ? 'label-warning' : 'label-info');
+                state.time < 0 ? 'T-' : '', minutes, seconds));
+            viewModel.game.timerCss(state.time < 0 ? 'label-warning' : 'label-info');
 
-            if (time > -1000 && time < 0) {
-                setTimeout(startGame, -time);
+            if (state.time > -1000 && state.time < 0) {
+                setTimeout(startGame, -state.time);
             }
 
             timeId = setTimeout(updateTime, 100);
@@ -256,9 +361,9 @@
 
     var resetStarting = function() {
         viewModel.game.gameStatus('Waiting for players...');
-        if ($currentChar) {
-            $currentChar.removeClass('player');
-            $currentChar = null;
+        if (state.playerCursor) {
+            state.playerCursor.destroy();
+            state.playerCursor = null;
         }
 
         clearTimeout(timeId);
@@ -272,6 +377,7 @@
         };
     };
 
+
     // Bind key events
     var keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     keys = keys.concat(_.map(keys, function(k) { return k.toUpperCase(); }));
@@ -282,38 +388,25 @@
     Mousetrap.bind(keys, wrapFullyStarted(function(e, key) {
         e.preventDefault();
 
-        log(key);
-
         key = _.contains(['space', 'shift+space'], key) ? ' ' :
               _.contains(['enter', 'shift+enter'], key) ? '\n' :
               key;
 
-        if (key === code.charAt(currentPos)) {
-            // TODO: Add completion detection
-            currentPos++;
-            $currentChar.removeClass('player untyped');
-            $currentChar.addClass('typed');
-
-            $currentChar = $currentChar.nextAll('.code-char').first();
-            $currentChar.addClass('player');
-        }
-        // TODO: Add incorrect key handling
+        state.playerCursor.processKey(key);
     }));
 
     Mousetrap.bind('backspace', wrapFullyStarted(function(e, key) {
         e.preventDefault();
-        // TODO: Add backspace handling
+        state.playerCursor.backspaceKey();
     }));
 
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
-        game = data.game;
-        exercise = data.exercise;
-        code = data.exercise.typeableCode;
+        game = swiftcode.game = data.game;
+        exercise = swiftcode.exercise = data.exercise;
+        state.code = data.exercise.typeableCode;
         nonTypeables = data.nonTypeables;
-        swiftcode.game = data.game;
-        swiftcode.exercise = data.exercise;
         viewModel.game.gamecode(data.exercise.code);
         viewModel.game.langCss('language-' + data.game.lang);
 
