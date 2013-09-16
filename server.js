@@ -1,4 +1,4 @@
-#!/bin/env node
+#!/usr/bin/env node
 
 var express = require('express');
 var io = require('socket.io');
