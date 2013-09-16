@@ -158,6 +158,7 @@ var SwiftCODE = function() {
             self.app.use(express.methodOverride());
 
             self.app.use(express.cookieParser());
+            // TODO: Replace this secret with a proper system
             self.app.use(express.session({ secret: 'temporarysecret', }));
             self.app.use(flash());
 
