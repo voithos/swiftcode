@@ -149,6 +149,29 @@
             var $elem = $(elem);
 
             if ($elem.is(nonTypeables)) {
+                // Handle special case of end-of-line comment
+                var $prev = $($contents.get(elIdx - 1)),
+                    $next = $($contents.get(elIdx + 1));
+
+                if ($prev && $next) {
+                    // End-of-line comment is preceded by non-newline and
+                    // followed by newline
+                    var isEndOfLineComment =
+                        !$prev.text().match(/\n\s*$/) &&
+                        $next.text().charAt(0) === '\n';
+
+                    if (isEndOfLineComment) {
+                        // Add the return at the end of the previous
+                        // element
+                        codemap.push({
+                            char: '\n',
+                            beforeComment: true,
+                            idx: $prev.text().search(/\s*$/),
+                            elIdx: elIdx - 1,
+                            el: $prev
+                        });
+                    }
+                }
                 return;
             }
 
@@ -156,6 +179,7 @@
             _.each(text, function(s, i) {
                 codemap.push({
                     char: s,
+                    beforeComment: false,
                     idx: i,
                     elIdx: elIdx,
                     el: $elem
@@ -276,7 +300,10 @@
                     idx = piece.idx + 1;
 
                     if (piece.char === '\n') {
-                        chunks.push('<span class="code-char return-char"></span>\n');
+                        chunks.push('<span class="code-char return-char"></span>');
+                        if (!piece.beforeComment) {
+                            chunks.push('\n');
+                        }
                     } else {
                         chunks.push('<span class="code-char">' + piece.char + '</span>');
                     }
