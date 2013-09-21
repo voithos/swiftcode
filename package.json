@@ -33,7 +33,7 @@
     "socket.io": "~0.9.16",
     "moment": "~2.1.0",
     "cheerio": "~0.12.1",
-    "forever-monitor": "~1.2.2"
+    "forever-monitor": "voithos/forever-monitor"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
