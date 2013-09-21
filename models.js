@@ -255,7 +255,6 @@ var GameSchema = new Schema({
     wasReset: { type: Boolean, default: false }
 });
 
-// TODO: Avoid emitting the games:update event so much; only when necessary
 GameSchema.pre('save', function(next) {
     var game = this;
 
@@ -286,12 +285,15 @@ GameSchema.methods.beginMultiPlayer = function() {
 GameSchema.methods.updateGameStatus = function(callback) {
     var game = this;
     game.setGameStatus();
+    var wasModified = game.isModified();
     game.save(function(err, game) {
         if (err) {
             console.log(err);
             return callback('error saving user');
         }
-        enet.emit('games:update', game);
+        if (wasModified) {
+            enet.emit('games:update', game);
+        }
         return callback(null, game);
     });
 };
