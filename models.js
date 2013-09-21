@@ -26,7 +26,7 @@ var UserSchema = new Schema({
     totalGames: { type: Number },
     totalMultiplayerGames: { type: Number },
     gamesWon: { type: Number },
-    currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
+    currentGame: { type: Schema.ObjectId }
 });
 
 // TODO: Look into using async library to avoid the spaghetti nesting
@@ -156,12 +156,8 @@ UserSchema.statics.resetCurrentGames = function() {
 // TODO: Create 'about' page that lists projects in use
 // and links to their sites and licenses
 var LangSchema = new Schema({
-    key: { type: String },
+    key: { type: String, unique: true },
     name: { type: String },
-    projectName: { type: String },
-    projectUrl: { type: String },
-    projectCodeUrl: { type: String },
-    projectLicenseUrl: { type: String },
     order: { type: Number },
     exercises: [Schema.ObjectId]
 });
@@ -170,9 +166,18 @@ LangSchema.methods.randomExercise = function() {
     return this.exercises[Math.floor(Math.random() * this.exercises.length)];
 };
 
+var ProjectSchema = new Schema({
+    key: { type: String, unique: true },
+    name: { type: String },
+    url: { type: String },
+    codeUrl: { type: String },
+    licenseUrl: { type: String }
+});
+
 var ExerciseSchema = new Schema({
     isInitialized: { type: Boolean },
     lang: { type: String },
+    project: { type: Schema.ObjectId },
     exerciseName: { type: String },
     code: { type: String },
     highlitCode: { type: String },
@@ -229,7 +234,7 @@ ExerciseSchema.methods.countTypeables = function() {
 var GameSchema = new Schema({
     lang: { type: String, required: true },
     langName: { type: String },
-    exercise: { type: Schema.ObjectId, ref: 'ExerciseSchema' },
+    exercise: { type: Schema.ObjectId },
     isSinglePlayer: { type: Boolean, default: false },
     numPlayers: { type: Number, min: 0, default: 0 },
     maxPlayers: { type: Number, min: 0, default: GAME_DEFAULT_MAX_PLAYERS },
@@ -241,8 +246,8 @@ var GameSchema = new Schema({
     starting: { type: Boolean, default: false },
     started: { type: Boolean, default: false },
     startTime: { type: Date },
-    creator: { type: Schema.ObjectId, ref: 'UserSchema' },
-    winner: { type: Schema.ObjectId, ref: 'UserSchema' },
+    creator: { type: Schema.ObjectId },
+    winner: { type: Schema.ObjectId },
     winnerTime: { type: Number, min: 0 },
     winnerSpeed: { type: Number, min: 0 },
     players: [Schema.ObjectId],
@@ -449,11 +454,13 @@ GameSchema.statics.resetIncomplete = function() {
 
 var User = mongoose.model('User', UserSchema);
 var Lang = mongoose.model('Lang', LangSchema);
+var Project = mongoose.model('Project', ProjectSchema);
 var Exercise = mongoose.model('Exercise', ExerciseSchema);
 var Game = mongoose.model('Game', GameSchema);
 
 module.exports.User = User;
 module.exports.Lang = Lang;
+module.exports.Project = Project;
 module.exports.Exercise = Exercise;
 module.exports.Game = Game;
 
