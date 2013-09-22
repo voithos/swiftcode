@@ -202,6 +202,11 @@
     visibility: hidden;
 }
 
+.code-char.return-char.mistake,
+.code-char.return-char.mistaken-path {
+    visibility: visible;
+}
+
 .code-char.return-char:before {
     content: '\23CE';
 }
