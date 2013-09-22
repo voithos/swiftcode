@@ -8,6 +8,7 @@ var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
 
+var settings = require('./settings');
 var routes = require('./routes');
 var models = require('./models');
 var sockets = require('./sockets');
@@ -41,15 +42,15 @@ var SwiftCODEConfig = function() {
     self.openshift = !!process.env.OPENSHIFT_APP_DNS;
     self.repo = process.env.OPENSHIFT_REPO_DIR || './';
 
-    self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
-    self.port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+    self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || settings.ipaddress;
+    self.port = process.env.OPENSHIFT_NODEJS_PORT || settings.port;
 
     self.mongodb = {
-        dbname: 'swiftcode',
-        host: process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost',
-        port: process.env.OPENSHIFT_MONGODB_DB_PORT || 27017,
-        username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || 'admin',
-        password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || 'password'
+        dbname: settings.dbname,
+        host: process.env.OPENSHIFT_MONGODB_DB_HOST || settings.dbhost,
+        port: process.env.OPENSHIFT_MONGODB_DB_PORT || settings.dbport,
+        username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || settings.dbusername,
+        password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || settings.dbpassword
     };
 };
 
@@ -158,8 +159,7 @@ var SwiftCODE = function() {
             self.app.use(express.methodOverride());
 
             self.app.use(express.cookieParser());
-            // TODO: Replace this secret with a proper system
-            self.app.use(express.session({ secret: 'temporarysecret', }));
+            self.app.use(express.session({ secret: settings.sessionSecret }));
             self.app.use(flash());
 
             self.app.use(passport.initialize());
