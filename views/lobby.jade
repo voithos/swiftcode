@@ -41,9 +41,11 @@ block content
                                             td(data-bind='text: statusText, css: statusCss')
                                             td
                                                 button.btn.btn-success.btn-sm(data-bind='visible: isJoinable, click: join') Join
-                                    tbody(data-bind='if: games().length == 0')
+                                    tbody(data-bind='if: loaded() && games().length == 0')
                                         tr.game-row.no-games
                                             td(colspan='5') There are no available games! Make a new one.
+                                .loading-container(data-bind='visible: loading')
+                                    img(src='/img/loading.gif')
             .col-lg-4
                 .slide-panel-container
                     .slide-panel.gametype-container
