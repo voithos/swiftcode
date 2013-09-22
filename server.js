@@ -31,6 +31,9 @@ var ensureAuthenticated = function(url, admin) {
     };
 };
 
+// Constants
+var SALT_LENGTH = 14; // 112 bits / 8 bits per char == 14
+
 /**
  * Configuration app for SwiftCODE
  */
@@ -145,6 +148,18 @@ var SwiftCODE = function() {
      * Setup app configuration
      */
     self._setupApp = function() {
+        var genSalt = function(n) {
+            var chars = [],
+                corpus = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()-_=+[{]}\\|;:,<.>/?',
+                length = corpus.length;
+
+            for (var i = 0; i < n; i++) {
+                chars.push(corpus.charAt(Math.floor(Math.random() * length)));
+            }
+
+            return chars.join('');
+        };
+
         self.app = express();
         self.app.configure(function() {
             self.app.set('views', path.join(self.config.repo, 'views'));
@@ -159,7 +174,7 @@ var SwiftCODE = function() {
             self.app.use(express.methodOverride());
 
             self.app.use(express.cookieParser());
-            self.app.use(express.session({ secret: settings.sessionSecret }));
+            self.app.use(express.session({ secret: settings.sessionSecret || genSalt(SALT_LENGTH) }));
             self.app.use(flash());
 
             self.app.use(passport.initialize());
