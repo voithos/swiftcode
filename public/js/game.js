@@ -395,7 +395,7 @@
         state.playerCursor.processKey(key);
     }));
 
-    Mousetrap.bind('backspace', wrapFullyStarted(function(e, key) {
+    Mousetrap.bind(['backspace', 'shift+backspace'], wrapFullyStarted(function(e, key) {
         e.preventDefault();
         state.playerCursor.backspaceKey();
     }));
