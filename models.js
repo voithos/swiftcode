@@ -23,12 +23,12 @@ var UserSchema = new Schema({
     isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
-    averageTime: { type: Number, default: 0 },
-    averageSpeed: { type: Number, default: 0 },
-    totalGames: { type: Number, default: 0 },
-    totalMultiplayerGames: { type: Number, default: 0 },
-    gamesWon: { type: Number, default: 0 },
-    currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
+    averageTime: { type: Number },
+    averageSpeed: { type: Number },
+    totalGames: { type: Number },
+    totalMultiplayerGames: { type: Number },
+    gamesWon: { type: Number },
+    currentGame: { type: Schema.ObjectId }
 });
 
 // TODO: Look into using async library to avoid the spaghetti nesting
@@ -501,8 +501,8 @@ GameSchema.statics.resetIncomplete = function() {
 };
 
 var StatsSchema = new Schema({
-    player: { type: Schema.ObjectId, required: true, ref: 'UserSchema' },
-    game: { type: Schema.ObjectId, required: true, ref: 'GameSchema' },
+    player: { type: Schema.ObjectId, required: true },
+    game: { type: Schema.ObjectId, required: true },
     time: { type: Number },
     speed: { type: Number },
     typeables: { type: Number },
