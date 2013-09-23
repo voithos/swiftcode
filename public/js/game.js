@@ -4,7 +4,7 @@
     var socket = io.connect(getSocketUrl() + '/game');
 
     var GameState = function() {
-        this.gameStatus = ko.observable('Waiting for players...');
+        this.gameStatus = ko.observable('Loading...');
         this.gameStatusCss = ko.observable('');
         this.timer = ko.observable('');
         this.timerCss = ko.observable('');
@@ -15,6 +15,7 @@
     };
 
     var viewModel = {
+        loading: ko.observable(false),
         game: new GameState()
     };
 
@@ -431,7 +432,7 @@
         state.playerCursor.processKey(key);
     }));
 
-    Mousetrap.bind('backspace', wrapFullyStarted(function(e, key) {
+    Mousetrap.bind(['backspace', 'shift+backspace'], wrapFullyStarted(function(e, key) {
         e.preventDefault();
         state.playerCursor.backspaceKey();
     }));
@@ -443,6 +444,8 @@
         exercise = swiftcode.exercise = data.exercise;
         state.code = data.exercise.typeableCode;
         nonTypeables = data.nonTypeables;
+        viewModel.loading(false);
+        viewModel.game.gameStatus('Waiting for players...');
         viewModel.game.gamecode(data.exercise.code);
         viewModel.game.langCss('language-' + data.game.lang);
 
@@ -453,12 +456,13 @@
 
     socket.on('ingame:ping:res', function(data) {
         console.log('received ingame:ping:res');
-        game = data.game;
+        game = swiftcode.game = data.game;
         viewModel.game.timerRunning(game.starting || game.started);
         viewModel.game.started(game.started);
 
         if (game.started) {
             clearTimeout(pingId);
+            setStarting();
             startGame();
         } else if (game.starting) {
             setStarting();
@@ -473,4 +477,5 @@
 
     console.log('emit ingame:ready');
     socket.emit('ingame:ready', { player: user._id });
+    viewModel.loading(true);
 })();

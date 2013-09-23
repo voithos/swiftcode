@@ -104,7 +104,8 @@ exports.signup = function(req, res) {
 
 exports.admin = function(req, res) {
     res.render('admin', {
-        title: 'Admin'
+        title: 'Admin',
+        error: req.flash('error')
     });
 };
 
@@ -112,60 +113,116 @@ exports.admin = function(req, res) {
  * POST admin/add-lang.
  */
 
-// TODO: Add a .flash() for the results
 exports.addLang = function(req, res) {
-    var done = function() {
+    var done = function(err) {
+        if (err) {
+            req.flash('error', err);
+        }
         res.redirect('/admin');
+    };
+
+    var eachZipped = function(zipped, fn) {
+        for (var i = 0, l = zipped.length; i < l; i++) {
+            fn.apply(zipped, zipped[i]);
+        }
+    };
+
+    var getRequestArray = function(key, l) {
+        var collection = [],
+            i, v;
+        for (i = 0; i < l; i++) {
+            v = req.body[key + i];
+            if (v) {
+                collection.push(v);
+            }
+        }
+        return collection;
+    };
+
+    var allSame = function(array) {
+        if (array.length > 0) {
+            for (var i = 0; i < array.length; i++) {
+                if (array[i] !== array[0]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     };
 
     var key = req.body.key,
         name = req.body.name,
-        projectName = req.body.projectName,
-        projectUrl = req.body.projectUrl,
-        projectCodeUrl = req.body.projectCodeUrl,
-        projectLicenseUrl = req.body.projectLicenseUrl,
         order = req.body.order,
-        exerciseName = req.body.exerciseName,
-        code = req.body.code;
+        projectCount = parseInt(req.body.projectCount),
+        exerciseCount = parseInt(req.body.exerciseCount),
+        projectKey = getRequestArray('projectKey', projectCount),
+        projectName = getRequestArray('projectName', projectCount),
+        projectUrl = getRequestArray('projectUrl', projectCount),
+        projectCodeUrl = getRequestArray('projectCodeUrl', projectCount),
+        projectLicenseUrl = getRequestArray('projectLicenseUrl', projectCount),
+        exerciseProject = getRequestArray('exerciseProject', exerciseCount),
+        exerciseName = getRequestArray('exerciseName', exerciseCount),
+        code = getRequestArray('code', exerciseCount);
 
-    if (_.all([key, name, projectName, projectUrl, projectCodeUrl, projectLicenseUrl, order, exerciseName, code]) &&
-        exerciseName.length === code.length) {
+    if (_.all([key, name, order, projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl, exerciseProject, exerciseName, code]) &&
+        allSame(_.pluck([projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl], 'length')) &&
+        allSame(_.pluck([exerciseProject, exerciseName, code], 'length'))) {
+
         var lang = new models.Lang({
             key: key,
             name: name,
-            projectName: projectName,
-            projectUrl: projectUrl,
-            projectCodeUrl: projectCodeUrl,
-            projectLicenseUrl: projectLicenseUrl,
             order: order
         });
 
         var exercises = [];
-
-        _.each(_.zip(exerciseName, code), function(zipped) {
+        eachZipped(_.zip(exerciseName, code), function(exerciseName, code) {
             exercises.push({
                 lang: key,
-                exerciseName: zipped[0],
-                code: zipped[1]
+                exerciseName: exerciseName,
+                code: code
             });
         });
 
-        models.Exercise.create(exercises, function(err) {
+        var projects = [];
+        eachZipped(_.zip(projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl), function(key, name, url, codeUrl, licenseUrl) {
+            projects.push({
+                key: key,
+                name: name,
+                url: url,
+                codeUrl: codeUrl,
+                licenseUrl: licenseUrl
+            });
+        });
+
+        models.Project.create(projects, function(err) {
             if (err) {
                 console.log(err);
                 console.log('addLang error');
-                done();
+                return done(err);
             }
-            _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
-                lang.exercises.push(exercise._id);
+
+            var projects = Array.prototype.slice.call(arguments, 1);
+            _.each(_.map(exerciseProject, function(p) { return parseInt(p); }), function(project, i) {
+                exercises[i].project = projects[project]._id;
             });
 
-            lang.save(function(err) {
-                done();
+            models.Exercise.create(exercises, function(err) {
+                if (err) {
+                    console.log(err);
+                    console.log('addLang error');
+                    return done(err);
+                }
+                _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
+                    lang.exercises.push(exercise._id);
+                });
+
+                lang.save(function(err) {
+                    return done(err);
+                });
             });
         });
     } else {
-        done();
+        return done('Did not pass validation.');
     }
 };
 
@@ -187,7 +244,7 @@ exports.reinitExercises = function(req, res) {
         if (err) {
             console.log(err);
             console.log('reinitLang error');
-            done(err);
+            return done(err);
         }
         var total = exercises.length,
             saveCount = 0;
@@ -201,7 +258,7 @@ exports.reinitExercises = function(req, res) {
                 }
                 saveCount++;
                 if (saveCount === total) {
-                    done();
+                    return done();
                 }
             });
         });

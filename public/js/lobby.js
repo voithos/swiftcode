@@ -53,6 +53,8 @@
     // the websocket
     var viewModel = {
         games: ko.observableArray(),
+        loading: ko.observable(false),
+        loaded: ko.observable(false),
         newGameType: ko.observable(''),
         setGameType: function(gameType) {
             this.newGameType(gameType);
@@ -78,6 +80,8 @@
             return new Game(v);
         });
         ko.utils.arrayPushAll(viewModel.games, games);
+        viewModel.loading(false);
+        viewModel.loaded(true);
     });
 
     socket.on('games:update', function(data) {
@@ -122,4 +126,5 @@
 
     console.log('emit games:fetch');
     socket.emit('games:fetch');
+    viewModel.loading(true);
 })();

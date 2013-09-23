@@ -97,6 +97,12 @@
     text-align: center;
 }
 
+.lobby .loading-container {
+    height: 300px;
+    text-align: center;
+    line-height: 300px;
+}
+
 .slide-panel-container {
     position: relative;
 }
@@ -127,6 +133,12 @@
 
 .control-panel .timer {
     font-size: 25px;
+}
+
+.code .loading-container {
+    height: 300px;
+    text-align: center;
+    line-height: 300px;
 }
 
 .code {
@@ -188,6 +200,11 @@
     display: inline-block;
     width: 20px;
     visibility: hidden;
+}
+
+.code-char.return-char.mistake,
+.code-char.return-char.mistaken-path {
+    visibility: visible;
 }
 
 .code-char.return-char:before {

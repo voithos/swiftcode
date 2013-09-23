@@ -32,7 +32,9 @@ block content
         .row
             .col-lg-1
             .col-lg-10
-                pre(data-bind="template: 'gamecodeTemplate'")
-                script(id='gamecodeTemplate', type='text/html')
-                    code.code#gamecode(data-bind='text: game.gamecode, css: game.langCss')
+                pre
+                    code.code
+                        span#gamecode(data-bind='text: game.gamecode, css: game.langCss')
+                        .loading-container(data-bind='visible: loading')
+                            img(src='/img/loading.gif')
             .col-lg-1

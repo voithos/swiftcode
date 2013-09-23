@@ -15,9 +15,12 @@ block content
                 .col-lg-10
                 .col-lg-2
                     button.btn.btn-info.btn-xs(type='button', data-bind='click: reinitExercises') Reinitialize Exercises
-                .alert-container(data-bind="template: { name: 'alertTemplate', if: showAlert }")
+                if error.length != 0
+                    script.
+                        var error = '#{error}';
+                .alert-container(data-bind="template: { name: 'alertTemplate', if: alertVisible }")
                 script(id='alertTemplate', type='text/html')
-                    .reinit-alert.alert.fade.in.col-lg-6.col-lg-push-3(data-bind='css: alertCss')
+                    .admin-alert.alert.fade.in.col-lg-6.col-lg-push-3(data-bind='css: alertCss')
                         button.close(type='button', data-bind='click: hideAlert') x
                         span(data-bind='text: alertMessage')
             .form-group.form-group-tooltip
@@ -29,41 +32,56 @@ block content
                 .col-lg-6
                     input.form-control(id='nameInput', type='text', name='name', data-required='true', data-placement='right')
             .form-group.form-group-tooltip
-                label.col-lg-2.control-label(for='projectNameInput') Project Name
-                .col-lg-6
-                    input.form-control(id='projectNameInput', type='text', name='projectName', data-required='true', data-placement='right')
-            .form-group.form-group-tooltip
-                label.col-lg-2.control-label(for='projectUrlInput') Project URL
-                .col-lg-6
-                    input.form-control(id='projectUrlInput', type='text', name='projectUrl', data-required='true', data-type='url', data-placement='right')
-            .form-group.form-group-tooltip
-                label.col-lg-2.control-label(for='projectCodeUrlInput') Project Code URL
-                .col-lg-6
-                    input.form-control(id='projectCodeUrlInput', type='text', name='projectCodeUrl', data-required='true', data-type='url', data-placement='right')
-            .form-group.form-group-tooltip
-                label.col-lg-2.control-label(for='projectLicenseUrlInput') Project License URL
-                .col-lg-6
-                    input.form-control(id='projectLicenseUrlInput', type='text', name='projectLicenseUrl', data-required='true', data-type='url', data-placement='right')
-            .form-group.form-group-tooltip
                 label.col-lg-2.control-label(for='orderInput') Order
                 .col-lg-6
                     input.form-control(id='orderInput', type='text', name='order', data-required='true', data-type='number', data-placement='right')
 
-            fieldset.code-samples
-                legend Exercises
-                div(data-bind="template: { name: 'exercisesTemplate', foreach: exercises }")
-                script(id='exercisesTemplate', type='text/html')
+            fieldset.code-projects
+                legend Source Projects
+                input(type='hidden', name='projectCount', data-bind='value: $root.projectCount')
+                input(type='hidden', name='exerciseCount', data-bind='value: $root.exerciseCount')
+                div(data-bind="template: { name: 'projectsTemplate', foreach: projects }")
+
+                script(id='projectsTemplate', type='text/html')
                     .form-group.form-group-tooltip
-                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'exerciseNameInput' + $index() }") Exercise Name
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectKeyInput' + $index() }") Project Key
                         .col-lg-4
-                            input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $index() }, value: 'exercise' + $index()", type='text', name='exerciseName', data-required='true', data-placement='right')
+                            input.form-control(data-bind="attr: { 'id': 'projectKeyInput' + $index(), 'name': 'projectKey' + $index() }", type='text', data-required='true', data-placement='right')
                     .form-group.form-group-tooltip
-                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'codeInput' + $index() }") Code
-                        .col-lg-10
-                            textarea.form-control.code(data-bind="attr: { 'id': 'codeInput' + $index() }", name='code', rows='10', data-required='true', data-placement='right')
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectNameInput' + $index() }") Project Name
+                        .col-lg-6
+                            input.form-control(data-bind="attr: { 'id': 'projectNameInput' + $index(), 'name': 'projectName' + $index() }", type='text', data-required='true', data-placement='right') .form-group.form-group-tooltip
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectUrlInput' + $index() }") Project URL
+                        .col-lg-6
+                            input.form-control(data-bind="attr: { 'id': 'projectUrlInput' + $index(), 'name': 'projectUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+                    .form-group.form-group-tooltip
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectCodeUrlInput' + $index() }") Project Code URL
+                        .col-lg-6
+                            input.form-control(data-bind="attr: { 'id': 'projectCodeUrlInput' + $index(), 'name': 'projectCodeUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+                    .form-group.form-group-tooltip
+                        label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectLicenseUrlInput' + $index() }") Project License URL
+                        .col-lg-6
+                            input.form-control(data-bind="attr: { 'id': 'projectLicenseUrlInput' + $index(), 'name': 'projectLicenseUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+
+                    fieldset.code-samples
+                        legend Exercises
+                        div(data-bind="foreach: exercises")
+                            input(type='hidden', name='exerciseProject', data-bind="attr: { 'name': 'exerciseProject' + absIndex }, value: $parentContext.$index")
+                            .form-group.form-group-tooltip
+                                label.col-lg-2.control-label(data-bind="attr: { 'for': 'exerciseNameInput' + $parentContext.$index() + '-' + $index() }") Exercise Name
+                                .col-lg-4
+                                    input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $parentContext.$index() + '-' + $index(), name: 'exerciseName' + absIndex }, value: 'exercise' + $parentContext.$index() + '-' + $index()", type='text', data-required='true', data-placement='right')
+                            .form-group.form-group-tooltip
+                                label.col-lg-2.control-label(data-bind="attr: { 'for': 'codeInput' + $parentContext.$index() + '-' + $index() }") Code
+                                .col-lg-10
+                                    textarea.form-control.code(data-bind="attr: { 'id': 'codeInput' + $parentContext.$index() + '-' + $index(), name: 'code' + absIndex }", rows='10', data-required='true', data-placement='right')
+                    .form-group
+                        .col-lg-2
+                        .col-lg-8
+                            button.btn.btn-large(type='button', data-bind='click: addExercise') Add Exercise
 
             .form-group
                 .col-lg-2
                 .col-lg-8
-                    button.btn.btn-large(type='button', data-bind='click: addExercise') Add Exercise
+                    button.btn.btn-large(type='button', data-bind='click: addProject') Add Project
                     button.btn.btn-large.btn-primary(type='submit') Submit
