@@ -25,7 +25,7 @@ block content
                         span(data-bind='text: alertMessage')
             .form-group.form-group-tooltip
                 label.col-lg-2.control-label(for='keyInput') Key
-                .col-lg-6
+                .col-lg-4
                     input.form-control(id='keyInput', type='text', name='key', data-required='true', data-placement='right', autofocus)
             .form-group.form-group-tooltip
                 label.col-lg-2.control-label(for='nameInput') Language Name
@@ -51,6 +51,7 @@ block content
                         label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectNameInput' + $index() }") Project Name
                         .col-lg-6
                             input.form-control(data-bind="attr: { 'id': 'projectNameInput' + $index(), 'name': 'projectName' + $index() }", type='text', data-required='true', data-placement='right') .form-group.form-group-tooltip
+                    .form-group.form-group-tooltip
                         label.col-lg-2.control-label(data-bind="attr: { 'for': 'projectUrlInput' + $index() }") Project URL
                         .col-lg-6
                             input.form-control(data-bind="attr: { 'id': 'projectUrlInput' + $index(), 'name': 'projectUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
