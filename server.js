@@ -8,7 +8,21 @@ var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
 
-var settings = require('./settings');
+var detectOpenShift = function() {
+    return !!process.env.OPENSHIFT_APP_DNS;
+};
+
+var settings;
+try {
+    settings = require('./settings');
+} catch (e) {
+    if (detectOpenShift()) {
+        settings = {};
+    } else {
+        throw new Error('settings.js not found; see the README for details');
+    }
+}
+
 var routes = require('./routes');
 var models = require('./models');
 var sockets = require('./sockets');
@@ -42,7 +56,7 @@ var SwiftCODEConfig = function() {
     var self = this;
 
     // Setup a flag indicating if we're in OpenShift or not
-    self.openshift = !!process.env.OPENSHIFT_APP_DNS;
+    self.openshift = detectOpenShift();
     self.repo = process.env.OPENSHIFT_REPO_DIR || './';
 
     self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || settings.ipaddress;
