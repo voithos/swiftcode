@@ -87,6 +87,7 @@ var SwiftCODESockets = function() {
                             console.log('ingame:ready error'); return;
                         }
                         if (user) {
+                            socket.set('game', user.currentGame);
                             models.Game.findById(user.currentGame, function(err, game) {
                                 if (game) {
                                     if (err) {
@@ -114,20 +115,60 @@ var SwiftCODESockets = function() {
             });
 
             socket.on('ingame:ping', function(data) {
-                models.Game.findById(data.gameId, function(err, game) {
+                socket.get('game', function(err, game) {
                     if (err) {
                         console.log(err);
-                        console.log('ingame:ping error'); return;
+                        return;
                     }
-                    if (game) {
-                        game.updateGameStatus(function(err, game) {
+                    models.Game.findById(game, function(err, game) {
+                        if (err) {
+                            console.log(err);
+                            console.log('ingame:ping error'); return;
+                        }
+                        if (game) {
+                            game.updateGameStatus(function(err, game) {
+                                if (err) {
+                                    console.log(err);
+                                    console.log('ingame:ping error'); return;
+                                }
+                                socket.emit('ingame:ping:res', { game: game });
+                            });
+                        }
+                    });
+                });
+            });
+
+            socket.on('ingame:complete', function(data) {
+                socket.get('player', function(err, player) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    socket.get('game', function(err, game) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        
+                        var stats = new models.Stats({
+                            player: player,
+                            game: game,
+                            time: data.time,
+                            typed: data.typed,
+                            mistakes: data.mistakes
+                        });
+
+                        stats.updateStatistics(function(err, stats, user, game) {
                             if (err) {
                                 console.log(err);
-                                console.log('ingame:ping error'); return;
+                                return;
                             }
-                            socket.emit('ingame:ping:res', { game: game });
+                            socket.emit('ingame:complete:res', {
+                                stats: stats,
+                                game: game
+                            });
                         });
-                    }
+                    });
                 });
             });
 

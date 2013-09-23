@@ -35,9 +35,10 @@
         this.cursor = cursor;
         this.code = code;
         this.pos = 0;
+        this.typed = 0;
         this.isMistaken = false;
         this.mistakePathLength = 0;
-        this.numMistakes = 0;
+        this.mistakes = 0;
         this.mistakePositions = [];
 
         this.onGameComplete = fn || function() {};
@@ -56,6 +57,7 @@
     };
 
     CodeCursor.prototype.advanceCursor = function(curClass, trailingClass) {
+        this.typed++;
         this.pos++;
         this.cursor.removeClass('untyped').removeClass(curClass);
         this.cursor.addClass('typed').addClass(trailingClass);
@@ -65,6 +67,7 @@
     };
 
     CodeCursor.prototype.retreatCursor = function(curClass, trailingClass) {
+        this.typed++;
         this.pos--;
         this.mistakePathLength--;
 
@@ -79,7 +82,7 @@
         this.advanceCursor(this.playerName);
 
         if (this.pos === this.code.length) {
-            this.onGameComplete();
+            this.onGameComplete.call(this, this);
         }
     };
 
@@ -88,7 +91,7 @@
         // create a mistake path, so check for it
         if (this.pos < this.code.length - 1) {
             this.isMistaken = true;
-            this.numMistakes++;
+            this.mistakes++;
             this.mistakePositions.push(this.pos);
             this.advanceCursor(this.playerName, 'mistake');
             this.mistakePathLength++;
@@ -333,7 +336,7 @@
 
     var pingId = null;
     var pingWaiting = function() {
-        socket.emit('ingame:ping', { gameId: game._id });
+        socket.emit('ingame:ping');
         pingId = setTimeout(pingWaiting, 500);
     };
 
@@ -359,9 +362,15 @@
         }
     };
 
-    var completeGame = function() {
+    var completeGame = swiftcode.completeGame = function(cursor) {
         game.isComplete = true;
         clearTimeout(timeId);
+
+        socket.emit('ingame:complete', {
+            time: state.time,
+            typed: cursor.typed,
+            mistakes: cursor.mistakes
+        });
     };
 
 
@@ -456,6 +465,10 @@
         } else {
             resetStarting();
         }
+    });
+
+    socket.on('ingame:complete:res', function(data) {
+        console.log(data);
     });
 
     console.log('emit ingame:ready');

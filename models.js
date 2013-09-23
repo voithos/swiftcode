@@ -14,6 +14,8 @@ var GAME_TIME_JOIN_CUTOFF_MS = 5000;
 var GAME_SINGLE_PLAYER_WAIT_TIME = 6;
 var GAME_MULTI_PLAYER_WAIT_TIME = 16;
 var GAME_DEFAULT_MAX_PLAYERS = 4;
+var CHARACTERS_PER_WORD = 5;
+var MILLISECONDS_PER_MINUTE = 60000;
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
@@ -21,11 +23,11 @@ var UserSchema = new Schema({
     isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
-    averageTime: { type: Number },
-    averageSpeed: { type: Number },
-    totalGames: { type: Number },
-    totalMultiplayerGames: { type: Number },
-    gamesWon: { type: Number },
+    averageTime: { type: Number, default: 0 },
+    averageSpeed: { type: Number, default: 0 },
+    totalGames: { type: Number, default: 0 },
+    totalMultiplayerGames: { type: Number, default: 0 },
+    gamesWon: { type: Number, default: 0 },
     currentGame: { type: Schema.ObjectId, ref: 'GameSchema' }
 });
 
@@ -135,6 +137,29 @@ UserSchema.methods.quitCurrentGame = function(callback) {
     } else {
         return callback();
     }
+};
+
+UserSchema.methods.updateStatistics = function(stats, game, callback) {
+    var user = this;
+    user.bestTime = Math.min(user.bestTime || Infinity, stats.time || Infinity);
+    user.bestSpeed = Math.max(user.bestSpeed || 0, stats.speed || 0);
+    user.totalGames += 1;
+    if (!game.isSinglePlayer) {
+        user.totalMultiplayerGames += 1;
+    }
+    if (game.winner === user.id) {
+        user.gamesWon += 1;
+    }
+    user.averageTime = (user.averageTime * (user.totalGames - 1) + stats.time) / user.totalGames;
+    user.averageSpeed = (user.averageSpeed * (user.totalGames - 1) + stats.speed) / user.totalGames;
+
+    user.save(function(err) {
+        if (err) {
+            console.log(err);
+            return callback('error saving user');
+        }
+        return callback(null, user);
+    });
 };
 
 UserSchema.statics.resetCurrentGames = function() {
@@ -426,6 +451,27 @@ GameSchema.methods.finish = function() {
     game.isJoinable = false;
 };
 
+GameSchema.methods.updateStatistics = function(stats, callback) {
+    var game = this;
+    if (game.winnerTime !== stats.time &&
+        Math.min(game.winnerTime || Infinity, stats.time || Infinity) === stats.time) {
+
+        game.winner = stats.player;
+        game.winnerTime = stats.time;
+        game.winnerSpeed = stats.speed;
+
+        game.save(function(err) {
+            if (err) {
+                console.log(err);
+                return callback('error saving game');
+            }
+            return callback(null, game);
+        });
+    } else {
+        return callback(null, game);
+    }
+};
+
 GameSchema.statics.resetIncomplete = function() {
     var games = this;
     games.update({
@@ -447,15 +493,80 @@ GameSchema.statics.resetIncomplete = function() {
     });
 };
 
+var StatsSchema = new Schema({
+    player: { type: Schema.ObjectId, required: true, ref: 'UserSchema' },
+    game: { type: Schema.ObjectId, required: true, ref: 'GameSchema' },
+    time: { type: Number },
+    speed: { type: Number },
+    typeables: { type: Number },
+    typed: { type: Number },
+    percentUnproductive: { type: Number },
+    mistakes: { type: Number }
+});
+
+StatsSchema.methods.updateStatistics = function(callback) {
+    var stats = this;
+
+    User.findById(stats.player, function(err, user) {
+        if (err) {
+            console.log(err);
+            return callback(err);
+        }
+        Game.findById(stats.game, function(err, game) {
+            if (err) {
+                console.log(err);
+                return callback(err);
+            }
+            if (game) {
+                Exercise.findById(game.exercise, function(err, exercise) {
+                    if (err) {
+                        console.log(err);
+                        return callback(err);
+                    }
+
+                    // TODO: Validate input time, to make sure no one is cheating
+                    // stats.time = moment().diff(game.startTime, 'milliseconds');
+                    stats.typeables = exercise.typeables;
+                    stats.speed = (stats.typeables / CHARACTERS_PER_WORD) *
+                                  (1 / (stats.time / MILLISECONDS_PER_MINUTE));
+                    stats.percentUnproductive = 1 - stats.typeables / stats.typed;
+
+                    stats.save(function(err) {
+                        if (err) {
+                            console.log(err);
+                            return callback(err);
+                        }
+                        game.updateStatistics(stats, function(err) {
+                            if (err) {
+                                console.log(err);
+                                return callback(err);
+                            }
+                            user.updateStatistics(stats, game, function(err) {
+                                if (err) {
+                                    console.log(err);
+                                    return callback(err);
+                                }
+                                return callback(null, stats, user, game);
+                            });
+                        });
+                    });
+                });
+            }
+        });
+    });
+};
+
 var User = mongoose.model('User', UserSchema);
 var Lang = mongoose.model('Lang', LangSchema);
 var Exercise = mongoose.model('Exercise', ExerciseSchema);
 var Game = mongoose.model('Game', GameSchema);
+var Stats = mongoose.model('Stats', StatsSchema);
 
 module.exports.User = User;
 module.exports.Lang = Lang;
 module.exports.Exercise = Exercise;
 module.exports.Game = Game;
+module.exports.Stats = Stats;
 
 module.exports.NON_TYPEABLES = NON_TYPEABLES;
 module.exports.NON_TYPEABLE_CLASSES = NON_TYPEABLE_CLASSES;
