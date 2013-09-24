@@ -222,3 +222,23 @@
 .form-group-tooltip textarea {
     max-width: 70%;
 }
+
+/* About page */
+.about-projects .project-container {
+    background-color: #fafafa;
+    border: 1px solid #dadada;
+    position: relative;
+}
+
+.about-projects .project-name {
+    font-size: 26px;
+    margin: 5px 0;
+    display: block;
+}
+
+.about-projects .link-group {
+}
+
+.about-projects .project-link {
+    width: 75%;
+}

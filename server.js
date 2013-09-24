@@ -238,7 +238,7 @@ var SwiftCODE = function() {
         self.app.get('/admin', adminMiddleware, routes.admin);
         self.app.post('/admin/add-lang', adminMiddleware, routes.addLang);
         self.app.post('/admin/reinit-exercises', adminMiddleware, routes.reinitExercises);
-        self.app.get('/help', routes.help);
+        self.app.get('/about', routes.about);
     };
 
     /**

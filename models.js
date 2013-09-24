@@ -178,8 +178,6 @@ UserSchema.statics.resetCurrentGames = function() {
     });
 };
 
-// TODO: Create 'about' page that lists projects in use
-// and links to their sites and licenses
 var LangSchema = new Schema({
     key: { type: String, unique: true },
     name: { type: String },

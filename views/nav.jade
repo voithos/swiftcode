@@ -6,8 +6,8 @@
                 a(href='/lobby') Lobby
             li(class= path=='/game' ? 'active' : '')
                 a(href='/game') Game
-            li(class= path=='/help' ? 'active' : '')
-                a(href='/help') Help
+            li(class= path=='/about' ? 'active' : '')
+                a(href='/about') About
         if !user
             form.navbar-form.pull-right.form-parsley(action='/login', method='POST')
                 .form-group

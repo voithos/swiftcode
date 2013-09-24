@@ -1,0 +1,23 @@
+extends layout
+
+block content
+    h1= title
+    p.lead.
+        SwiftCode would not be possible were it not for the multitude of
+        open source projects that are freely available to learn from. Below
+        is the list of source projects from which typeable code has been taken,
+        along with links to the code and licenses.
+    .col-lg-1
+    .about-projects.col-lg-10
+        each p in projects
+            .col-lg-6
+                .project-container.well
+                    .col-lg-8
+                        a.project-name(href='#{p.url}') #{p.name}
+                    .link-group.col-lg-4
+                        .row
+                            a.btn.btn-info.btn-xs.project-link(href='#{p.codeUrl}') Code
+                        .row
+                            a.btn.btn-info.btn-xs.project-link(href='#{p.licenseUrl}') License
+                    .clearfix
+    .col-lg-1

@@ -50,12 +50,19 @@ exports.game = function(req, res) {
 };
 
 /*
- * GET help page.
+ * GET about page.
  */
 
-exports.help = function(req, res) {
-    res.render('help', {
-        title: 'Help'
+exports.about = function(req, res) {
+    models.Project.find({}, function(err, docs) {
+        if (err) {
+            console.log(err);
+            console.log('Projects not found'); return;
+        }
+        res.render('about', {
+            title: 'About',
+            projects: docs
+        });
     });
 };
 
