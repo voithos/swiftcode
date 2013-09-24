@@ -236,9 +236,18 @@
     display: block;
 }
 
+.about-projects .lang {
+    font-size: 15px;
+    margin-left: 20px;
+}
+
 .about-projects .link-group {
+    padding-top: 7px;
+    padding-bottom: 7px;
 }
 
 .about-projects .project-link {
     width: 75%;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }

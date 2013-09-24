@@ -194,7 +194,9 @@ var ProjectSchema = new Schema({
     name: { type: String },
     url: { type: String },
     codeUrl: { type: String },
-    licenseUrl: { type: String }
+    licenseUrl: { type: String },
+    lang: { type: String },
+    langName: { type: String }
 });
 
 var ExerciseSchema = new Schema({

@@ -197,7 +197,9 @@ exports.addLang = function(req, res) {
                 name: name,
                 url: url,
                 codeUrl: codeUrl,
-                licenseUrl: licenseUrl
+                licenseUrl: licenseUrl,
+                lang: key,
+                langName: name
             });
         });
 
