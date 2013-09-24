@@ -23,5 +23,8 @@
                         | 
                         b.caret
                     ul.dropdown-menu
+                        if user.isAdmin
+                            li
+                                a(href='/admin') Admin
                         li
                             a(href='/logout') Log out
