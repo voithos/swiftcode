@@ -54,7 +54,7 @@ exports.game = function(req, res) {
  */
 
 exports.about = function(req, res) {
-    models.Project.find({}, function(err, docs) {
+    models.Project.find({}, null, { sort: { name: 1 } }, function(err, docs) {
         if (err) {
             console.log(err);
             console.log('Projects not found'); return;
