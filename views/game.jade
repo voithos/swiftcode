@@ -33,8 +33,8 @@ block content
             .col-lg-1
             .col-lg-10
                 pre
-                    code.code
-                        span#gamecode(data-bind='text: game.gamecode, css: game.langCss')
+                    code.code(data-bind='css: game.langCss')
+                        span#gamecode(data-bind='text: game.gamecode')
                         span.loading-container(data-bind='visible: loading')
                             img(src='/img/loading.gif')
             .col-lg-1
