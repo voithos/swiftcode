@@ -198,7 +198,7 @@
 }
 
 .code-char.return-char.mistake,
-.code-char.return-char.mistaken-path {
+.code-char.return-char.mistake-path {
     visibility: visible;
 }
 
