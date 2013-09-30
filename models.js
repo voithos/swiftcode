@@ -506,7 +506,7 @@ var StatsSchema = new Schema({
     time: { type: Number },
     speed: { type: Number },
     typeables: { type: Number },
-    typed: { type: Number },
+    keystrokes: { type: Number },
     percentUnproductive: { type: Number },
     mistakes: { type: Number }
 });
@@ -536,7 +536,7 @@ StatsSchema.methods.updateStatistics = function(callback) {
                     stats.typeables = exercise.typeables;
                     stats.speed = (stats.typeables / CHARACTERS_PER_WORD) *
                                   (1 / (stats.time / MILLISECONDS_PER_MINUTE));
-                    stats.percentUnproductive = 1 - stats.typeables / stats.typed;
+                    stats.percentUnproductive = 1 - stats.typeables / stats.keystrokes;
 
                     stats.save(function(err) {
                         if (err) {

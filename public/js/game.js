@@ -21,7 +21,7 @@
             time: ko.observable(''),
             speed: ko.observable(0),
             typeables: ko.observable(0),
-            typed: ko.observable(0),
+            keystrokes: ko.observable(0),
             percentUnproductive: ko.observable(0),
             mistakes: ko.observable(0)
         },
@@ -45,7 +45,7 @@
         this.cursor = cursor;
         this.code = code;
         this.pos = 0;
-        this.typed = 0;
+        this.keystrokes = 0;
         this.isMistaken = false;
         this.mistakePathLength = 0;
         this.mistakes = 0;
@@ -67,7 +67,7 @@
     };
 
     CodeCursor.prototype.advanceCursor = function(curClass, trailingClass) {
-        this.typed++;
+        this.keystrokes++;
         this.pos++;
         this.cursor.removeClass('untyped').removeClass(curClass);
         this.cursor.addClass('typed').addClass(trailingClass);
@@ -77,7 +77,7 @@
     };
 
     CodeCursor.prototype.retreatCursor = function(curClass, trailingClass) {
-        this.typed++;
+        this.keystrokes++;
         this.pos--;
         this.mistakePathLength--;
 
@@ -378,7 +378,7 @@
 
         socket.emit('ingame:complete', {
             time: state.time,
-            typed: cursor.typed,
+            keystrokes: cursor.keystrokes,
             mistakes: cursor.mistakes
         });
     };
@@ -494,7 +494,7 @@
         viewModel.stats.time(moment(data.stats.time).format('mm:ss'));
         viewModel.stats.speed(data.stats.speed | 0);
         viewModel.stats.typeables(data.stats.typeables | 0);
-        viewModel.stats.typed(data.stats.typed | 0);
+        viewModel.stats.keystrokes(data.stats.keystrokes | 0);
         viewModel.stats.percentUnproductive((data.stats.percentUnproductive * 100).toFixed(2));
         viewModel.stats.speed(data.stats.speed | 0);
         viewModel.stats.mistakes(data.stats.mistakes | 0);

@@ -154,7 +154,7 @@ var SwiftCODESockets = function() {
                             player: player,
                             game: game,
                             time: data.time,
-                            typed: data.typed,
+                            keystrokes: data.keystrokes,
                             mistakes: data.mistakes
                         });
 
