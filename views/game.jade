@@ -20,14 +20,14 @@ block content
                 .panel.panel-danger
                     .panel-heading
                     .panel-body.control-panel(data-bind="template: 'controlPanelTemplate'")
-                script(id='controlPanelTemplate', type='text/html')
-                    .row
-                        .col-lg-7
-                            h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
-                        .col-lg-5
-                            div(data-bind='if: game.timerRunning')
-                                div.timer-parent
-                                    span.timer.label(data-bind='text: game.timer, css: game.timerCss')
+                    script(id='controlPanelTemplate', type='text/html')
+                        .row
+                            .col-lg-7
+                                h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
+                            .col-lg-5
+                                div(data-bind='if: game.timerRunning')
+                                    div.timer-parent
+                                        span.timer.label(data-bind='text: game.timer, css: game.timerCss')
             .col-lg-4
         .row
             .col-lg-1
@@ -38,3 +38,41 @@ block content
                         span.loading-container(data-bind='visible: loading')
                             img(src='/img/loading.gif')
             .col-lg-1
+        #completion-dialog.completion-dialog.modal.fade(tabindex='-1', role='dialog', data-backdrop='static', data-keyboard='false')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        h3.completion-header.text-info(data-bind='text: completionText')
+                    .modal-body
+                        .col-lg-1
+                        .col-lg-10.completion-table
+                            .row
+                                .col-lg-8 Time:
+                                .col-lg-4
+                                    span(data-bind='text: stats.time')
+                            .row
+                                .col-lg-8 Speed:
+                                .col-lg-4
+                                    span(data-bind='text: stats.speed')
+                                    span.muted wpm
+                            .row
+                                .col-lg-8 Typed:
+                                .col-lg-4
+                                    span(data-bind='text: stats.typed')
+                            .row
+                                .col-lg-8 Characters:
+                                .col-lg-4
+                                    span(data-bind='text: stats.typeables')
+                            .row
+                                .col-lg-8 Unproductive:
+                                .col-lg-4
+                                    span(data-bind='text: stats.percentUnproductive')
+                                    span.muted %
+                            .row
+                                .col-lg-8 Mistakes:
+                                .col-lg-4
+                                    span(data-bind='text: stats.mistakes')
+                        .col-lg-1
+                        .clearfix
+                    .modal-footer
+                        a.btn.btn-primary(href='/lobby') Back to lobby

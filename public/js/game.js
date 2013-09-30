@@ -16,6 +16,15 @@
 
     var viewModel = {
         loading: ko.observable(false),
+        completionText: ko.observable(''),
+        stats: {
+            time: ko.observable(''),
+            speed: ko.observable(0),
+            typeables: ko.observable(0),
+            typed: ko.observable(0),
+            percentUnproductive: ko.observable(0),
+            mistakes: ko.observable(0)
+        },
         game: new GameState()
     };
 
@@ -414,6 +423,7 @@
         };
     };
 
+    // TODO: Bind CTRL+Backspace
 
     // Bind key events
     var keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -472,7 +482,50 @@
     });
 
     socket.on('ingame:complete:res', function(data) {
-        console.log(data);
+        console.log('received ingame:complete:res');
+        game = swiftcode.game = data.game;
+
+        if (game.isSinglePlayer) {
+            viewModel.completionText('You completed the code! Well done!');
+        } else {
+            // TODO: Add multiplayer mode completion
+        }
+
+        viewModel.stats.time(moment(data.stats.time).format('mm:ss'));
+        viewModel.stats.speed(data.stats.speed | 0);
+        viewModel.stats.typeables(data.stats.typeables | 0);
+        viewModel.stats.typed(data.stats.typed | 0);
+        viewModel.stats.percentUnproductive((data.stats.percentUnproductive * 100).toFixed(2));
+        viewModel.stats.speed(data.stats.speed | 0);
+        viewModel.stats.mistakes(data.stats.mistakes | 0);
+
+        var $dialog = $('#completion-dialog');
+        $dialog.on('shown.bs.modal', function() {
+            var rows = $('#completion-dialog .row'),
+                animIdx = 0;
+
+            var animateSingle = function(row) {
+                $(row).animate({
+                    opacity: 1,
+                    left: 0
+                }, {
+                    queue: true,
+                    duration: 200,
+                    complete: function() {
+                        enqueueAnimation();
+                    }
+                });
+            };
+
+            var enqueueAnimation = function() {
+                if (animIdx < rows.length) {
+                    animateSingle(rows[animIdx++]);
+                }
+            };
+
+            enqueueAnimation();
+        });
+        $dialog.modal('show');
     });
 
     console.log('emit ingame:ready');

@@ -198,7 +198,7 @@
 }
 
 .code-char.return-char.mistake,
-.code-char.return-char.mistake-path {
+.code-char.return-char.mistaken-path {
     visibility: visible;
 }
 
@@ -215,6 +215,25 @@
 
 .code-char.backspace-char:before {
     content: '\232B';
+}
+
+.completion-header {
+    font-weight: bold;
+    text-align: center;
+}
+
+.completion-table {
+    font-size: 34px;
+}
+
+.completion-table .muted {
+    font-size: 24px;
+}
+
+.completion-table .row {
+    opacity: 0;
+    position: relative;
+    left: -55px;
 }
 
 /* Admin Page */
@@ -242,7 +261,7 @@
 }
 
 .about-projects .link-group {
-    padding-top: 7px;
+    margin-top: 7px;
     padding-bottom: 7px;
 }
 
