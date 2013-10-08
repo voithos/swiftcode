@@ -15,3 +15,4 @@
 * In-game dashboard, showing opponent names / progress
 * Names / passwords / invitation-only option for game rooms
 * Training mode? ("beat your own time")
+* Dynamic favicon update in lobby page, when people login / logout
