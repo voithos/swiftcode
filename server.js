@@ -3,6 +3,7 @@
 var express = require('express');
 var io = require('socket.io');
 var http = require('http');
+var helmet = require('helmet');
 
 var path = require('path');
 var _ = require('lodash');
@@ -33,6 +34,14 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var flash = require('connect-flash');
+
+var requireHTTPS = function(req, res, next) {
+    console.log('watwatwat');
+    if (!req.secure) {
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+};
 
 var ensureAuthenticated = function(url, admin) {
     return function(req, res, next) {
@@ -175,9 +184,25 @@ var SwiftCODE = function() {
         };
 
         self.app = express();
+
+        // Environment-specific configuration
+        self.app.configure('development', function() {
+            self.app.locals.pretty = true;
+        });
+
+        self.app.configure('production', function() {
+            // Force redirection to HTTPS
+            self.app.use(requireHTTPS);
+        });
+
+        // General configuration
         self.app.configure(function() {
             self.app.set('views', path.join(self.config.repo, 'views'));
             self.app.set('view engine', 'jade');
+
+            // Use HTTP Strict Transport Security, to require compliant
+            // user agents to communicate by HTTPS only
+            self.app.use(helmet.hsts());
 
             self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico')));
             self.app.use(express.json());
@@ -206,10 +231,6 @@ var SwiftCODE = function() {
 
             self.app.use(self.app.router);
             self.app.use(express.static(path.join(self.config.repo, 'public')));
-        });
-
-        self.app.configure('development', function() {
-            self.app.locals.pretty = true;
         });
     };
 

@@ -23,3 +23,5 @@ echo ""
 echo "  - pre_start_nodejs: Adding Node.js version $ver binaries to path"
 _SHOW_SETUP_PATH_MESSAGES="true" setup_path_for_custom_node_version
 
+#  Source user script
+source "$OPENSHIFT_REPO_DIR/.openshift/user/pre_start"
