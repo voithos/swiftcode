@@ -11,7 +11,7 @@
     "name": "Zaven Muradyan",
     "email": "megalivoithos@gmail.com"
   },
-  "homepage": "http://swiftcode-blackkite.rhcloud.com/",
+  "homepage": "http://swiftcode-voithos.rhcloud.com/",
   "repository": {
     "type": "git",
     "url": "https://github.com/Pandacodium/Black-Kite"
@@ -43,5 +43,8 @@
   },
   "bundleDependencies": [],
   "private": true,
-  "main": "server.js"
+  "main": "server.js",
+  "scripts": {
+    "start": "node runserver.js"
+  }
 }
