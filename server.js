@@ -36,9 +36,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var flash = require('connect-flash');
 
 var requireHTTPS = function(req, res, next) {
-    console.log('watwatwat');
-    if (!req.secure) {
-        return res.redirect('https://' + req.get('host') + req.url);
+    if (req.headers['x-forwarded-proto'] != 'https') {
+        return res.redirect(301, 'https://' + req.get('host') + req.url);
     }
     next();
 };
