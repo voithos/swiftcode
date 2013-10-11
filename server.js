@@ -9,19 +9,11 @@ var path = require('path');
 var _ = require('lodash');
 var fs = require('fs');
 
-var detectOpenShift = function() {
-    return !!process.env.OPENSHIFT_APP_DNS;
-};
-
 var settings;
 try {
     settings = require('./settings');
 } catch (e) {
-    if (detectOpenShift()) {
-        settings = {};
-    } else {
-        throw new Error('settings.js not found; see the README for details');
-    }
+    settings = {};
 }
 
 var routes = require('./routes');
@@ -63,19 +55,27 @@ var SwiftCODEConfig = function() {
     // Setup configuration from the environment
     var self = this;
 
-    // Setup a flag indicating if we're in OpenShift or not
-    self.openshift = detectOpenShift();
-    self.repo = process.env.OPENSHIFT_REPO_DIR || './';
+    self.repo = process.env.SWIFTCODE_REPO_DIR || './';
 
-    self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || settings.ipaddress;
-    self.port = process.env.OPENSHIFT_NODEJS_PORT || settings.port;
+    self.ipaddress = process.env.SWIFTCODE_NODEJS_IP ||
+        settings.ipaddress || '0.0.0.0';
+    self.port = process.env.SWIFTCODE_NODEJS_PORT ||
+        settings.port || 8080;
 
-    self.mongodb = {
-        dbname: settings.dbname,
-        host: process.env.OPENSHIFT_MONGODB_DB_HOST || settings.dbhost,
-        port: process.env.OPENSHIFT_MONGODB_DB_PORT || settings.dbport,
-        username: process.env.OPENSHIFT_MONGODB_DB_USERNAME || settings.dbusername,
-        password: process.env.OPENSHIFT_MONGODB_DB_PASSWORD || settings.dbpassword
+    self.dbconnectionstring = process.env.SWIFTCODE_DB_CONNECTIONSTRING ||
+        settings.dbconnectionstring || null;
+
+    self.db = {
+        name: process.env.SWIFTCODE_DB_NAME ||
+            settings.dbname || 'swiftcode',
+        host: process.env.SWIFTCODE_DB_HOST ||
+            settings.dbhost || 'localhost',
+        port: process.env.SWIFTCODE_DB_PORT ||
+            settings.dbport || 27017,
+        username: process.env.SWIFTCODE_DB_USERNAME ||
+            settings.dbusername || 'admin',
+        password: process.env.SWIFTCODE_DB_PASSWORD ||
+            settings.dbpassword || 'password'
     };
 };
 
@@ -95,9 +95,6 @@ var SwiftCODE = function() {
         self.server.listen(self.config.port, self.config.ipaddress);
         self.sockets.listen(self.io);
 
-        if (self.config.openshift) {
-            self.sockets.configureForOpenShift();
-        }
         console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
     };
 
@@ -118,10 +115,15 @@ var SwiftCODE = function() {
      * Setup database connection
      */
     self._setupDb = function() {
-        mongoose.connect('mongodb://' + self.config.mongodb.host + ':' + self.config.mongodb.port + '/' + self.config.mongodb.dbname, {
-            user: self.config.mongodb.username,
-            pass: self.config.mongodb.password
-        });
+        // Connection string takes precedence
+        if (self.config.dbconnectionstring) {
+            mongoose.connect(self.config.dbconnectionstring);
+        } else {
+            mongoose.connect('mongodb://' + self.config.db.host + ':' + self.config.db.port + '/' + self.config.db.name, {
+                user: self.config.db.username,
+                pass: self.config.db.password
+            });
+        }
 
         models.Game.resetIncomplete();
         models.User.resetCurrentGames();
@@ -222,8 +224,7 @@ var SwiftCODE = function() {
             self.app.use(function(req, res, next) {
                 res.locals({
                     user: req.user,
-                    path: req.path,
-                    openshift: self.config.openshift
+                    path: req.path
                 });
                 next();
             });

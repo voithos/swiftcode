@@ -13,10 +13,6 @@ var SwiftCODESockets = function() {
         self.setupListeners();
     };
 
-    self.configureForOpenShift = function() {
-        self.io.set('transports', ['websocket']);
-    };
-
     /**
      * Setup socket listeners
      */

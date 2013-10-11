@@ -1,10 +1,11 @@
 var settings = {};
 
-// Note: when running this app in OpenShift, most of these
-// configuration options are overridden with their corresponding
-// OpenShift environment variables
+// Note: most of these configuration options can be overridden
+// with specific environment variables. See the README for details
 
 // HTTP server's (and WebSocket server's) settings
+// NOTE: Generally, you'll want to set the ipaddress to '0.0.0.0' when in
+// a production environment (search for INADDR_ANY for more info)
 settings.ipaddress = '127.0.0.1';
 settings.port = 8080;
 
@@ -19,5 +20,9 @@ settings.dbhost = 'localhost';
 settings.dbport = 27017; // Default MongoDB port
 settings.dbusername = '<username>';
 settings.dbpassword = '<password>';
+
+// Database connection string, for convenience (if this is not falsy, it
+// will OVERRIDE the previous DB settings)
+settings.dbconnectionstring = null;
 
 module.exports = settings;

@@ -11,10 +11,10 @@
     "name": "Zaven Muradyan",
     "email": "megalivoithos@gmail.com"
   },
-  "homepage": "http://swiftcode-voithos.rhcloud.com/",
+  "homepage": "http://swiftcode.jit.su/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pandacodium/Black-Kite"
+    "url": "https://github.com/voithos/swiftcode"
   },
   "engines": {
     "node": ">= 0.10.0"
@@ -32,12 +32,12 @@
     "socket.io": "~0.9.16",
     "moment": "~2.1.0",
     "cheerio": "~0.12.1",
-    "forever-monitor": "git://github.com/voithos/forever-monitor#master",
     "helmet": "~0.1.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.6.3",
+    "forever-monitor": "git://github.com/voithos/forever-monitor#master",
     "grunt-contrib-watch": "~0.5.2"
   },
   "bundleDependencies": [],
@@ -45,5 +45,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node runserver.js"
-  }
+  },
+  "subdomain": "swiftcode"
 }
