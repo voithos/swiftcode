@@ -1,6 +1,6 @@
 {
   "name": "SwiftCODE",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Realtime typing speed game for coders",
   "keywords": [
     "typing",
@@ -44,7 +44,7 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node runserver.js"
+    "start": "node server.js"
   },
   "subdomain": "swiftcode"
 }
