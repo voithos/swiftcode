@@ -92,8 +92,13 @@ var SwiftCODESockets = function() {
                                     }
                                     models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
                                         if (exercise) {
-                                            // Join a room
+                                            // Join a room and broadcast join
                                             socket.join('game-' + game.id);
+                                            socket.broadcast.to('game-' + game.id).emit('ingame:join', {
+                                                player: user,
+                                                game: game
+                                            });
+
                                             socket.emit('ingame:ready:res', {
                                                 game: game,
                                                 exercise: exercise,
@@ -168,25 +173,44 @@ var SwiftCODESockets = function() {
                 });
             });
 
+            socket.on('ingame:advancecursor', function(data) {
+                socket.broadcast.to('game-' + data.game).emit('ingame:advancecursor', {
+                    player: data.player,
+                    game: data.game
+                });
+            });
+
             socket.on('disconnect', function() {
-                socket.get('player', function(err, player) {
+                socket.get('game', function(err, game) {
                     if (err) {
                         console.log(err);
                         return;
                     }
-                    models.User.findById(player, function(err, user) {
+                    socket.get('player', function(err, player) {
                         if (err) {
                             console.log(err);
-                            console.log('ingame:exit error'); return;
+                            return;
                         }
-                        if (user) {
-                            user.quitCurrentGame(function(err, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('ingame:exit error'); return;
-                                }
-                            });
-                        }
+                        // Emit a 'leave' notice to other players in the room
+                        socket.broadcast.to('game-' + game).emit('ingame:leave', {
+                            player: player,
+                            game: game
+                        });
+
+                        models.User.findById(player, function(err, user) {
+                            if (err) {
+                                console.log(err);
+                                console.log('ingame:exit error'); return;
+                            }
+                            if (user) {
+                                user.quitCurrentGame(function(err, game) {
+                                    if (err) {
+                                        console.log(err);
+                                        console.log('ingame:exit error'); return;
+                                    }
+                                });
+                            }
+                        });
                     });
                 });
             });

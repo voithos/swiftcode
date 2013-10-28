@@ -1,7 +1,6 @@
 # TODO
 
 ### Core features
-* Add multiplayer keystroke propagation
 * Add multiplayer end screen
 * Anonymous usage
 * Spam protection in login process

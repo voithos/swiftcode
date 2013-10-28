@@ -40,7 +40,7 @@
     /**
      * Represents a player or opponent's cursor
      */
-    var CodeCursor = function(playerName, cursor, code, fn) {
+    var CodeCursor = function(playerName, cursor, code, keyfn, endfn) {
         this.playerName = playerName;
         this.cursor = cursor;
         this.code = code;
@@ -51,7 +51,8 @@
         this.mistakes = 0;
         this.mistakePositions = [];
 
-        this.onGameComplete = fn || function() {};
+        this.onCorrectKey = keyfn || function() {};
+        this.onGameComplete = endfn || function() {};
 
         this.cursor.addClass(this.playerName);
     };
@@ -66,7 +67,11 @@
         }
     };
 
-    CodeCursor.prototype.advanceCursor = function(curClass, trailingClass) {
+    CodeCursor.prototype.advanceCursor = function() {
+        this.advanceCursorWithClass(this.playerName);
+    };
+
+    CodeCursor.prototype.advanceCursorWithClass = function(curClass, trailingClass) {
         this.keystrokes++;
         this.pos++;
         this.cursor.removeClass('untyped').removeClass(curClass);
@@ -89,8 +94,9 @@
     };
 
     CodeCursor.prototype.correctKey = function() {
-        this.advanceCursor(this.playerName);
+        this.advanceCursorWithClass(this.playerName);
 
+        this.onCorrectKey.call(this);
         if (this.pos === this.code.length) {
             this.onGameComplete.call(this, this);
         }
@@ -103,7 +109,7 @@
             this.isMistaken = true;
             this.mistakes++;
             this.mistakePositions.push(this.pos);
-            this.advanceCursor(this.playerName, 'mistake');
+            this.advanceCursorWithClass(this.playerName, 'mistake');
             this.mistakePathLength++;
         }
         // But we do want to highlight a mistake, even if we're at the end
@@ -114,7 +120,7 @@
     CodeCursor.prototype.mistakePathKey = function() {
         if (this.pos < this.code.length - 1) {
             if (this.mistakePathLength < 10) {
-                this.advanceCursor(this.playerName + ' mistaken', 'mistake-path');
+                this.advanceCursorWithClass(this.playerName + ' mistaken', 'mistake-path');
                 this.mistakePathLength++;
             }
         }
@@ -142,7 +148,9 @@
     var state = swiftcode.state = {
         time: null,
         code: null,
-        playerCursor: null
+        playerCursor: null,
+        opponents: 0,
+        opponentCursors: {}
     };
 
     /**
@@ -368,14 +376,44 @@
 
         updateTime();
         if (!state.playerCursor) {
-            state.playerCursor = new CodeCursor('player', $gamecode.find('.code-char').first(), state.code, completeGame);
+            state.playerCursor = new CodeCursor('player', $gamecode.find('.code-char').first(), state.code, emitCursorAdvancement, completeGame);
         }
+    };
+
+    var addOpponent = function(opponent) {
+        state.opponents++;
+        state.opponentCursors[opponent] = new CodeCursor('opponent' + state.opponents, $gamecode.find('.code-char').first(), state.code);
+    };
+
+    var removeOpponent = function(opponent) {
+        state.opponents--;
+        if (opponent in state.opponentCursors) {
+            state.opponentCursors[opponent].destroy();
+            delete state.opponentCursors[opponent];
+        }
+    };
+
+    var addInitialOpponents = function() {
+        _.each(game.players, function(player) {
+            // Do not add self as an opponent
+            if (player != user._id) {
+                addOpponent(player);
+            }
+        });
+    };
+
+    var emitCursorAdvancement = function() {
+        socket.emit('ingame:advancecursor', {
+            game: game._id,
+            player: user._id
+        });
     };
 
     var completeGame = swiftcode.completeGame = function(cursor) {
         game.isComplete = true;
         clearTimeout(timeId);
 
+        console.log('emit ingame:complete');
         socket.emit('ingame:complete', {
             time: state.time,
             keystrokes: cursor.keystrokes,
@@ -423,7 +461,7 @@
         };
     };
 
-    // TODO: Bind CTRL+Backspace
+    // TODO: Bind CTRL+Backspace?
 
     // Bind key events
     var keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -462,6 +500,7 @@
         hljs.initHighlighting();
         bindCodeCharacters();
         pingWaiting();
+        addInitialOpponents();
     });
 
     socket.on('ingame:ping:res', function(data) {
@@ -526,6 +565,21 @@
             enqueueAnimation();
         });
         $dialog.modal('show');
+    });
+
+    socket.on('ingame:join', function(data) {
+        addOpponent(data.player._id);
+    });
+
+    socket.on('ingame:leave', function(data) {
+        removeOpponent(data.player);
+    });
+
+    socket.on('ingame:advancecursor', function(data) {
+        var opponent = data.player;
+        if (opponent in state.opponentCursors) {
+            state.opponentCursors[opponent].advanceCursor();
+        }
     });
 
     console.log('emit ingame:ready');
