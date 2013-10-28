@@ -22,6 +22,8 @@ var sockets = require('./sockets');
 
 var mongoose = require('mongoose');
 
+var SessionStore = require('session-mongoose')(express);
+
 // Auth libs
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -101,6 +103,7 @@ var SwiftCODE = function() {
     self._initialize = function() {
         self._setupConfig();
         self._setupDb();
+        self._setupSession();
         self._setupAuth();
         self._setupApp();
         self._setupRoutes();
@@ -127,6 +130,13 @@ var SwiftCODE = function() {
 
         models.Game.resetIncomplete();
         models.User.resetCurrentGames();
+    };
+
+    self._setupSession = function() {
+        self.sessionstore = new SessionStore({
+            interval: 120000,
+            connection: mongoose.connection
+        });
     };
 
     /**
@@ -214,7 +224,13 @@ var SwiftCODE = function() {
             self.app.use(express.methodOverride());
 
             self.app.use(express.cookieParser());
-            self.app.use(express.session({ secret: settings.sessionSecret || genSalt(SALT_LENGTH) }));
+            self.app.use(express.session({
+                store: self.sessionstore,
+                secret: settings.sessionSecret || genSalt(SALT_LENGTH),
+                cookie: {
+                    maxAge: 900000 // 15 minutes or 900 seconds
+                }
+            }));
             self.app.use(flash());
 
             self.app.use(passport.initialize());

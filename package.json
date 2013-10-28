@@ -32,7 +32,9 @@
     "socket.io": "~0.9.16",
     "moment": "~2.1.0",
     "cheerio": "~0.12.1",
-    "helmet": "~0.1.0"
+    "helmet": "~0.1.0",
+    "connect": "~2.10.1",
+    "session-mongoose": "~0.3.2"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
