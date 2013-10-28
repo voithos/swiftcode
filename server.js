@@ -218,7 +218,7 @@ var SwiftCODE = function() {
             self.app.use(express.favicon(path.join(self.config.repo, 'public/img/favicon.ico')));
             self.app.use(express.json());
 
-            // Do not use bodyParser, which include express.multipart, which
+            // Do not use bodyParser, which includes express.multipart, which
             // has a problem with creating tmp files on every request
             self.app.use(express.urlencoded());
             self.app.use(express.methodOverride());
