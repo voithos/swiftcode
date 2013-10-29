@@ -9,7 +9,9 @@
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 
 ### Bugs
-* Game start time is based on client-side clock, which could be slightly off by a couple of seconds. Find a better way to synchronize the game start
+* Finished games are not immediately removed from the lobby
+* Reloading the 'game' page does not redirect back to the lobby initially
+* Opponents' colors are not shown on newline characters
 
 ### Possible future features
 * Auto-scrolling in-game

@@ -147,6 +147,7 @@
      */
     var state = swiftcode.state = {
         time: null,
+        startTime: null,
         code: null,
         playerCursor: null,
         opponents: 0,
@@ -363,6 +364,7 @@
         if (fullyStarted) {
             return;
         }
+        state.startTime = moment();
         viewModel.game.gameStatus('Go!');
         viewModel.game.gameStatusCss('text-info control-panel-go');
         fullyStarted = true;
@@ -412,6 +414,7 @@
     var completeGame = swiftcode.completeGame = function(cursor) {
         game.isComplete = true;
         clearTimeout(timeId);
+        lastTimestamp = null;
 
         console.log('emit ingame:complete');
         socket.emit('ingame:complete', {
@@ -423,9 +426,13 @@
 
 
     var timeId = null;
+    var lastTimestamp = null;
     var updateTime = function() {
         if (game.starting && !game.isComplete) {
-            state.time = moment().diff(game.startTime);
+            // Synchronize with the time since start
+            if (state.startTime) {
+                state.time = moment().diff(state.startTime);
+            }
             var t = moment.duration(state.time);
             var minutes = t.minutes();
             var seconds = t.seconds();
@@ -435,6 +442,13 @@
                 state.time < 0 ? 'T-' : '', minutes, seconds));
             viewModel.game.timerCss(state.time < 0 ? 'label-warning' : 'label-info');
 
+            // Increment with smaller granularity for the cruicial starting time
+            if (lastTimestamp && !state.startTime) {
+                state.time += moment().diff(lastTimestamp);
+            }
+            lastTimestamp = moment();
+
+            // Schedule the start of the game if close enough
             if (state.time > -1000 && state.time < 0) {
                 setTimeout(startGame, -state.time);
             }
@@ -451,6 +465,7 @@
         }
 
         clearTimeout(timeId);
+        lastTimestamp = null;
     };
 
     var wrapFullyStarted = function(fn) {
@@ -506,6 +521,7 @@
     socket.on('ingame:ping:res', function(data) {
         console.log('received ingame:ping:res');
         game = swiftcode.game = data.game;
+        state.time = data.timeLeft;
         viewModel.game.timerRunning(game.starting || game.started);
         viewModel.game.started(game.started);
 

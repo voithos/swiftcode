@@ -1,4 +1,5 @@
 var io = require('socket.io');
+var moment = require('moment');
 
 var models = require('./models');
 var enet = require('./eventnet');
@@ -132,7 +133,13 @@ var SwiftCODESockets = function() {
                                     console.log(err);
                                     console.log('ingame:ping error'); return;
                                 }
-                                socket.emit('ingame:ping:res', { game: game });
+                                // Client-side clocks cannot be relied upon to
+                                // be synchronized, so we specify the time left
+                                // directly from the server
+                                socket.emit('ingame:ping:res', {
+                                    game: game,
+                                    timeLeft: moment().diff(game.startTime)
+                                });
                             });
                         }
                     });
