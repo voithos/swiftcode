@@ -236,9 +236,8 @@ var SwiftCODESockets = function() {
         });
 
         enet.on('games:remove', function(game) {
-            if (game.isViewable) {
-                lobby.emit('games:remove', game);
-            }
+            // By definition, a game must be removed when it isn't viewable
+            lobby.emit('games:remove', game);
         });
     };
 };

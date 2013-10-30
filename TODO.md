@@ -9,9 +9,9 @@
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 
 ### Bugs
-* Finished games are not immediately removed from the lobby
 * Reloading the 'game' page does not redirect back to the lobby initially
 * Opponents' colors are not shown on newline characters
+* Session timeouts seem to not be refreshing
 
 ### Possible future features
 * Auto-scrolling in-game
