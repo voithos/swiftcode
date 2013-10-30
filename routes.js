@@ -40,9 +40,13 @@ exports.lobby = function(req, res) {
  */
 
 exports.game = function(req, res) {
-    if (!req.user.currentGame) {
+    if (!req.user.isJoiningGame) {
         return res.redirect('/lobby');
     }
+
+    // Reset the joining flag
+    req.user.isJoiningGame = false;
+    req.user.save();
 
     res.render('game', {
         title: 'Game'

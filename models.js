@@ -28,6 +28,7 @@ var UserSchema = new Schema({
     totalGames: { type: Number },
     totalMultiplayerGames: { type: Number },
     gamesWon: { type: Number },
+    isJoiningGame: { type: Boolean, default: false },
     currentGame: { type: Schema.ObjectId }
 });
 
@@ -71,6 +72,7 @@ UserSchema.methods.joinGame = function(game, callback) {
         return callback('game is not joinable by this user', false);
     }
 
+    user.isJoiningGame = true;
     user.currentGame = game._id;
     game.addPlayer(user._id, function(err) {
         if (err) {
