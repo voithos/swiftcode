@@ -9,7 +9,6 @@
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 
 ### Bugs
-* Opponents' colors are not shown on newline characters
 * Session timeouts seem to not be refreshing
 
 ### Possible future features
