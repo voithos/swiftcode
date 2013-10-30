@@ -187,6 +187,15 @@ var SwiftCODESockets = function() {
                 });
             });
 
+            socket.on('report:highlightingerror', function(data) {
+                models.Exercise.findById(data.exercise, function(err, exercise) {
+                    if (exercise) {
+                        exercise.highlightingErrorReports++;
+                        exercise.save();
+                    }
+                });
+            });
+
             socket.on('disconnect', function() {
                 socket.get('game', function(err, game) {
                     if (err) {

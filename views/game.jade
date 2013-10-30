@@ -37,6 +37,9 @@ block content
                         span#gamecode(data-bind='text: game.gamecode')
                         span.loading-container(data-bind='visible: loading')
                             img(src='/img/loading.gif')
+                .col-lg-3.pull-right
+                    a(href='', data-bind='click: submitHighlightingReport')
+                        span.highlight-flag.label.label-default The syntax highlighting is wrong!
             .col-lg-1
         #completion-dialog.completion-dialog.modal.fade(tabindex='-1', role='dialog', data-backdrop='static', data-keyboard='false')
             .modal-dialog

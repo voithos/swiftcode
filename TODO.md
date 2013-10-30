@@ -5,7 +5,6 @@
 * Anonymous usage
 * Spam protection in login process
 * Modify home screen to provide overview of game
-* Flag button to allow users to indicate incorrect highlighting of code
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 
 ### Bugs

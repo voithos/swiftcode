@@ -25,7 +25,16 @@
             percentUnproductive: ko.observable(0),
             mistakes: ko.observable(0)
         },
-        game: new GameState()
+        game: new GameState(),
+        submitHighlightingReport: function() {
+            console.log('emit report:highlightingerror');
+            socket.emit('report:highlightingerror', {
+                exercise: game.exercise
+            });
+
+            $('.highlight-flag').hide('slide', { direction: 'up' });
+            alertify.log("Thanks! We'll look into it.", 'success', 3000);
+        }
     };
 
     swiftcode.viewModel = viewModel;
@@ -210,7 +219,7 @@
         });
 
         /**
-         * Reusable filter methods that keeps track of indices
+         * Reusable filter method that keeps track of indices
          * marked for removal, with custom criteria functions
          */
         var iterativeFilter = function(collection, state, loopFn) {

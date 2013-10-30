@@ -210,7 +210,8 @@ var ExerciseSchema = new Schema({
     highlitCode: { type: String },
     commentlessCode: { type: String },
     typeableCode: { type: String },
-    typeables: { type: Number }
+    typeables: { type: Number },
+    highlightingErrorReports: { type: Number, default: 0 }
 });
 
 var NON_TYPEABLES = ['comment', 'template_comment', 'diff', 'javadoc', 'phpdoc'];
