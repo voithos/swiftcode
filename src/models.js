@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
 var _ = require('lodash');
 var moment = require('moment');
-var hljs = require('./highlight.js');
+var hljs = require('highlight.js');
 var cheerio = require('cheerio');
 
 var enet = require('./eventnet');

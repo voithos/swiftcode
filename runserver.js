@@ -3,7 +3,7 @@ var forever = require('forever-monitor');
 
 // TODO: Use official forever repo as dependency once
 // ignorePattern bug has been fixed
-var server = new forever.Monitor('server.js', {
+var server = new forever.Monitor('src/server.js', {
     options: process.argv.slice(2),
     watch: true,
     watchIgnorePatterns: ['.*/**', 'public/**', 'views/**', '**.md'],

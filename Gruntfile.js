@@ -3,7 +3,7 @@
 
   module.exports = function(grunt) {
     var jsFiles = ['Gruntfile.js', 'public/**/*.js', '!public/js/libs/**/*.js',
-      '!public/js/plugins.js', 'eventnet.js', 'routes.js', 'models.js', 'server.js', 'sockets.js'];
+      '!public/js/plugins.js', 'src/**/*.js'];
 
     grunt.initConfig({
       pkg: grunt.file.readJSON('package.json'),
