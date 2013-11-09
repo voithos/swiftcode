@@ -11,6 +11,7 @@
         this.timerRunning = ko.observable(false);
         this.started = ko.observable(false);
         this.gamecode = ko.observable('');
+        this.projectName = ko.observable('');
         this.langCss = ko.observable('');
         this.isMultiplayer = ko.observable(false);
         this.opponents = ko.observableArray();
@@ -577,6 +578,7 @@
         viewModel.game.isMultiplayer(!data.game.isSinglePlayer);
         viewModel.game.gameStatus('Waiting for players...');
         viewModel.game.gamecode(data.exercise.code);
+        viewModel.game.projectName(data.exercise.projectName);
         viewModel.game.langCss('language-' + data.game.lang);
 
         hljs.initHighlighting();

@@ -217,6 +217,7 @@ exports.addLang = function(req, res) {
             var projects = Array.prototype.slice.call(arguments, 1);
             _.each(_.map(exerciseProject, function(p) { return parseInt(p); }), function(project, i) {
                 exercises[i].project = projects[project]._id;
+                exercises[i].projectName = projects[project].name;
             });
 
             models.Exercise.create(exercises, function(err) {

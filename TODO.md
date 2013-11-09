@@ -7,7 +7,7 @@
 * Modify home screen to provide overview of game
 * Auto-scrolling in-game
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
-* Add excerpt on game page, "Code take from projectXYZ"
+* Back functionality for game type selection box
 
 ### Bugs
 * Session timeouts seem to not be refreshing

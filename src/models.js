@@ -205,6 +205,7 @@ var ExerciseSchema = new Schema({
     isInitialized: { type: Boolean },
     lang: { type: String },
     project: { type: Schema.ObjectId },
+    projectName: { type: String },
     exerciseName: { type: String },
     code: { type: String },
     highlitCode: { type: String },

@@ -91,7 +91,7 @@ var SwiftCODESockets = function() {
                                         console.log(err);
                                         console.log('ingame:ready error'); return;
                                     }
-                                    models.Exercise.findById(game.exercise, 'code typeableCode typeables', function(err, exercise) {
+                                    models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
                                         if (exercise) {
                                             // Join a room and broadcast join
                                             socket.join('game-' + game.id);
