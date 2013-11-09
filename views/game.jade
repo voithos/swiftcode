@@ -17,11 +17,11 @@ block content
         .row
             .col-lg-4
             .col-lg-4
-                .panel.panel-danger
+                .panel.panel-danger.control-panel
                     .panel-heading
-                    .panel-body.control-panel(data-bind="template: 'controlPanelTemplate'")
+                    .panel-body.center-parent(data-bind="template: 'controlPanelTemplate'")
                     script(id='controlPanelTemplate', type='text/html')
-                        .row
+                        .row.center-child
                             .col-lg-7
                                 h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
                             .col-lg-5
@@ -38,9 +38,9 @@ block content
                                 .panel-body(data-bind="foreach: game.opponents")
                                     .row
                                         .progress.progress-striped.progress-labeled.active(data-bind="css: 'progress-' + colorClass()")
-                                            .progress-label(data-bind="text: name, css: cssClass")
+                                            .progress-label(data-bind="text: formattedName(20), css: cssClass")
                                             .progress-bar.progress-labeled(data-bind="css: 'progress-bar-' + colorClass(), style: { width: percentage() + '%' }")
-                                                .progress-label(data-bind="text: name")
+                                                .progress-label(data-bind="text: formattedName(20)")
                             div(data-bind='if: loaded() && game.opponents().length == 0')
                                 .panel-body
                                     .row

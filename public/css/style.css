@@ -69,6 +69,23 @@
     margin-top: 50px;
 }
 
+.center-parent {
+    text-align: center;
+}
+
+.center-parent:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -0.25em;
+}
+
+.center-child {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 /* Index page */
 .form-signup {
     max-width: 330px;
@@ -118,6 +135,14 @@
 }
 
 /* Game page */
+.control-panel {
+    height: 127px;
+}
+
+.control-panel .panel-body {
+    height: 85%;
+}
+
 .control-panel-go {
     margin: 0 auto;
 }

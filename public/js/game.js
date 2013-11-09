@@ -30,6 +30,12 @@
         this.colorClass = ko.observable(opponentMapping[this.cssClass()]);
     };
 
+    Opponent.prototype.formattedName = function(n) {
+        return this.name().length > n ?
+               this.name().substr(0, n-1) + '&hellip;' :
+               this.name();
+    };
+
     var viewModel = {
         loaded: ko.observable(false),
         loading: ko.observable(false),

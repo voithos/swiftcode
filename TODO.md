@@ -7,13 +7,14 @@
 * Modify home screen to provide overview of game
 * Auto-scrolling in-game
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
-* In-game dashboard, showing opponent names / progress
+* Add excerpt on game page, "Code take from projectXYZ"
 
 ### Bugs
 * Session timeouts seem to not be refreshing
 * Sometimes can get locked inside a game, unable to create new games
 * Error occurs after unjoining (playerCursor set to null, never set back?)
 * Server multiplayer game end state is throwing an error
+* Docstrings are not classified seperately by highlight.js, thus not excluded
 
 ### Possible future features
 * Learning mode? (collaborate with 'Learn X in Y' project?)
