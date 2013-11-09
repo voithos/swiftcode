@@ -60,7 +60,7 @@ block content
                     .col-lg-3(data-bind="if: game.projectName")
                         span.label.label-info(data-bind="text: 'Code taken from ' + game.projectName()")
                     .col-lg-3.pull-right
-                        a(href='', data-bind='click: submitHighlightingReport')
+                        a.pull-right(href='', data-bind='click: submitHighlightingReport')
                             span.highlight-flag.label.label-default The syntax highlighting is wrong!
             .col-lg-1
         #completion-dialog.completion-dialog.modal.fade(tabindex='-1', role='dialog', data-backdrop='static', data-keyboard='false')
