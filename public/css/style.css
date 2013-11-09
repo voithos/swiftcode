@@ -248,6 +248,62 @@
     left: -55px;
 }
 
+.panel-default {
+    border-color: #95a5a6;
+}
+
+.opponents-panel .panel-body {
+    padding: 10px;
+}
+
+.progress.progress-labeled {
+    width: 200px;
+    height: 22px;
+    margin: 3px auto;
+}
+
+.progress.progress-labeled .progress-label {
+    width: 200px;
+    height: 22px;
+    font-size: 15px;
+    position: absolute;
+    text-align: center;
+}
+
+.progress.progress-labeled .progress-label.opponent1 {
+    color: #3498db;
+}
+
+.progress.progress-labeled .progress-label.opponent2 {
+    color: #f39c12;
+}
+
+.progress.progress-labeled .progress-label.opponent3 {
+    color: #e74c3c;
+}
+
+.opponents-panel .progress-info {
+    border: 1px solid #3498db;
+}
+
+.opponents-panel .progress-warning {
+    border: 1px solid #f39c12;
+}
+
+.opponents-panel .progress-danger {
+    border: 1px solid #e74c3c;
+}
+
+.progress-bar.progress-labeled {
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar.progress-labeled .progress-label {
+    left: 0;
+    color: #ffffff;
+}
+
 /* Admin Page */
 .form-group-tooltip input,
 .form-group-tooltip textarea {

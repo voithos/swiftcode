@@ -74,7 +74,7 @@ UserSchema.methods.joinGame = function(game, callback) {
 
     user.isJoiningGame = true;
     user.currentGame = game._id;
-    game.addPlayer(user._id, function(err) {
+    game.addPlayer(user, function(err) {
         if (err) {
             console.log(err);
             return callback('error joining game', false);
@@ -120,7 +120,7 @@ UserSchema.methods.quitCurrentGame = function(callback) {
                 return callback('error retrieving game');
             }
             if (game) {
-                game.removePlayer(user._id, function(err) {
+                game.removePlayer(user, function(err) {
                     if (err) {
                         console.log(err);
                         return callback(err);
@@ -279,6 +279,7 @@ var GameSchema = new Schema({
     winnerTime: { type: Number, min: 0 },
     winnerSpeed: { type: Number, min: 0 },
     players: [Schema.ObjectId],
+    playerNames: [String],
     startingPlayers: [Schema.ObjectId],
     wasReset: { type: Boolean, default: false }
 });
@@ -404,7 +405,8 @@ GameSchema.methods.addPlayer = function(player, callback) {
     var game = this;
 
     var wasNew = game.isNew;
-    game.players.push(player);
+    game.players.push(player._id);
+    game.playerNames.push(player.username);
     game.numPlayers += 1;
 
     game.save(function(err, game) {
@@ -424,7 +426,8 @@ GameSchema.methods.addPlayer = function(player, callback) {
 
 GameSchema.methods.removePlayer = function(player, callback) {
     var game = this;
-    game.players.remove(player);
+    game.players.remove(player._id);
+    game.playerNames.remove(player.username);
     game.numPlayers = game.numPlayers <= 0 ? 0 : game.numPlayers - 1;
 
     if (game.numPlayers === 0) {

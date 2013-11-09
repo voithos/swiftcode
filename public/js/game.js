@@ -12,9 +12,26 @@
         this.started = ko.observable(false);
         this.gamecode = ko.observable('');
         this.langCss = ko.observable('');
+        this.isMultiplayer = ko.observable(false);
+        this.opponents = ko.observableArray();
+    };
+
+    var opponentMapping = {
+        opponent1: 'info',
+        opponent2: 'warning',
+        opponent3: 'danger'
+    };
+
+    var Opponent = function(id, name) {
+        this.id = id; // Used for removal
+        this.name = ko.observable(name);
+        this.percentage = ko.observable(0);
+        this.cssClass = ko.observable('opponent' + state.opponents);
+        this.colorClass = ko.observable(opponentMapping[this.cssClass()]);
     };
 
     var viewModel = {
+        loaded: ko.observable(false),
         loading: ko.observable(false),
         completionText: ko.observable(''),
         stats: {
@@ -49,10 +66,12 @@
     /**
      * Represents a player or opponent's cursor
      */
-    var CodeCursor = function(playerName, cursor, code, keyfn, endfn) {
-        this.playerName = playerName;
-        this.cursor = cursor;
-        this.code = code;
+    var CodeCursor = function(cfg) {
+        this.playerId = cfg.playerId;
+        this.playerName = cfg.playerName;
+        this.cursor = cfg.cursor;
+        this.code = cfg.code;
+        this.codeLength = cfg.code.length;
         this.pos = 0;
         this.keystrokes = 0;
         this.isMistaken = false;
@@ -60,8 +79,9 @@
         this.mistakes = 0;
         this.mistakePositions = [];
 
-        this.onCorrectKey = keyfn || function() {};
-        this.onGameComplete = endfn || function() {};
+        this.onCorrectKey = cfg.onCorrectKey || function() {};
+        this.onAdvanceCursor = cfg.onAdvanceCursor || function() {};
+        this.onGameComplete = cfg.onGameComplete || function() {};
 
         this.cursor.addClass(this.playerName);
     };
@@ -78,6 +98,7 @@
 
     CodeCursor.prototype.advanceCursor = function() {
         this.advanceCursorWithClass(this.playerName);
+        this.onAdvanceCursor.call(this, this);
     };
 
     CodeCursor.prototype.advanceCursorWithClass = function(curClass, trailingClass) {
@@ -106,7 +127,7 @@
         this.advanceCursorWithClass(this.playerName);
 
         this.onCorrectKey.call(this);
-        if (this.pos === this.code.length) {
+        if (this.pos === this.codeLength) {
             this.onGameComplete.call(this, this);
         }
     };
@@ -114,7 +135,7 @@
     CodeCursor.prototype.incorrectKey = function() {
         // We must *not* be at the final character of the code if we want to
         // create a mistake path, so check for it
-        if (this.pos < this.code.length - 1) {
+        if (this.pos < this.codeLength - 1) {
             this.isMistaken = true;
             this.mistakes++;
             this.mistakePositions.push(this.pos);
@@ -127,7 +148,7 @@
     };
 
     CodeCursor.prototype.mistakePathKey = function() {
-        if (this.pos < this.code.length - 1) {
+        if (this.pos < this.codeLength - 1) {
             if (this.mistakePathLength < 10) {
                 this.advanceCursorWithClass(this.playerName + ' mistaken', 'mistake-path');
                 this.mistakePathLength++;
@@ -387,28 +408,57 @@
 
         updateTime();
         if (!state.playerCursor) {
-            state.playerCursor = new CodeCursor('player', $gamecode.find('.code-char').first(), state.code, emitCursorAdvancement, completeGame);
+            state.playerCursor = new CodeCursor({
+                playerName: 'player',
+                cursor: $gamecode.find('.code-char').first(),
+                code: state.code,
+                onCorrectKey: emitCursorAdvancement,
+                onGameComplete: completeGame
+            });
         }
     };
 
-    var addOpponent = function(opponent) {
+    var addOpponent = function(opponentId, opponentName) {
         state.opponents++;
-        state.opponentCursors[opponent] = new CodeCursor('opponent' + state.opponents, $gamecode.find('.code-char').first(), state.code);
+        state.opponentCursors[opponentId] = new CodeCursor({
+            playerId: opponentId,
+            playerName: 'opponent' + state.opponents,
+            cursor: $gamecode.find('.code-char').first(),
+            code: state.code,
+            onAdvanceCursor: updateOpponentProgress
+        });
+        viewModel.game.opponents.push(new Opponent(opponentId, opponentName));
     };
 
-    var removeOpponent = function(opponent) {
+    var removeOpponent = function(opponentId) {
         state.opponents--;
-        if (opponent in state.opponentCursors) {
-            state.opponentCursors[opponent].destroy();
-            delete state.opponentCursors[opponent];
+        if (opponentId in state.opponentCursors) {
+            state.opponentCursors[opponentId].destroy();
+            delete state.opponentCursors[opponentId];
+        }
+
+        var match = ko.utils.arrayFirst(viewModel.game.opponents(), function(opponent) {
+            return opponent.id == opponentId;
+        });
+        if (match) {
+            viewModel.game.opponents.remove(match);
+        }
+    };
+
+    var updateOpponentProgress = function(cursor) {
+        var match = ko.utils.arrayFirst(viewModel.game.opponents(), function(opponent) {
+            return opponent.id == cursor.playerId;
+        });
+        if (match) {
+            match.percentage((cursor.pos / cursor.codeLength * 100) | 0);
         }
     };
 
     var addInitialOpponents = function() {
-        _.each(game.players, function(player) {
+        _.each(game.players, function(player, i) {
             // Do not add self as an opponent
             if (player != user._id) {
-                addOpponent(player);
+                addOpponent(player, game.playerNames[i]);
             }
         });
     };
@@ -516,7 +566,9 @@
         exercise = swiftcode.exercise = data.exercise;
         state.code = data.exercise.typeableCode;
         nonTypeables = data.nonTypeables;
+        viewModel.loaded(true);
         viewModel.loading(false);
+        viewModel.game.isMultiplayer(!data.game.isSinglePlayer);
         viewModel.game.gameStatus('Waiting for players...');
         viewModel.game.gamecode(data.exercise.code);
         viewModel.game.langCss('language-' + data.game.lang);
@@ -593,7 +645,7 @@
     });
 
     socket.on('ingame:join', function(data) {
-        addOpponent(data.player._id);
+        addOpponent(data.player._id, data.player.username);
     });
 
     socket.on('ingame:leave', function(data) {
