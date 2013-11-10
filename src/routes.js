@@ -18,6 +18,26 @@ exports.index = function(req, res) {
 };
 
 /*
+ * GET playnow.
+ */
+exports.playnow = function(req, res) {
+    if (req.isAuthenticated()) {
+        res.redirect('/lobby');
+        return;
+    }
+
+    var user = new models.User({
+        isAnonymous: true,
+        username: models.User.generateAnonymousUsername()
+    });
+    user.save(function(err, saved) {
+        req.logIn(user, function(err) {
+            return res.redirect('/lobby');
+        });
+    });
+};
+
+/*
  * GET lobby page.
  */
 

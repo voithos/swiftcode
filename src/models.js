@@ -17,9 +17,13 @@ var GAME_DEFAULT_MAX_PLAYERS = 4;
 var CHARACTERS_PER_WORD = 5;
 var MILLISECONDS_PER_MINUTE = 60000;
 
+// Anonymous ID
+var anonymousId = 0;
+
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true },
+    password: { type: String },
+    isAnonymous: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
@@ -178,6 +182,32 @@ UserSchema.statics.resetCurrentGames = function() {
         }
         console.log('users reset');
     });
+};
+
+UserSchema.statics.resetAnonymous = function() {
+    var users = this;
+    users.remove({ isAnonymous: true }, function(err) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('anonymous reset');
+    });
+};
+
+UserSchema.statics.setupAnonymous = function() {
+    var users = this;
+    users.count({}, function(err, count) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        anonymousId = count;
+    });
+};
+
+UserSchema.statics.generateAnonymousUsername = function() {
+    anonymousId++;
+    return 'user' + anonymousId;
 };
 
 var LangSchema = new Schema({

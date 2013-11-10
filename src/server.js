@@ -130,6 +130,8 @@ var SwiftCODE = function() {
 
         models.Game.resetIncomplete();
         models.User.resetCurrentGames();
+        models.User.resetAnonymous();
+        models.User.setupAnonymous();
     };
 
     self._setupSession = function() {
@@ -228,7 +230,7 @@ var SwiftCODE = function() {
                 store: self.sessionstore,
                 secret: settings.sessionSecret || genSalt(SALT_LENGTH),
                 cookie: {
-                    maxAge: 900000 // 15 minutes or 900 seconds
+                    maxAge: 5000 // 15 minutes or 900 seconds
                 }
             }));
             self.app.use(flash());
@@ -262,13 +264,28 @@ var SwiftCODE = function() {
             failureRedirect: '/',
             failureFlash: true
         }));
+
         self.app.get('/logout', function(req, res) {
+            var deletionId;
+
+            if (req.user && req.user.isAnonymous) {
+                deletionId = req.user._id;
+            }
             req.logout();
+
+            if (deletionId) {
+                models.User.remove({ _id: deletionId }, function(err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            }
             res.redirect('/');
         });
 
 
         self.app.get('/', routes.index);
+        self.app.get('/playnow', routes.playnow);
         self.app.post('/signup', routes.signup);
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/game', authMiddleware, routes.game);

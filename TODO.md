@@ -2,7 +2,6 @@
 
 ### Core features
 * Add multiplayer end screen
-* Anonymous usage
 * Spam protection in login process
 * Modify home screen to provide overview of game
 * Auto-scrolling in-game
