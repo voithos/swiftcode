@@ -9,7 +9,6 @@
 * Back functionality for game type selection box
 
 ### Bugs
-* Session timeouts seem to not be refreshing
 * Sometimes can get locked inside a game, unable to create new games
 * Error occurs after unjoining (playerCursor set to null, never set back?)
 * Server multiplayer game end state is throwing an error

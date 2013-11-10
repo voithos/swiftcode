@@ -230,13 +230,26 @@ var SwiftCODE = function() {
                 store: self.sessionstore,
                 secret: settings.sessionSecret || genSalt(SALT_LENGTH),
                 cookie: {
-                    maxAge: 5000 // 15 minutes or 900 seconds
+                    maxAge: 900 * 1000 // 15 minutes or 900 seconds
                 }
             }));
             self.app.use(flash());
 
             self.app.use(passport.initialize());
             self.app.use(passport.session());
+
+            // The default Connect session does not function as a normal
+            // rolling session (i.e. session timeout cookies are not updated
+            // per request - only when session is modified)
+            self.app.use(function(req, res, next) {
+                if (req.method === 'HEAD' || req.method === 'OPTIONS') {
+                    return next();
+                }
+                // Force express to generate a new session timestamp
+                req.session._noop = new Date().getTime();
+                req.session.touch();
+                next();
+            });
 
             // Template default available attributes
             self.app.use(function(req, res, next) {
