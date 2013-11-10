@@ -58,7 +58,8 @@ block content
                         .well
                             fieldset.languages
                                 legend Choose Language
-                                each l in langs
-                                    button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
+                                .language-list
+                                    each l in langs
+                                        button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
                 .clearfix
             .col-lg-1

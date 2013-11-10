@@ -6,6 +6,11 @@
             color: '#2c3e50',
             height: '400px'
         });
+
+        $('.language-list').slimScroll({
+            color: '#2c3e50',
+            height: '444px'
+        });
     });
 
     // TODO: Rethink the gameNum concept

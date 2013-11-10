@@ -134,6 +134,11 @@
     display: none;
 }
 
+.lang {
+    width: 90%;
+    margin: 0 auto;
+}
+
 /* Game page */
 .control-panel {
     height: 127px;
