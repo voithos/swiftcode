@@ -11,7 +11,6 @@
 ### Bugs
 * Sometimes can get locked inside a game, unable to create new games
 * Error occurs after unjoining (playerCursor set to null, never set back?)
-* Server multiplayer game end state is throwing an error
 * Docstrings are not classified seperately by highlight.js, thus not excluded
 
 ### Possible future features

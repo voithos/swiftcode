@@ -16,6 +16,7 @@ var GAME_MULTI_PLAYER_WAIT_TIME = 16;
 var GAME_DEFAULT_MAX_PLAYERS = 4;
 var CHARACTERS_PER_WORD = 5;
 var MILLISECONDS_PER_MINUTE = 60000;
+var STATISTICS_VALIDATION_THRESHOLD_MS = 100;
 
 // Anonymous ID
 var anonymousId = 0;
@@ -27,11 +28,11 @@ var UserSchema = new Schema({
     isAdmin: { type: Boolean, default: false },
     bestTime: { type: Number },
     bestSpeed: { type: Number },
-    averageTime: { type: Number },
-    averageSpeed: { type: Number },
-    totalGames: { type: Number },
-    totalMultiplayerGames: { type: Number },
-    gamesWon: { type: Number },
+    averageTime: { type: Number, default: 0 },
+    averageSpeed: { type: Number, default: 0 },
+    totalGames: { type: Number, default: 0 },
+    totalMultiplayerGames: { type: Number, default: 0 },
+    gamesWon: { type: Number, default: 0 },
     isJoiningGame: { type: Boolean, default: false },
     currentGame: { type: Schema.ObjectId }
 });
@@ -568,8 +569,13 @@ StatsSchema.methods.updateStatistics = function(callback) {
                         return callback(err);
                     }
 
-                    // TODO: Validate input time, to make sure no one is cheating
-                    // stats.time = moment().diff(game.startTime, 'milliseconds');
+                    // Clamp input to the real time difference, if it is beyond
+                    // a threshold
+                    var realTime = moment().diff(game.startTime, 'milliseconds');
+                    if (Math.abs(realTime - stats.time) > STATISTICS_VALIDATION_THRESHOLD_MS) {
+                        stats.time = realTime;
+                    }
+
                     stats.typeables = exercise.typeables;
                     stats.speed = (stats.typeables / CHARACTERS_PER_WORD) *
                                   (1 / (stats.time / MILLISECONDS_PER_MINUTE));
@@ -578,20 +584,19 @@ StatsSchema.methods.updateStatistics = function(callback) {
                     stats.save(function(err) {
                         if (err) {
                             console.log(err);
+                        }
+                    });
+                    game.updateStatistics(stats, function(err) {
+                        if (err) {
+                            console.log(err);
                             return callback(err);
                         }
-                        game.updateStatistics(stats, function(err) {
+                        user.updateStatistics(stats, game, function(err) {
                             if (err) {
                                 console.log(err);
                                 return callback(err);
                             }
-                            user.updateStatistics(stats, game, function(err) {
-                                if (err) {
-                                    console.log(err);
-                                    return callback(err);
-                                }
-                                return callback(null, stats, user, game);
-                            });
+                            return callback(null, stats, user, game);
                         });
                     });
                 });
