@@ -1,7 +1,9 @@
 # TODO
 
 ### Core features
-* Add multiplayer end screen
+* Add current player to 'opponents' list
+* Add '1st', '2nd', etc place to 'opponents' list
+* Modify color of opponent3 (red looks too much like an error)
 * Spam protection in login process
 * Modify home screen to provide overview of game
 * Auto-scrolling in-game

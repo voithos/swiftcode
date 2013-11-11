@@ -609,12 +609,19 @@
         console.log('received ingame:complete:res');
         game = swiftcode.game = data.game;
 
+        var message;
+
         if (game.isSinglePlayer) {
-            viewModel.completionText('You completed the code! Well done!');
+            message = 'You completed the code! Well done!';
         } else {
-            // TODO: Add multiplayer mode completion
+            if (game.winner === user._id) {
+                message = 'Congratulations! You got 1st place!';
+            } else {
+                message = 'Nicely done!';
+            }
         }
 
+        viewModel.completionText(message);
         viewModel.stats.time(moment(data.stats.time).format('mm:ss'));
         viewModel.stats.speed(data.stats.speed | 0);
         viewModel.stats.typeables(data.stats.typeables | 0);
