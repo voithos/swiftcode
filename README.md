@@ -65,12 +65,25 @@ account that SwiftCode will use to connect.
     > use swiftcode
     > db.addUser({ user: 'swiftcodeuser', pwd: 'password', roles: ['readWrite'] })
 
-Copy the sample `settings.js` file, and fill out the settings as desired
-(specifically, you must provide the database settings to your MongoDB).
+Copy the sample `settings.js.example.js` file to `settings.js`, and fill out
+the settings as desired (specifically, you must provide the database settings
+to your MongoDB).
 
     cd src
     cp settings.js.example.js settings.js
     vim settings.js
+
+SwiftCODE does not come with code exercises preloaded, but does have a simple
+admin interface which allows for the definition of new languages, projects, and
+exercises. An admin user is required to access the interface, which can be
+created through grunt (note, this requires the database settings to be in
+place).
+
+    grunt add-admin
+
+Once an admin user has been added, the admin interface can be accessed after
+logging in, using the link in the drop-down in the top-right corner of the
+page.
 
 ### Run
 

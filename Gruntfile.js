@@ -43,6 +43,43 @@
     grunt.registerTask('watchtest', 'Watch for changes and lint and test source files',
                        ['usetheforce_on', 'test', 'watch:test', 'usetheforce_off']);
 
+    grunt.registerTask('add-admin', 'Add an administrator user into the database', function() {
+      var done = this.async();
+
+      var prompt = require('prompt');
+      prompt.start();
+
+      prompt.get([{
+        name: 'username',
+        required: true
+      }, {
+        name: 'password',
+        hidden: true,
+        required: true,
+        conform: function(value) {
+          return true;
+        }
+      }], function(err, result) {
+        // Setup DB connection
+        var SwiftCODEConfig = require('./src/config');
+        var db = require('./src/db');
+        var models = require('./src/models');
+        db.setupConnection(new SwiftCODEConfig());
+
+        var user = new models.User({
+          username: result.username,
+          password: result.password,
+          isAdmin: true
+        });
+        user.save(function(err, saved) {
+          if (err) {
+            console.log(err);
+          }
+          done();
+        });
+      });
+    });
+
     grunt.registerTask('default', ['test']);
 
   };
