@@ -16,9 +16,12 @@ try {
     settings = {};
 }
 
+var db = require('./db');
 var routes = require('./routes');
 var models = require('./models');
 var sockets = require('./sockets');
+
+var SwiftCODEConfig = require('./config');
 
 var mongoose = require('mongoose');
 
@@ -44,40 +47,6 @@ var ensureAuthenticated = function(url, admin) {
             return res.redirect(url);
         }
         next();
-    };
-};
-
-// Constants
-var SALT_LENGTH = 14; // 112 bits / 8 bits per char == 14
-
-/**
- * Configuration app for SwiftCODE
- */
-var SwiftCODEConfig = function() {
-    // Setup configuration from the environment
-    var self = this;
-
-    self.repo = process.env.SWIFTCODE_REPO_DIR || './';
-
-    self.ipaddress = process.env.SWIFTCODE_NODEJS_IP ||
-        settings.ipaddress || '0.0.0.0';
-    self.port = process.env.SWIFTCODE_NODEJS_PORT ||
-        settings.port || 8080;
-
-    self.dbconnectionstring = process.env.SWIFTCODE_DB_CONNECTIONSTRING ||
-        settings.dbconnectionstring || null;
-
-    self.db = {
-        name: process.env.SWIFTCODE_DB_NAME ||
-            settings.dbname || 'swiftcode',
-        host: process.env.SWIFTCODE_DB_HOST ||
-            settings.dbhost || 'localhost',
-        port: process.env.SWIFTCODE_DB_PORT ||
-            settings.dbport || 27017,
-        username: process.env.SWIFTCODE_DB_USERNAME ||
-            settings.dbusername || 'admin',
-        password: process.env.SWIFTCODE_DB_PASSWORD ||
-            settings.dbpassword || 'password'
     };
 };
 
@@ -118,15 +87,7 @@ var SwiftCODE = function() {
      * Setup database connection
      */
     self._setupDb = function() {
-        // Connection string takes precedence
-        if (self.config.dbconnectionstring) {
-            mongoose.connect(self.config.dbconnectionstring);
-        } else {
-            mongoose.connect('mongodb://' + self.config.db.host + ':' + self.config.db.port + '/' + self.config.db.name, {
-                user: self.config.db.username,
-                pass: self.config.db.password
-            });
-        }
+        db.setupConnection(self.config);
 
         models.Game.resetIncomplete();
         models.User.resetCurrentGames();
@@ -184,18 +145,6 @@ var SwiftCODE = function() {
      * Setup app configuration
      */
     self._setupApp = function() {
-        var genSalt = function(n) {
-            var chars = [],
-                corpus = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()-_=+[{]}\\|;:,<.>/?',
-                length = corpus.length;
-
-            for (var i = 0; i < n; i++) {
-                chars.push(corpus.charAt(Math.floor(Math.random() * length)));
-            }
-
-            return chars.join('');
-        };
-
         self.app = express();
 
         // Environment-specific configuration
@@ -228,7 +177,7 @@ var SwiftCODE = function() {
             self.app.use(express.cookieParser());
             self.app.use(express.session({
                 store: self.sessionstore,
-                secret: settings.sessionSecret || genSalt(SALT_LENGTH),
+                secret: self.config.sessionSecret,
                 cookie: {
                     maxAge: 900 * 1000 // 15 minutes or 900 seconds
                 }
