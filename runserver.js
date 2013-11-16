@@ -6,7 +6,7 @@ var forever = require('forever-monitor');
 var server = new forever.Monitor('src/server.js', {
     options: process.argv.slice(2),
     watch: true,
-    watchIgnorePatterns: ['.*/**', 'public/**', 'views/**', '**.md'],
+    watchIgnorePatterns: ['.*/**', 'backup/**', 'public/**', 'views/**', '**.md'],
     watchDirectory: '.'
 });
 
