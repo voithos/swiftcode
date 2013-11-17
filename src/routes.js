@@ -181,8 +181,8 @@ exports.addLang = function(req, res) {
         return true;
     };
 
-    var key = req.body.key,
-        name = req.body.name,
+    var langKey = req.body.key,
+        langName = req.body.name,
         order = req.body.order,
         projectCount = parseInt(req.body.projectCount),
         exerciseCount = parseInt(req.body.exerciseCount),
@@ -195,20 +195,20 @@ exports.addLang = function(req, res) {
         exerciseName = getRequestArray('exerciseName', exerciseCount),
         code = getRequestArray('code', exerciseCount);
 
-    if (_.all([key, name, order, projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl, exerciseProject, exerciseName, code]) &&
+    if (_.all([langKey, langName, order, projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl, exerciseProject, exerciseName, code]) &&
         allSame(_.pluck([projectKey, projectName, projectUrl, projectCodeUrl, projectLicenseUrl], 'length')) &&
         allSame(_.pluck([exerciseProject, exerciseName, code], 'length'))) {
 
         var lang = new models.Lang({
-            key: key,
-            name: name,
+            key: langKey,
+            name: langName,
             order: order
         });
 
         var exercises = [];
         eachZipped(_.zip(exerciseName, code), function(exerciseName, code) {
             exercises.push({
-                lang: key,
+                lang: langKey,
                 exerciseName: exerciseName,
                 code: code
             });
@@ -222,8 +222,8 @@ exports.addLang = function(req, res) {
                 url: url,
                 codeUrl: codeUrl,
                 licenseUrl: licenseUrl,
-                lang: key,
-                langName: name
+                lang: langKey,
+                langName: langName
             });
         });
 
