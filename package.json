@@ -1,6 +1,6 @@
 {
   "name": "SwiftCODE",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Realtime typing speed game for coders",
   "keywords": [
     "typing",
@@ -34,7 +34,8 @@
     "cheerio": "~0.12.1",
     "helmet": "~0.1.0",
     "connect": "~2.10.1",
-    "session-mongoose": "~0.3.2"
+    "session-mongoose": "~0.3.2",
+    "highlight.js": "~7.5.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
