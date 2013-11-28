@@ -14,24 +14,25 @@
         this.projectName = ko.observable('');
         this.langCss = ko.observable('');
         this.isMultiplayer = ko.observable(false);
-        this.opponents = ko.observableArray();
+        this.players = ko.observableArray();
     };
 
-    var opponentMapping = {
-        opponent1: 'info',
-        opponent2: 'warning',
-        opponent3: 'danger'
+    var playerMapping = {
+        player0: 'success',
+        player1: 'info',
+        player2: 'warning',
+        player3: 'danger'
     };
 
-    var Opponent = function(id, name) {
+    var Player = function(id, numId, name) {
         this.id = id; // Used for removal
         this.name = ko.observable(name);
         this.percentage = ko.observable(0);
-        this.cssClass = ko.observable('opponent' + state.opponents);
-        this.colorClass = ko.observable(opponentMapping[this.cssClass()]);
+        this.cssClass = ko.observable('player' + numId);
+        this.colorClass = ko.observable(playerMapping[this.cssClass()]);
     };
 
-    Opponent.prototype.formattedName = function(n) {
+    Player.prototype.formattedName = function(n) {
         return this.name().length > n ?
                this.name().substr(0, n-1) + '&hellip;' :
                this.name();
@@ -417,11 +418,12 @@
         updateTime();
         if (!state.playerCursor) {
             state.playerCursor = new CodeCursor({
+                playerId: user._id,
                 playerName: 'player',
                 cursor: $gamecode.find('.code-char').first(),
                 code: state.code,
                 onCorrectKey: emitCursorAdvancement,
-                onAdvanceCursor: scrollToCursor,
+                onAdvanceCursor: onPlayerAdvanceCursor,
                 onGameComplete: completeGame
             });
         }
@@ -434,9 +436,9 @@
             playerName: 'opponent' + state.opponents,
             cursor: $gamecode.find('.code-char').first(),
             code: state.code,
-            onAdvanceCursor: updateOpponentProgress
+            onAdvanceCursor: updatePlayerProgress
         });
-        viewModel.game.opponents.push(new Opponent(opponentId, opponentName));
+        viewModel.game.players.push(new Player(opponentId, state.opponents, opponentName));
     };
 
     var removeOpponent = function(opponentId) {
@@ -446,21 +448,26 @@
             delete state.opponentCursors[opponentId];
         }
 
-        var match = ko.utils.arrayFirst(viewModel.game.opponents(), function(opponent) {
-            return opponent.id == opponentId;
+        var match = ko.utils.arrayFirst(viewModel.game.players(), function(player) {
+            return player.id == opponentId;
         });
         if (match) {
-            viewModel.game.opponents.remove(match);
+            viewModel.game.players.remove(match);
         }
     };
 
-    var updateOpponentProgress = function(cursor) {
-        var match = ko.utils.arrayFirst(viewModel.game.opponents(), function(opponent) {
-            return opponent.id == cursor.playerId;
+    var updatePlayerProgress = function(cursor) {
+        var match = ko.utils.arrayFirst(viewModel.game.players(), function(player) {
+            return player.id == cursor.playerId;
         });
         if (match) {
             match.percentage((cursor.pos / cursor.codeLength * 100) | 0);
         }
+    };
+
+    var onPlayerAdvanceCursor = function(cursor) {
+        scrollToCursor(cursor);
+        updatePlayerProgress(cursor);
     };
 
     var scrollToCursor = function(cursor) {
@@ -479,6 +486,10 @@
                 }, 1000);
             }
         }
+    };
+
+    var addInitialPlayer = function() {
+        viewModel.game.players.push(new Player(user._id, 0, user.username));
     };
 
     var addInitialOpponents = function() {
@@ -604,6 +615,7 @@
         hljs.initHighlighting();
         bindCodeCharacters();
         pingWaiting();
+        addInitialPlayer();
         addInitialOpponents();
     });
 

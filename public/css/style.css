@@ -141,7 +141,7 @@
 
 /* Game page */
 .control-panel {
-    height: 127px;
+    height: 147px;
 }
 
 .control-panel .panel-body {
@@ -282,50 +282,58 @@
     border-color: #95a5a6;
 }
 
-.opponents-panel .panel-body {
+.players-panel .panel-body {
     padding: 10px;
 }
 
 .progress.progress-labeled {
     width: 200px;
-    height: 22px;
+    height: 20px;
     margin: 3px auto;
 }
 
 .progress.progress-labeled .progress-label {
     width: 200px;
-    height: 22px;
-    font-size: 15px;
+    height: 20px;
+    font-size: 14px;
     position: absolute;
     text-align: center;
 }
 
-.progress.progress-labeled .progress-label.opponent1 {
+.progress.progress-labeled .progress-label.player0 {
+    color: #18bc9c;
+}
+
+.progress.progress-labeled .progress-label.player1 {
     color: #3498db;
 }
 
-.progress.progress-labeled .progress-label.opponent2 {
+.progress.progress-labeled .progress-label.player2 {
     color: #f39c12;
 }
 
-.progress.progress-labeled .progress-label.opponent3 {
+.progress.progress-labeled .progress-label.player3 {
     color: #563d7c;
 }
 
-.opponents-panel .progress.opponent1 {
+.players-panel .progress.player0 {
+    border: 1px solid #18bc9c;
+}
+
+.players-panel .progress.player1 {
     border: 1px solid #3498db;
 }
 
-.opponents-panel .progress.opponent2 {
+.players-panel .progress.player2 {
     border: 1px solid #f39c12;
 }
 
-.opponents-panel .progress.opponent3 {
+.players-panel .progress.player3 {
     border: 1px solid #563d7c;
 }
 
 /* Special case for opponent3 - custom purple color (not part of theme) */
-.progress.opponent3 .progress-bar {
+.progress.player3 .progress-bar {
     background-color: #563d7c;
 }
 

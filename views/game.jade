@@ -29,19 +29,19 @@ block content
                                     div.timer-parent
                                         span.timer.label(data-bind='text: game.timer, css: game.timerCss')
             .col-lg-3
-                div(data-bind="template: 'opponentsPanelTemplate'")
-                script(id='opponentsPanelTemplate', type='text/html')
+                div(data-bind="template: 'playersPanelTemplate'")
+                script(id='playersPanelTemplate', type='text/html')
                     div(data-bind="if: game.isMultiplayer")
-                        .label.label-default Opponents
-                        .panel.panel-default.opponents-panel
-                            div(data-bind="if: loaded() && game.opponents().length > 0")
-                                .panel-body(data-bind="foreach: game.opponents")
+                        .label.label-default Players
+                        .panel.panel-default.players-panel
+                            div(data-bind="if: loaded() && game.players().length > 0")
+                                .panel-body(data-bind="foreach: game.players")
                                     .row
                                         .progress.progress-striped.progress-labeled.active(data-bind="css: cssClass")
                                             .progress-label(data-bind="text: formattedName(20), css: cssClass")
                                             .progress-bar.progress-labeled(data-bind="css: 'progress-bar-' + colorClass(), style: { width: percentage() + '%' }")
                                                 .progress-label(data-bind="text: formattedName(20)")
-                            div(data-bind='if: loaded() && game.opponents().length == 0')
+                            div(data-bind='if: loaded() && game.players().length == 0')
                                 .panel-body
                                     .row
                                         .progress.progress-labeled
