@@ -58,6 +58,7 @@ block content
                         .well
                             fieldset.languages
                                 legend Choose Language
+                                    button.back-btn.btn.btn-primary.btn-xs.pull-right(type='button', data-bind='click: slideBack') <span class="glyphicon glyphicon-chevron-left"></span> Back
                                 .language-list
                                     each l in langs
                                         button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name

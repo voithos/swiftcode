@@ -60,8 +60,15 @@
         newGameType: ko.observable(''),
         setGameType: function(gameType) {
             this.newGameType(gameType);
+            this.slideForward();
+        },
+        slideForward: function() {
             $('.gametype-container').hide('slide', { direction: 'left' });
             $('.lang-container').show('slide', { direction: 'right' });
+        },
+        slideBack: function() {
+            $('.lang-container').hide('slide', { direction: 'right' });
+            $('.gametype-container').show('slide', { direction: 'left' });
         },
         newGame: function(key) {
             console.log('emit games:createnew');

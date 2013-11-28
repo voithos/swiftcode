@@ -2,12 +2,10 @@
 
 ### Core features
 * Add current player to 'opponents' list
-* Add '1st', '2nd', etc place to 'opponents' list
 * Modify color of opponent3 (red looks too much like an error)
 * Spam protection in login process
 * Modify home screen to provide overview of game
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
-* Back functionality for game type selection box
 * Add keep-alive script to in-game and admin pages
 
 ### Bugs
