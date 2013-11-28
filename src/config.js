@@ -1,3 +1,5 @@
+'use strict';
+
 var settings;
 try {
     settings = require('./settings');

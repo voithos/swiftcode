@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 
 var express = require('express');
 var io = require('socket.io');
@@ -268,6 +269,6 @@ var SwiftCODE = function() {
 };
 
 if (require.main === module) {
-    app = new SwiftCODE();
+    var app = new SwiftCODE();
     app.listen();
 }

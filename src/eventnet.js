@@ -1,3 +1,5 @@
+'use strict';
+
 var events = require('events');
 
 var SwiftCODEEventNet = function() {

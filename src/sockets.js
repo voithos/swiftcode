@@ -1,3 +1,5 @@
+'use strict';
+
 var io = require('socket.io');
 var moment = require('moment');
 

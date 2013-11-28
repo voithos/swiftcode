@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var models = require('./models');
 
@@ -184,8 +186,8 @@ exports.addLang = function(req, res) {
     var langKey = req.body.key,
         langName = req.body.name,
         order = req.body.order,
-        projectCount = parseInt(req.body.projectCount),
-        exerciseCount = parseInt(req.body.exerciseCount),
+        projectCount = parseInt(req.body.projectCount, 10),
+        exerciseCount = parseInt(req.body.exerciseCount, 10),
         projectKey = getRequestArray('projectKey', projectCount),
         projectName = getRequestArray('projectName', projectCount),
         projectUrl = getRequestArray('projectUrl', projectCount),
@@ -235,7 +237,7 @@ exports.addLang = function(req, res) {
             }
 
             var projects = Array.prototype.slice.call(arguments, 1);
-            _.each(_.map(exerciseProject, function(p) { return parseInt(p); }), function(project, i) {
+            _.each(_.map(exerciseProject, function(p) { return parseInt(p, 10); }), function(project, i) {
                 exercises[i].project = projects[project]._id;
                 exercises[i].projectName = projects[project].name;
             });

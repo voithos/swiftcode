@@ -1,3 +1,5 @@
+'use strict';
+
 var settings = {};
 
 // Note: most of these configuration options can be overridden

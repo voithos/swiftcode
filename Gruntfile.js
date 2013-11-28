@@ -9,7 +9,8 @@
       pkg: grunt.file.readJSON('package.json'),
       jshint: {
         options: {
-          newcap: false
+          newcap: false,
+          node: true
         },
         all: jsFiles
       },
