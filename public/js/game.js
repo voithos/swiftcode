@@ -105,7 +105,6 @@
 
     CodeCursor.prototype.advanceCursor = function() {
         this.advanceCursorWithClass(this.playerName);
-        this.onAdvanceCursor.call(this, this);
     };
 
     CodeCursor.prototype.advanceCursorWithClass = function(curClass, trailingClass) {
@@ -116,6 +115,8 @@
 
         this.cursor = this.cursor.nextAll('.code-char').first();
         this.cursor.addClass(curClass);
+
+        this.onAdvanceCursor.call(this, this);
     };
 
     CodeCursor.prototype.retreatCursor = function(curClass, trailingClass) {
@@ -420,6 +421,7 @@
                 cursor: $gamecode.find('.code-char').first(),
                 code: state.code,
                 onCorrectKey: emitCursorAdvancement,
+                onAdvanceCursor: scrollToCursor,
                 onGameComplete: completeGame
             });
         }
@@ -458,6 +460,24 @@
         });
         if (match) {
             match.percentage((cursor.pos / cursor.codeLength * 100) | 0);
+        }
+    };
+
+    var scrollToCursor = function(cursor) {
+        // Make sure the cursor DOM element exists
+        if (cursor.cursor.length) {
+            var windowHeight = $(window).height(),
+                isAnimating = $('html, body').is(':animated'),
+                cursorPos = cursor.cursor.offset().top,
+                windowPos = $(window).scrollTop() + windowHeight;
+
+            // Begin scrolling when 25% from the bottom
+            if (windowPos - cursorPos < windowHeight * 0.25 && !isAnimating) {
+                $('html, body').animate({
+                    // Move to 25% from top
+                    scrollTop: cursorPos - windowHeight * 0.25
+                }, 1000);
+            }
         }
     };
 
