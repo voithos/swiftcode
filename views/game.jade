@@ -37,7 +37,7 @@ block content
                             div(data-bind="if: loaded() && game.opponents().length > 0")
                                 .panel-body(data-bind="foreach: game.opponents")
                                     .row
-                                        .progress.progress-striped.progress-labeled.active(data-bind="css: 'progress-' + colorClass()")
+                                        .progress.progress-striped.progress-labeled.active(data-bind="css: cssClass")
                                             .progress-label(data-bind="text: formattedName(20), css: cssClass")
                                             .progress-bar.progress-labeled(data-bind="css: 'progress-bar-' + colorClass(), style: { width: percentage() + '%' }")
                                                 .progress-label(data-bind="text: formattedName(20)")

@@ -187,7 +187,7 @@
 }
 
 .code-char.opponent3 {
-    background-color: #e74c3c;
+    background-color: #563d7c;
     /* outline: 1px solid #e74c3c; */
     color: #ffffff;
 }
@@ -309,19 +309,24 @@
 }
 
 .progress.progress-labeled .progress-label.opponent3 {
-    color: #e74c3c;
+    color: #563d7c;
 }
 
-.opponents-panel .progress-info {
+.opponents-panel .progress.opponent1 {
     border: 1px solid #3498db;
 }
 
-.opponents-panel .progress-warning {
+.opponents-panel .progress.opponent2 {
     border: 1px solid #f39c12;
 }
 
-.opponents-panel .progress-danger {
-    border: 1px solid #e74c3c;
+.opponents-panel .progress.opponent3 {
+    border: 1px solid #563d7c;
+}
+
+/* Special case for opponent3 - custom purple color (not part of theme) */
+.progress.opponent3 .progress-bar {
+    background-color: #563d7c;
 }
 
 .progress-bar.progress-labeled {
