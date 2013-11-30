@@ -9,14 +9,39 @@ block content
                 Just choose a username and password to begin!
                 Or, if you don't care about saving progress,
                 <a href="/playnow">play now!</a>
-            if error.length != 0
-                .alert.alert-danger
-                    button.close(type='button', data-dismiss='alert') x
-                    strong Oops! 
-                    = error
-            form.form-signup.form-parsley(action='/signup', method='POST')
-                .form-group
-                    input.form-control(type='text', placeholder='Username', name='username', data-required='true', data-rangelength='[2, 32]', data-placement='right')
-                .form-group
-                    input.form-control(type='password', placeholder='Password', name='password', data-required='true', data-minlength='8', data-placement='right')
-                button.btn.btn-large.btn-primary.btn-block(type='submit') Sign up
+        hr.featurette-divider
+        .row.featurette
+            .col-lg-6
+                h2.featurette-heading It's just you and your keyboard.<br>
+                    span.text-muted Use the source, Luke.
+                p.lead.
+                    Do you enjoy hearing the clicking of the keyboard as you
+                    furiously type out code? The keyboard is the most basic
+                    tool in a programmer's arsenal; to master such a tool
+                    requires training. Enter SwiftCODE. Prepare yourself, find
+                    focus, and dive in.
+            .col-lg-6
+                img.featurette-image.img-circle.pull-right(src='/img/computer.png')
+        .row.featurette
+            .col-lg-6
+                img.featurette-image.img-circle(src='/img/computer.png')
+            .col-lg-6
+                h2.featurette-heading Play by yourself, or with friends.<br>
+                    span.text-muted See who's swiftest.
+                p.lead.
+                    Hone your skills in single-player mode. Train to improve on
+                    typing speed and accuracy, making every keystroke count.
+                    Then, enter the multiplayer fray and challenge up to 3
+                    others in a real-time battle of swiftness.
+        .row.featurette
+            .col-lg-6
+                h2.featurette-heading Try out the syntax of new languages.<br>
+                    span.text-muted Go supersonic.
+                p.lead.
+                    Play with your favorite language, or try a new one, whether
+                    it's object-oriented, functional, declarative, or something
+                    else altogether. Type code taken from real open-source
+                    projects. Practice the hard-to-reach and quirky characters
+                    that the language uses.
+            .col-lg-6
+                img.featurette-image.img-circle.pull-right(src='/img/code.png')

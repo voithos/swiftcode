@@ -93,13 +93,29 @@ exports.about = function(req, res) {
 };
 
 /*
- * POST signup.
+ * GET signup page.
  */
 
 exports.signup = function(req, res) {
+    if (req.isAuthenticated()) {
+        res.redirect('/lobby');
+        return;
+    }
+
+    res.render('signup', {
+        title: 'Signup',
+        error: req.flash('error')
+    });
+};
+
+/*
+ * POST create-account.
+ */
+
+exports.createAccount = function(req, res) {
     var reportError = function(msg) {
         req.flash('error', msg);
-        return res.redirect('/');
+        return res.redirect('/signup');
     };
     var username = req.body.username,
         password = req.body.password;

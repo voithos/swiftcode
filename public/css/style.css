@@ -87,6 +87,11 @@
 }
 
 /* Index page */
+.featurette-heading {
+    margin-top: 125px;
+}
+
+/* Signup page */
 .form-signup {
     max-width: 330px;
     padding: 15px;

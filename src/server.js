@@ -248,8 +248,9 @@ var SwiftCODE = function() {
 
 
         self.app.get('/', routes.index);
+        self.app.get('/signup', routes.signup);
         self.app.get('/playnow', routes.playnow);
-        self.app.post('/signup', routes.signup);
+        self.app.post('/create-account', routes.createAccount);
         self.app.get('/lobby', authMiddleware, routes.lobby);
         self.app.get('/game', authMiddleware, routes.game);
         self.app.get('/admin', adminMiddleware, routes.admin);
