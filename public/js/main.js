@@ -27,6 +27,24 @@ $(document).ready(function() {
     });
 });
 
+// Initialize automatic page refresh alert
+if (typeof user != 'undefined') {
+    setTimeout(function() {
+        alertify.set({
+            labels: {
+                ok: 'Yes'
+            }
+        });
+
+        alertify.alert("You haven't changed pages in a while. Are you still there?", function() {
+            $.ajax({
+                type: 'GET',
+                url: '/'
+            });
+        });
+    }, 600 * 1000); // 600 seconds, or 10 minutes
+}
+
 var getQualifiedUrl = function() {
     return location.protocol + '//' + location.hostname +
         (location.port ? ':' + location.port : '');
