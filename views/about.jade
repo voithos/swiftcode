@@ -7,18 +7,18 @@ block content
         open source projects that are freely available to learn from. Below
         is the list of source projects from which typeable code has been taken,
         along with links to the code and licenses.
-    .col-lg-1
-    .about-projects.col-lg-10
+    .col-md-1
+    .about-projects.col-md-10
         each p in projects
-            .col-lg-6
+            .col-md-6
                 .project-container.well
-                    .col-lg-8
+                    .col-md-8
                         a.project-name(href='#{p.url}') #{p.name}
                         span.lang #{p.langName}
-                    .link-group.col-lg-4
+                    .link-group.col-md-4
                         .row
                             a.btn.btn-info.btn-xs.project-link(href='#{p.codeUrl}') Code
                         .row
                             a.btn.btn-info.btn-xs.project-link(href='#{p.licenseUrl}') License
                     .clearfix
-    .col-lg-1
+    .col-md-1

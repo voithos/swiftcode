@@ -15,20 +15,20 @@ block scripts
 block content
     .container
         .row
-            .col-lg-4
-            .col-lg-4
+            .col-md-4
+            .col-md-4
                 .panel.panel-danger.control-panel
                     .panel-heading
                     .panel-body.center-parent(data-bind="template: 'controlPanelTemplate'")
                     script(id='controlPanelTemplate', type='text/html')
                         .row.center-child
-                            .col-lg-7
+                            .col-md-7
                                 h3.status(data-bind='text: game.gameStatus, css: game.gameStatusCss')
-                            .col-lg-5
+                            .col-md-5
                                 div(data-bind='if: game.timerRunning')
                                     div.timer-parent
                                         span.timer.label(data-bind='text: game.timer, css: game.timerCss')
-            .col-lg-3
+            .col-md-3
                 div(data-bind="template: 'playersPanelTemplate'")
                 script(id='playersPanelTemplate', type='text/html')
                     div(data-bind="if: game.isMultiplayer")
@@ -46,10 +46,10 @@ block content
                                     .row
                                         .progress.progress-labeled
                                             .progress-label.text-primary None yet
-            .col-lg-1
+            .col-md-1
         .row
-            .col-lg-1
-            .col-lg-10
+            .col-md-1
+            .col-md-10
                 .row
                     pre
                         code.code(data-bind='css: game.langCss')
@@ -57,47 +57,47 @@ block content
                             span.loading-container(data-bind='visible: loading')
                                 img(src='/img/loading.gif')
                 .row
-                    .col-lg-3(data-bind="if: game.projectName")
+                    .col-md-3(data-bind="if: game.projectName")
                         span.label.label-info(data-bind="text: 'Code taken from ' + game.projectName()")
-                    .col-lg-3.pull-right
+                    .col-md-3.pull-right
                         a.pull-right(href='', data-bind='click: submitHighlightingReport')
                             span.highlight-flag.label.label-default The syntax highlighting is wrong!
-            .col-lg-1
+            .col-md-1
         #completion-dialog.completion-dialog.modal.fade(tabindex='-1', role='dialog', data-backdrop='static', data-keyboard='false')
             .modal-dialog
                 .modal-content
                     .modal-header
                         h3.completion-header.text-info(data-bind='text: completionText')
                     .modal-body
-                        .col-lg-1
-                        .col-lg-10.completion-table
+                        .col-md-1
+                        .col-md-10.completion-table
                             .row
-                                .col-lg-8 Time:
-                                .col-lg-4
+                                .col-md-8 Time:
+                                .col-md-4
                                     span(data-bind='text: stats.time')
                             .row
-                                .col-lg-8 Speed:
-                                .col-lg-4
+                                .col-md-8 Speed:
+                                .col-md-4
                                     span(data-bind='text: stats.speed')
                                     span.muted wpm
                             .row
-                                .col-lg-8 Keystrokes:
-                                .col-lg-4
+                                .col-md-8 Keystrokes:
+                                .col-md-4
                                     span(data-bind='text: stats.keystrokes')
                             .row
-                                .col-lg-8 Characters:
-                                .col-lg-4
+                                .col-md-8 Characters:
+                                .col-md-4
                                     span(data-bind='text: stats.typeables')
                             .row
-                                .col-lg-8 Unproductive:
-                                .col-lg-4
+                                .col-md-8 Unproductive:
+                                .col-md-4
                                     span(data-bind='text: stats.percentUnproductive')
                                     span.muted %
                             .row
-                                .col-lg-8 Mistakes:
-                                .col-lg-4
+                                .col-md-8 Mistakes:
+                                .col-md-4
                                     span(data-bind='text: stats.mistakes')
-                        .col-lg-1
+                        .col-md-1
                         .clearfix
                     .modal-footer
                         a.btn.btn-primary(href='/lobby') Back to lobby

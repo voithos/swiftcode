@@ -8,8 +8,8 @@ block scripts
 block content
     .container
         .row
-            .col-lg-1
-            .col-lg-6
+            .col-md-1
+            .col-md-6
                 .well
                     fieldset
                         legend Join Game
@@ -46,7 +46,7 @@ block content
                                             td(colspan='5') There are no available games! Make a new one.
                                 .loading-container(data-bind='visible: loading')
                                     img(src='/img/loading.gif')
-            .col-lg-4
+            .col-md-4
                 .slide-panel-container
                     .slide-panel.gametype-container
                         .well
@@ -63,4 +63,4 @@ block content
                                     each l in langs
                                         button.lang.btn.btn-danger.btn-block(type='button', data-bind="click: newGame.bind($data, '#{l.key}')")= l.name
                 .clearfix
-            .col-lg-1
+            .col-md-1
