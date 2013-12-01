@@ -10,6 +10,7 @@
 * Docstrings are not classified seperately by highlight.js, thus not excluded
 * Certain keys don't work under Opera (for example, underscore is treated as '-')
 * When multiple players join around the same time, some may not get "ingame:join" updates
+* Need better way of cleaning up games, if game is created but never "ingame"
 
 ### Possible future features
 * Learning mode? (collaborate with 'Learn X in Y' project?)
