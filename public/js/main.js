@@ -29,20 +29,27 @@ $(document).ready(function() {
 
 // Initialize automatic page refresh alert
 if (typeof user != 'undefined') {
-    setTimeout(function() {
-        alertify.set({
-            labels: {
-                ok: 'Yes'
-            }
-        });
+    (function() {
+        var alertTimeout = 600 * 1000; // 600 seconds, or 10 minutes
 
-        alertify.alert("You haven't changed pages in a while. Are you still there?", function() {
-            $.ajax({
-                type: 'GET',
-                url: '/'
+        var showTimeoutAlert = function() {
+            alertify.set({
+                labels: {
+                    ok: 'Yes'
+                }
             });
-        });
-    }, 600 * 1000); // 600 seconds, or 10 minutes
+
+            alertify.alert("You haven't changed pages in a while. Are you still there?", function() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/'
+                });
+                setTimeout(showTimeoutAlert, alertTimeout);
+            });
+        };
+
+        setTimeout(showTimeoutAlert, alertTimeout); // 600 seconds, or 10 minutes
+    })();
 }
 
 var getQualifiedUrl = function() {

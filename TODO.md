@@ -17,5 +17,5 @@
 * Profile page, where user can see stats, tweak settings
 * Names / passwords / invitation-only option for game rooms
 * Training mode? ("beat your own time")
-* Dynamic favicon update in lobby page, when people login / logout
+* Dynamic favicon update in lobby page, when people login / logout (know how many people are in lobby)
 * Badges / leaderboard?
