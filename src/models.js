@@ -13,8 +13,8 @@ var enet = require('./eventnet');
 // Constant configs
 var SALT_WORK_FACTOR = 10;
 var GAME_TIME_JOIN_CUTOFF_MS = 5000;
-var GAME_SINGLE_PLAYER_WAIT_TIME = 6;
-var GAME_MULTI_PLAYER_WAIT_TIME = 16;
+var GAME_SINGLE_PLAYER_WAIT_TIME = 5;
+var GAME_MULTI_PLAYER_WAIT_TIME = 15;
 var GAME_DEFAULT_MAX_PLAYERS = 4;
 var CHARACTERS_PER_WORD = 5;
 var MILLISECONDS_PER_MINUTE = 60000;
@@ -316,15 +316,6 @@ var GameSchema = new Schema({
     playerNames: [String],
     startingPlayers: [Schema.ObjectId],
     wasReset: { type: Boolean, default: false }
-});
-
-GameSchema.pre('save', function(next) {
-    var game = this;
-
-    if (game.isNew || game.isModified()) {
-        game.setGameStatus();
-    }
-    return next();
 });
 
 GameSchema.methods.beginSinglePlayer = function() {

@@ -2,7 +2,6 @@
 
 ### Core features
 * Spam protection in login process
-* Modify home screen to provide overview of game
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 
 ### Bugs
