@@ -8,81 +8,82 @@ block scripts
     script(src='/js/admin.js')
 
 block content
-    form.form-horizontal.form-parsley(action='/admin/add-lang', method='POST', role='form')
-        fieldset
-            legend New Language
-            .row
-                .col-md-10
-                .col-md-2
-                    button.btn.btn-info.btn-xs(type='button', data-bind='click: reinitExercises') Reinitialize Exercises
-                if error.length != 0
-                    script.
-                        var error = '#{error}';
-                .alert-container(data-bind="template: { name: 'alertTemplate', if: alertVisible }")
-                script(id='alertTemplate', type='text/html')
-                    .admin-alert.alert.fade.in.col-md-6.col-md-push-3(data-bind='css: alertCss')
-                        button.close(type='button', data-bind='click: hideAlert') x
-                        span(data-bind='text: alertMessage')
-            .form-group.form-group-tooltip
-                label.col-md-2.control-label(for='keyInput') Key
-                .col-md-4
-                    input.form-control(id='keyInput', type='text', name='key', data-required='true', data-placement='right', autofocus)
-            .form-group.form-group-tooltip
-                label.col-md-2.control-label(for='nameInput') Language Name
-                .col-md-6
-                    input.form-control(id='nameInput', type='text', name='name', data-required='true', data-placement='right')
-            .form-group.form-group-tooltip
-                label.col-md-2.control-label(for='orderInput') Order
-                .col-md-6
-                    input.form-control(id='orderInput', type='text', name='order', data-required='true', data-type='number', data-placement='right')
+    .container
+        form.form-horizontal.form-parsley(action='/admin/add-lang', method='POST', role='form')
+            fieldset
+                legend New Language
+                .row
+                    .col-md-10
+                    .col-md-2
+                        button.btn.btn-info.btn-xs(type='button', data-bind='click: reinitExercises') Reinitialize Exercises
+                    if error.length != 0
+                        script.
+                            var error = '#{error}';
+                    .alert-container(data-bind="template: { name: 'alertTemplate', if: alertVisible }")
+                    script(id='alertTemplate', type='text/html')
+                        .admin-alert.alert.fade.in.col-md-6.col-md-push-3(data-bind='css: alertCss')
+                            button.close(type='button', data-bind='click: hideAlert') x
+                            span(data-bind='text: alertMessage')
+                .form-group.form-group-tooltip
+                    label.col-md-2.control-label(for='keyInput') Key
+                    .col-md-4
+                        input.form-control(id='keyInput', type='text', name='key', data-required='true', data-placement='right', autofocus)
+                .form-group.form-group-tooltip
+                    label.col-md-2.control-label(for='nameInput') Language Name
+                    .col-md-6
+                        input.form-control(id='nameInput', type='text', name='name', data-required='true', data-placement='right')
+                .form-group.form-group-tooltip
+                    label.col-md-2.control-label(for='orderInput') Order
+                    .col-md-6
+                        input.form-control(id='orderInput', type='text', name='order', data-required='true', data-type='number', data-placement='right')
 
-            fieldset.code-projects
-                legend Source Projects
-                input(type='hidden', name='projectCount', data-bind='value: $root.projectCount')
-                input(type='hidden', name='exerciseCount', data-bind='value: $root.exerciseCount')
-                div(data-bind="template: { name: 'projectsTemplate', foreach: projects }")
+                fieldset.code-projects
+                    legend Source Projects
+                    input(type='hidden', name='projectCount', data-bind='value: $root.projectCount')
+                    input(type='hidden', name='exerciseCount', data-bind='value: $root.exerciseCount')
+                    div(data-bind="template: { name: 'projectsTemplate', foreach: projects }")
 
-                script(id='projectsTemplate', type='text/html')
-                    .form-group.form-group-tooltip
-                        label.col-md-2.control-label(data-bind="attr: { 'for': 'projectKeyInput' + $index() }") Project Key
-                        .col-md-4
-                            input.form-control(data-bind="attr: { 'id': 'projectKeyInput' + $index(), 'name': 'projectKey' + $index() }", type='text', data-required='true', data-placement='right')
-                    .form-group.form-group-tooltip
-                        label.col-md-2.control-label(data-bind="attr: { 'for': 'projectNameInput' + $index() }") Project Name
-                        .col-md-6
-                            input.form-control(data-bind="attr: { 'id': 'projectNameInput' + $index(), 'name': 'projectName' + $index() }", type='text', data-required='true', data-placement='right') .form-group.form-group-tooltip
-                    .form-group.form-group-tooltip
-                        label.col-md-2.control-label(data-bind="attr: { 'for': 'projectUrlInput' + $index() }") Project URL
-                        .col-md-6
-                            input.form-control(data-bind="attr: { 'id': 'projectUrlInput' + $index(), 'name': 'projectUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
-                    .form-group.form-group-tooltip
-                        label.col-md-2.control-label(data-bind="attr: { 'for': 'projectCodeUrlInput' + $index() }") Project Code URL
-                        .col-md-6
-                            input.form-control(data-bind="attr: { 'id': 'projectCodeUrlInput' + $index(), 'name': 'projectCodeUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
-                    .form-group.form-group-tooltip
-                        label.col-md-2.control-label(data-bind="attr: { 'for': 'projectLicenseUrlInput' + $index() }") Project License URL
-                        .col-md-6
-                            input.form-control(data-bind="attr: { 'id': 'projectLicenseUrlInput' + $index(), 'name': 'projectLicenseUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+                    script(id='projectsTemplate', type='text/html')
+                        .form-group.form-group-tooltip
+                            label.col-md-2.control-label(data-bind="attr: { 'for': 'projectKeyInput' + $index() }") Project Key
+                            .col-md-4
+                                input.form-control(data-bind="attr: { 'id': 'projectKeyInput' + $index(), 'name': 'projectKey' + $index() }", type='text', data-required='true', data-placement='right')
+                        .form-group.form-group-tooltip
+                            label.col-md-2.control-label(data-bind="attr: { 'for': 'projectNameInput' + $index() }") Project Name
+                            .col-md-6
+                                input.form-control(data-bind="attr: { 'id': 'projectNameInput' + $index(), 'name': 'projectName' + $index() }", type='text', data-required='true', data-placement='right') .form-group.form-group-tooltip
+                        .form-group.form-group-tooltip
+                            label.col-md-2.control-label(data-bind="attr: { 'for': 'projectUrlInput' + $index() }") Project URL
+                            .col-md-6
+                                input.form-control(data-bind="attr: { 'id': 'projectUrlInput' + $index(), 'name': 'projectUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+                        .form-group.form-group-tooltip
+                            label.col-md-2.control-label(data-bind="attr: { 'for': 'projectCodeUrlInput' + $index() }") Project Code URL
+                            .col-md-6
+                                input.form-control(data-bind="attr: { 'id': 'projectCodeUrlInput' + $index(), 'name': 'projectCodeUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
+                        .form-group.form-group-tooltip
+                            label.col-md-2.control-label(data-bind="attr: { 'for': 'projectLicenseUrlInput' + $index() }") Project License URL
+                            .col-md-6
+                                input.form-control(data-bind="attr: { 'id': 'projectLicenseUrlInput' + $index(), 'name': 'projectLicenseUrl' + $index() }", type='text', data-required='true', data-type='url', data-placement='right')
 
-                    fieldset.code-samples
-                        legend Exercises
-                        div(data-bind="foreach: exercises")
-                            input(type='hidden', name='exerciseProject', data-bind="attr: { 'name': 'exerciseProject' + absIndex }, value: $parentContext.$index")
-                            .form-group.form-group-tooltip
-                                label.col-md-2.control-label(data-bind="attr: { 'for': 'exerciseNameInput' + $parentContext.$index() + '-' + $index() }") Exercise Name
-                                .col-md-4
-                                    input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $parentContext.$index() + '-' + $index(), name: 'exerciseName' + absIndex }, value: 'exercise' + $parentContext.$index() + '-' + $index()", type='text', data-required='true', data-placement='right')
-                            .form-group.form-group-tooltip
-                                label.col-md-2.control-label(data-bind="attr: { 'for': 'codeInput' + $parentContext.$index() + '-' + $index() }") Code
-                                .col-md-10
-                                    textarea.form-control.code(data-bind="attr: { 'id': 'codeInput' + $parentContext.$index() + '-' + $index(), name: 'code' + absIndex }", rows='10', data-required='true', data-placement='right')
-                    .form-group
-                        .col-md-2
-                        .col-md-8
-                            button.btn.btn-large(type='button', data-bind='click: addExercise') Add Exercise
+                        fieldset.code-samples
+                            legend Exercises
+                            div(data-bind="foreach: exercises")
+                                input(type='hidden', name='exerciseProject', data-bind="attr: { 'name': 'exerciseProject' + absIndex }, value: $parentContext.$index")
+                                .form-group.form-group-tooltip
+                                    label.col-md-2.control-label(data-bind="attr: { 'for': 'exerciseNameInput' + $parentContext.$index() + '-' + $index() }") Exercise Name
+                                    .col-md-4
+                                        input.form-control(data-bind="attr: { 'id': 'exerciseNameInput' + $parentContext.$index() + '-' + $index(), name: 'exerciseName' + absIndex }, value: 'exercise' + $parentContext.$index() + '-' + $index()", type='text', data-required='true', data-placement='right')
+                                .form-group.form-group-tooltip
+                                    label.col-md-2.control-label(data-bind="attr: { 'for': 'codeInput' + $parentContext.$index() + '-' + $index() }") Code
+                                    .col-md-10
+                                        textarea.form-control.code(data-bind="attr: { 'id': 'codeInput' + $parentContext.$index() + '-' + $index(), name: 'code' + absIndex }", rows='10', data-required='true', data-placement='right')
+                        .form-group
+                            .col-md-2
+                            .col-md-8
+                                button.btn.btn-large(type='button', data-bind='click: addExercise') Add Exercise
 
-            .form-group
-                .col-md-2
-                .col-md-8
-                    button.btn.btn-large(type='button', data-bind='click: addProject') Add Project
-                    button.btn.btn-large.btn-primary(type='submit') Submit
+                .form-group
+                    .col-md-2
+                    .col-md-8
+                        button.btn.btn-large(type='button', data-bind='click: addProject') Add Project
+                        button.btn.btn-large.btn-primary(type='submit') Submit

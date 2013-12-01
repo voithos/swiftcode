@@ -1,14 +1,17 @@
 extends layout
 
 block content
-    .container-narrow
-        .jumbotron
-            h2 How Swift Are You?
-            p.
-                SwiftCODE is a multiplayer typing speed game for programmers.
-                Just choose a username and password to begin!
-                Or, if you don't care about saving progress,
-                <a href="/playnow">play now!</a>
+    .banner
+        .container
+            .row
+                .col-md-6
+                .col-md-6.banner-intro
+                    h1.banner-heading How Swift Are You?
+                    h2.banner-phrase SwiftCODE is a multiplayer typing speed game for programmers.
+                    .banner-buttons
+                        a.btn.btn-lg.btn-success.playnow-button(href='/playnow') Play Now
+                        .signup-section or <a href="/signup"><span class="label label-info">sign up</span></a> to keep track of your progress
+    .container
         hr.featurette-divider
         .row.featurette
             .col-md-6

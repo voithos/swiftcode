@@ -1,4 +1,8 @@
 /* Overrides for navbar-form */
+.navbar {
+    border-radius: 0;
+}
+
 .navbar-form {
     padding: 10px 15px;
     margin-top: 8px;
@@ -87,6 +91,45 @@
 }
 
 /* Index page */
+.banner {
+    background: url("/img/rockets.png") no-repeat top center #023251;
+    margin-top: -21px;
+    border-bottom: 5px solid #7dc3e9;
+}
+
+.banner .container {
+    height: 550px;
+}
+
+.banner-intro {
+    text-align: center;
+    margin-top: 110px;
+}
+
+.banner-heading {
+    font-size: 50px;
+    font-weight: bold;
+    color: #149c82;
+}
+
+.banner-phrase {
+    color: #ffffff;
+}
+
+.banner-buttons {
+}
+
+.banner-buttons .playnow-button {
+    margin: 15px 0 10px 0;
+    font-size: 30px;
+    width: 300px;
+}
+
+.banner-buttons .signup-section {
+    font-size: 20px;
+    color: #ffffff;
+}
+
 .featurette-heading {
     margin-top: 125px;
 }
