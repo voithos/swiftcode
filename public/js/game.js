@@ -395,7 +395,7 @@
     var pingId = null;
     var pingWaiting = function() {
         socket.emit('ingame:ping');
-        pingId = setTimeout(pingWaiting, 500);
+        pingId = setTimeout(pingWaiting, 2000);
     };
 
     var fullyStarted = false;
@@ -546,7 +546,7 @@
             lastTimestamp = moment();
 
             // Schedule the start of the game if close enough
-            if (state.time > -1000 && state.time < 0) {
+            if (state.time > -2500 && state.time < 0) {
                 setTimeout(startGame, -state.time);
             }
 
@@ -572,8 +572,6 @@
             }
         };
     };
-
-    // TODO: Bind CTRL+Backspace?
 
     // Bind key events
     var keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
