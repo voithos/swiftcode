@@ -15,7 +15,7 @@ block content
                 .col-md-1
             form.form-signup.form-parsley(action='/create-account', method='POST')
                 .form-group
-                    input.form-control.form-username(type='text', placeholder='Username', name='username', data-required='true', data-rangelength='[2, 32]', data-placement='right')
+                    input.form-control.form-username(type='text', placeholder='Username', name='username', autofocus, data-required='true', data-rangelength='[2, 32]', data-placement='right')
                 .form-group
                     input.form-control.form-password(type='password', placeholder='Password', name='password', data-required='true', data-minlength='8', data-placement='right')
                 .form-group
