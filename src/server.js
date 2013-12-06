@@ -222,11 +222,21 @@ var SwiftCODE = function() {
         var authMiddleware = ensureAuthenticated('/');
         var adminMiddleware = ensureAuthenticated('/', true);
 
-        self.app.post('/login', passport.authenticate('local', {
-            successRedirect: '/lobby',
-            failureRedirect: '/',
-            failureFlash: true
-        }));
+        // Use custom authentication handler in order to redirect back
+        // to the referer
+        self.app.post('/login', function(req, res, next) {
+            passport.authenticate('local', function(err, user, info) {
+                if (err) { return next(err); }
+                if (!user) {
+                    req.flash('error', info.message);
+                    return res.redirect(req.get('referer'));
+                }
+                req.login(user, function(err) {
+                    if (err) { return next(err); }
+                    return res.redirect('/lobby');
+                });
+            })(req, res, next);
+        });
 
         self.app.get('/logout', function(req, res) {
             var deletionId;
