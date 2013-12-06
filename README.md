@@ -58,8 +58,8 @@ Grab the source code and the dependencies.
 
 ### Configure
 
-Create a database in MongoDB for SwiftCode, and create a MongoDB user
-account that SwiftCode will use to connect.
+Create a database in MongoDB for SwiftCODE, and create a MongoDB user
+account that SwiftCODE will use to connect.
 
     mongo
     > use swiftcode
@@ -87,7 +87,7 @@ page.
 
 ### Run
 
-At this point, SwiftCode should be fully set up, and runnable.
+At this point, SwiftCODE should be fully set up, and runnable.
 
     ./runserver.js
 
