@@ -16,14 +16,6 @@ block content
                     .col-md-10
                     .col-md-2
                         button.btn.btn-info.btn-xs(type='button', data-bind='click: reinitExercises') Reinitialize Exercises
-                    if error.length != 0
-                        script.
-                            var error = '#{error}';
-                    .alert-container(data-bind="template: { name: 'alertTemplate', if: alertVisible }")
-                    script(id='alertTemplate', type='text/html')
-                        .admin-alert.alert.fade.in.col-md-6.col-md-push-3(data-bind='css: alertCss')
-                            button.close(type='button', data-bind='click: hideAlert') x
-                            span(data-bind='text: alertMessage')
                 .form-group.form-group-tooltip
                     label.col-md-2.control-label(for='keyInput') Key
                     .col-md-4

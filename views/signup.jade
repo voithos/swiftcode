@@ -13,11 +13,6 @@ block content
                         Or, if you don't care about saving progress,
                         <a href="/playnow"><span class="label label-success">play now!</span></a>
                 .col-md-1
-            if error.length != 0
-                .alert.alert-danger
-                    button.close(type='button', data-dismiss='alert') x
-                    strong Oops! 
-                    = error
             form.form-signup.form-parsley(action='/create-account', method='POST')
                 .form-group
                     input.form-control.form-username(type='text', placeholder='Username', name='username', data-required='true', data-rangelength='[2, 32]', data-placement='right')

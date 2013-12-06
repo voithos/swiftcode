@@ -28,5 +28,9 @@ html
                     _id: '#{user._id}',
                     username: '#{user.username}'
                 };
+        if error
+            if error.length != 0
+                script.
+                    var error = '#{error}';
         script(src='/js/main.js')
         block scripts

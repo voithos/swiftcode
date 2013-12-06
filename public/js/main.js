@@ -1,3 +1,23 @@
+var swiftcode = {};
+
+var getQualifiedUrl = function() {
+    return location.protocol + '//' + location.hostname +
+        (location.port ? ':' + location.port : '');
+};
+
+var getSocketUrl = function() {
+    return location.protocol + '//' + location.hostname +
+        (location.port ? ':' + location.port : '');
+};
+
+var redirect = function(page) {
+    location.href = getQualifiedUrl() + page;
+};
+
+var showAlert = function(msg, err) {
+    alertify.alert(msg, undefined, err ? 'alertify-error' : 'alertify-success');
+};
+
 // Initiate parsley validation
 $(document).ready(function() {
     $('.form-parsley').each(function(i, elem) {
@@ -52,18 +72,9 @@ if (typeof user != 'undefined') {
     })();
 }
 
-var getQualifiedUrl = function() {
-    return location.protocol + '//' + location.hostname +
-        (location.port ? ':' + location.port : '');
-};
-
-var getSocketUrl = function() {
-    return location.protocol + '//' + location.hostname +
-        (location.port ? ':' + location.port : '');
-};
-
-var redirect = function(page) {
-    location.href = getQualifiedUrl() + page;
-};
-
-var swiftcode = {};
+// Automatically display error alert if necessary
+if (typeof error !== 'undefined') {
+    $(document).ready(function() {
+        showAlert('Oops! ' + error, true);
+    });
+}

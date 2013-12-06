@@ -15,9 +15,6 @@
         projects: ko.observableArray(),
         projectCount: ko.observable(0),
         exerciseCount: ko.observable(0),
-        alertVisible: ko.observable(false),
-        alertMessage: ko.observable(''),
-        alertCss: ko.observable(''),
         addProject: function() {
             this.projects.push(new Project());
         },
@@ -27,29 +24,12 @@
                 url: '/admin/reinit-exercises',
                 success: function(data) {
                     if (data.success) {
-                        viewModel.showAlert('All exercises successfully reinitialized.', true);
+                        showAlert('All exercises successfully reinitialized.');
                     } else {
-                        viewModel.showAlert('There was an error during reinitialization.', false);
+                        showAlert('There was an error during reinitialization.', true);
                     }
                 },
                 dataType: 'json'
-            });
-        },
-        showAlert: function(msg, success) {
-            if (success) {
-                viewModel.alertCss('alert-success');
-            } else {
-                viewModel.alertCss('alert-danger');
-            }
-            viewModel.alertMessage(msg);
-            viewModel.alertVisible(true);
-            setTimeout(function() {
-                viewModel.hideAlert();
-            }, 3000);
-        },
-        hideAlert: function() {
-            $('.admin-alert').hide(function() {
-                viewModel.showAlert(false);
             });
         }
     };
@@ -57,8 +37,4 @@
     swiftcode.viewModel = viewModel;
     ko.applyBindings(viewModel);
     viewModel.addProject();
-
-    if (typeof error !== 'undefined') {
-        viewModel.showAlert(error, false);
-    }
 })();

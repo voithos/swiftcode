@@ -252,3 +252,19 @@
 		background: #DFF0D8;
 		border: 1px solid #D6E9C6;
 	}
+
+.alertify-error .alertify-message {
+    color: #e74c3c;
+}
+
+.alertify-error .alertify-button {
+    background-color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.alertify-error .alertify-button:hover,
+.alertify-error .alertify-button:focus,
+.alertify-error .alertify-button:active {
+    background-color: #df2e1b;
+    border: 1px solid #cd2a19;
+}
