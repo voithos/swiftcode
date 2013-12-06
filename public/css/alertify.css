@@ -162,6 +162,7 @@
 		text-align: left;
 	}
 		.alertify-message {
+            font-size: 20px;
 			padding: 15px;
 			margin: 0;
 		}
