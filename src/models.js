@@ -210,7 +210,7 @@ UserSchema.statics.setupAnonymous = function() {
 
 UserSchema.statics.generateAnonymousUsername = function() {
     anonymousId++;
-    return 'user' + anonymousId;
+    return 'player' + anonymousId;
 };
 
 var LangSchema = new Schema({
