@@ -14,8 +14,8 @@ var redirect = function(page) {
     location.href = getQualifiedUrl() + page;
 };
 
-var showAlert = function(msg, err) {
-    alertify.alert(msg, undefined, err ? 'alertify-error' : 'alertify-success');
+var showAlert = function(msg, err, fn) {
+    alertify.alert(msg, fn, err ? 'alertify-error' : 'alertify-success');
 };
 
 // Initiate parsley validation

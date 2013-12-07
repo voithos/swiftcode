@@ -241,9 +241,14 @@ var SwiftCODE = function() {
         self.app.get('/logout', function(req, res) {
             var deletionId;
 
-            if (req.user && req.user.isAnonymous) {
-                deletionId = req.user._id;
+            if (req.user) {
+                if (req.user.isAnonymous) {
+                    deletionId = req.user._id;
+                } else {
+                    req.user.quitCurrentGame();
+                }
             }
+
             req.logout();
 
             if (deletionId) {

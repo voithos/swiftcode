@@ -108,7 +108,6 @@
         if (data.success) {
             redirect('/game');
         }
-        // TODO: Add a message indicating something went wrong
     });
 
     socket.on('games:new', function(data) {

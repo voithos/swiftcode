@@ -20,8 +20,6 @@ var SwiftCODESockets = function() {
      * Setup socket listeners
      */
     self.setupListeners = function() {
-        // TODO: Rearchitect the lobby/game connections to remove possibility
-        // of dangling games
         var lobby = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
@@ -36,41 +34,35 @@ var SwiftCODESockets = function() {
                         console.log(err);
                         console.log('games:join error'); return;
                     }
-                    models.Game.findById(data.game, function(err, game) {
-                        if (err) {
-                            console.log(err);
-                            console.log('games:join error'); return;
-                        }
-                        user.joinGame(game, function(err, success, game) {
+                    if (user) {
+                        user.prepareIngameAction('join', {
+                            game: data.game
+                        }, function(err) {
                             if (err) {
                                 console.log(err);
-                                console.log('games:join error'); return;
                             }
-                            socket.emit('games:join:res', { success: success, game: game });
+                            socket.emit('games:join:res', { success: !err });
                         });
-                    });
+                    }
                 });
             });
 
             socket.on('games:createnew', function(data) {
-                models.Lang.findOne({ key: data.key }, function(err, lang) {
-                    if (lang) {
-                        models.User.findById(data.player, function(err, user) {
-                            user.createGame({
-                                lang: lang.key,
-                                langName: lang.name,
-                                exercise: lang.randomExercise(),
-                                isSinglePlayer: data.gameType === 'single'
-                            }, function(err, success, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('games:createnew error'); return;
-                                }
-                                socket.emit('games:createnew:res', { success: success, game: game });
-                            });
+                models.User.findById(data.player, function(err, user) {
+                    if (err) {
+                        console.log(err);
+                        console.log('games:join error'); return;
+                    }
+                    if (user) {
+                        user.prepareIngameAction('createnew', {
+                            lang: data.key,
+                            isSinglePlayer: data.gameType === 'single'
+                        }, function(err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            socket.emit('games:createnew:res', { success: !err });
                         });
-                    } else {
-                        console.log('No such game type: ' + data.key);
                     }
                 });
             });
@@ -83,35 +75,45 @@ var SwiftCODESockets = function() {
                     models.User.findById(data.player, function(err, user) {
                         if (err) {
                             console.log(err);
-                            console.log('ingame:ready error'); return;
+                            console.log('ingame:ready error');
+                            return socket.emit('ingame:ready:res', {
+                                success: false,
+                                err: err
+                            });;
                         }
                         if (user) {
-                            socket.set('game', user.currentGame);
-                            models.Game.findById(user.currentGame, function(err, game) {
-                                if (game) {
-                                    if (err) {
-                                        console.log(err);
-                                        console.log('ingame:ready error'); return;
-                                    }
-                                    models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
-                                        if (exercise) {
-                                            // Join a room and broadcast join
-                                            socket.join('game-' + game.id);
-                                            socket.broadcast.to('game-' + game.id).emit('ingame:join', {
-                                                player: user,
-                                                game: game
-                                            });
-
-                                            socket.emit('ingame:ready:res', {
-                                                game: game,
-                                                exercise: exercise,
-                                                nonTypeables: models.NON_TYPEABLE_CLASSES
-                                            });
-                                        } else {
-                                            console.log('lang and exercise not found');
-                                        }
+                            user.performIngameAction(function(err, success, game) {
+                                if (!success) {
+                                    return socket.emit('ingame:ready:res', {
+                                        success: false,
+                                        err: err
                                     });
                                 }
+
+                                socket.set('game', game);
+                                models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
+                                    if (exercise) {
+                                        // Join a room and broadcast join
+                                        socket.join('game-' + game.id);
+                                        socket.broadcast.to('game-' + game.id).emit('ingame:join', {
+                                            player: user,
+                                            game: game
+                                        });
+
+                                        socket.emit('ingame:ready:res', {
+                                            success: true,
+                                            game: game,
+                                            exercise: exercise,
+                                            nonTypeables: models.NON_TYPEABLE_CLASSES
+                                        });
+                                    } else {
+                                        console.log('exercise not found');
+                                        socket.emit('ingame:ready:res', {
+                                            success: false,
+                                            err: 'exercise not found'
+                                        });
+                                    }
+                                });
                             });
                         }
                     });

@@ -62,12 +62,11 @@ exports.lobby = function(req, res) {
  */
 
 exports.game = function(req, res) {
-    if (!req.user.isJoiningGame) {
+    if (!req.user.isAllowedIngame) {
         return res.redirect('/lobby');
     }
 
-    // Reset the joining flag
-    req.user.isJoiningGame = false;
+    req.user.isAllowedIngame = false;
     req.user.save();
 
     res.render('game', {

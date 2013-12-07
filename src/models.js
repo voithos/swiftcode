@@ -35,7 +35,9 @@ var UserSchema = new Schema({
     totalGames: { type: Number, default: 0 },
     totalMultiplayerGames: { type: Number, default: 0 },
     gamesWon: { type: Number, default: 0 },
-    isJoiningGame: { type: Boolean, default: false },
+    isAllowedIngame: { type: Boolean, default: false },
+    ingameAction: { type: String },
+    ingameArgs: { type: Schema.Types.Mixed },
     currentGame: { type: Schema.ObjectId }
 });
 
@@ -72,6 +74,60 @@ UserSchema.methods.comparePassword = function(candidate, callback) {
     });
 };
 
+UserSchema.methods.prepareIngameAction = function(action, args, callback) {
+    var user = this;
+
+    user.isAllowedIngame = true;
+    user.ingameAction = action;
+    user.ingameArgs = args;
+    user.save(callback);
+};
+
+UserSchema.methods.performIngameAction = function(callback) {
+    var user = this;
+
+    if (user.ingameAction === 'join') {
+        Game.findById(user.ingameArgs.game, function(err, game) {
+            if (err) {
+                console.log(err);
+                console.log('games:join error');
+                return callback(err, false);
+            }
+            user.joinGame(game, function(err, success, game) {
+                if (err) {
+                    console.log(err);
+                    console.log('games:join error');
+                    return callback(err, false);
+                }
+                return callback(err, success, game);
+            });
+        });
+    } else if (user.ingameAction === 'createnew') {
+        Lang.findOne({ key: user.ingameArgs.lang }, function(err, lang) {
+            if (lang) {
+                user.createGame({
+                    lang: lang.key,
+                    langName: lang.name,
+                    exercise: lang.randomExercise(),
+                    isSinglePlayer: user.ingameArgs.isSinglePlayer
+                }, function(err, success, game) {
+                    if (err) {
+                        console.log(err);
+                        console.log('games:createnew error');
+                        return callback(err, false);
+                    }
+                    return callback(err, success, game);
+                });
+            } else {
+                console.log('No such game type: ' + user.ingameArgs.lang);
+                return callback('No such game type: ' + user.ingameArgs.lang, false);
+            }
+        });
+    } else {
+        return callback('No such action type: ' + user.ingameAction, false);
+    }
+};
+
 UserSchema.methods.joinGame = function(game, callback) {
     var user = this;
 
@@ -79,7 +135,6 @@ UserSchema.methods.joinGame = function(game, callback) {
         return callback('game is not joinable by this user', false);
     }
 
-    user.isJoiningGame = true;
     user.currentGame = game._id;
     game.addPlayer(user, function(err) {
         if (err) {

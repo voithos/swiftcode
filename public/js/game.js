@@ -598,6 +598,14 @@
 
     socket.on('ingame:ready:res', function(data) {
         console.log('received ingame:ready:res');
+
+        if (!data.success) {
+            showAlert('Error: ' + data.err, true, function() {
+                redirect('/lobby');
+            });
+            return;
+        }
+
         game = swiftcode.game = data.game;
         exercise = swiftcode.exercise = data.exercise;
         state.code = data.exercise.typeableCode;
