@@ -11,7 +11,6 @@
 * Certain keys don't work under Opera (for example, underscore is treated as '-')
 * When multiple players join around the same time, some may not get "ingame:join" updates
 * Need better way of cleaning up games, if game is created but never "ingame"
-* Mousetrap.js seems to not work correctly when using CAPS LOCK
 
 ### Possible future features
 * Learning mode? (collaborate with 'Learn X in Y' project?)
