@@ -392,10 +392,19 @@
         $gamecode.find('.code-char').addClass('untyped');
     };
 
-    var pingId = null;
-    var pingWaiting = function() {
-        socket.emit('ingame:ping');
-        pingId = setTimeout(pingWaiting, 2000);
+    var checkGameState = function() {
+        viewModel.game.timerRunning(game.starting || game.started);
+        viewModel.game.started(game.started);
+        addRemoveOpponents();
+
+        if (game.started) {
+            setStarting();
+            startGame();
+        } else if (game.starting) {
+            setStarting();
+        } else {
+            resetStarting();
+        }
     };
 
     var fullyStarted = false;
@@ -427,6 +436,23 @@
                 onGameComplete: completeGame
             });
         }
+    };
+
+    var addRemoveOpponents = function() {
+        // Remove opponents that are no longer in-game
+        _.each(state.opponentCursors, function(cursor, opponentId) {
+            if (!_.contains(game.players, opponentId)) {
+                removeOpponent(opponentId);
+            }
+        });
+
+        // Add new opponents that are not in the list yet
+        _.each(game.players, function(player, i) {
+            // Do not add self as an opponent
+            if (player != user._id && !(player in state.opponentCursors)) {
+                addOpponent(player, game.playerNames[i]);
+            }
+        });
     };
 
     var addOpponent = function(opponentId, opponentName) {
@@ -490,15 +516,6 @@
 
     var addInitialPlayer = function() {
         viewModel.game.players.push(new Player(user._id, 0, user.username));
-    };
-
-    var addInitialOpponents = function() {
-        _.each(game.players, function(player, i) {
-            // Do not add self as an opponent
-            if (player != user._id) {
-                addOpponent(player, game.playerNames[i]);
-            }
-        });
     };
 
     var emitCursorAdvancement = function() {
@@ -609,6 +626,7 @@
         game = swiftcode.game = data.game;
         exercise = swiftcode.exercise = data.exercise;
         state.code = data.exercise.typeableCode;
+        state.time = data.timeLeft;
         nonTypeables = data.nonTypeables;
         viewModel.loaded(true);
         viewModel.loading(false);
@@ -620,27 +638,15 @@
 
         hljs.initHighlighting();
         bindCodeCharacters();
-        pingWaiting();
         addInitialPlayer();
-        addInitialOpponents();
+        checkGameState();
     });
 
-    socket.on('ingame:ping:res', function(data) {
-        console.log('received ingame:ping:res');
+    socket.on('ingame:update', function(data) {
+        console.log('received ingame:update');
         game = swiftcode.game = data.game;
         state.time = data.timeLeft;
-        viewModel.game.timerRunning(game.starting || game.started);
-        viewModel.game.started(game.started);
-
-        if (game.started) {
-            clearTimeout(pingId);
-            setStarting();
-            startGame();
-        } else if (game.starting) {
-            setStarting();
-        } else {
-            resetStarting();
-        }
+        checkGameState();
     });
 
     socket.on('ingame:complete:res', function(data) {
@@ -695,16 +701,6 @@
             enqueueAnimation();
         });
         $dialog.modal('show');
-    });
-
-    socket.on('ingame:join', function(data) {
-        console.log('received ingame:join');
-        addOpponent(data.player._id, data.player.username);
-    });
-
-    socket.on('ingame:leave', function(data) {
-        console.log('received ingame:leave');
-        removeOpponent(data.player);
     });
 
     socket.on('ingame:advancecursor', function(data) {

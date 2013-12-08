@@ -20,7 +20,7 @@ var SwiftCODESockets = function() {
      * Setup socket listeners
      */
     self.setupListeners = function() {
-        var lobby = self.io.of('/lobby')
+        var lobbySockets = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
                 models.Game.find({ isViewable: true }, function(err, docs) {
@@ -68,7 +68,7 @@ var SwiftCODESockets = function() {
             });
         });
 
-        var game = self.io.of('/game')
+        var gameSockets = self.io.of('/game')
         .on('connection', function(socket) {
             socket.on('ingame:ready', function(data) {
                 socket.set('player', data.player, function() {
@@ -95,14 +95,11 @@ var SwiftCODESockets = function() {
                                     if (exercise) {
                                         // Join a room and broadcast join
                                         socket.join('game-' + game.id);
-                                        socket.broadcast.to('game-' + game.id).emit('ingame:join', {
-                                            player: user,
-                                            game: game
-                                        });
 
                                         socket.emit('ingame:ready:res', {
                                             success: true,
                                             game: game,
+                                            timeLeft: game.starting ? moment().diff(game.startTime) : undefined,
                                             exercise: exercise,
                                             nonTypeables: models.NON_TYPEABLE_CLASSES
                                         });
@@ -113,36 +110,6 @@ var SwiftCODESockets = function() {
                                             err: 'exercise not found'
                                         });
                                     }
-                                });
-                            });
-                        }
-                    });
-                });
-            });
-
-            socket.on('ingame:ping', function(data) {
-                socket.get('game', function(err, game) {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                    models.Game.findById(game, function(err, game) {
-                        if (err) {
-                            console.log(err);
-                            console.log('ingame:ping error'); return;
-                        }
-                        if (game) {
-                            game.updateGameStatus(function(err, game) {
-                                if (err) {
-                                    console.log(err);
-                                    console.log('ingame:ping error'); return;
-                                }
-                                // Client-side clocks cannot be relied upon to
-                                // be synchronized, so we specify the time left
-                                // directly from the server
-                                socket.emit('ingame:ping:res', {
-                                    game: game,
-                                    timeLeft: moment().diff(game.startTime)
                                 });
                             });
                         }
@@ -211,12 +178,6 @@ var SwiftCODESockets = function() {
                             console.log(err);
                             return;
                         }
-                        // Emit a 'leave' notice to other players in the room
-                        socket.broadcast.to('game-' + game).emit('ingame:leave', {
-                            player: player,
-                            game: game
-                        });
-
                         models.User.findById(player, function(err, user) {
                             if (err) {
                                 console.log(err);
@@ -238,20 +199,25 @@ var SwiftCODESockets = function() {
 
         enet.on('games:new', function(game) {
             if (game.isViewable) {
-                lobby.emit('games:new', game);
+                lobbySockets.emit('games:new', game);
             }
         });
 
         enet.on('games:update', function(game) {
             if (game.isViewable) {
-                lobby.emit('games:update', game);
+                lobbySockets.emit('games:update', game);
             }
+            gameSockets.in('game-' + game.id).emit('ingame:update', {
+                game: game,
+                timeLeft: moment().diff(game.startTime)
+            });
         });
 
         enet.on('games:remove', function(game) {
             // By definition, a game must be removed when it isn't viewable
-            lobby.emit('games:remove', game);
+            lobbySockets.emit('games:remove', game);
         });
+
     };
 };
 

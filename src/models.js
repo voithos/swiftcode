@@ -70,7 +70,7 @@ UserSchema.methods.comparePassword = function(candidate, callback) {
             console.log(err);
             return callback(err);
         }
-        callback(null, isMatch);
+        return callback(null, isMatch);
     });
 };
 
@@ -373,6 +373,23 @@ var GameSchema = new Schema({
     wasReset: { type: Boolean, default: false }
 });
 
+var gameTimeouts = {
+    create: function(g, t, f) {
+        var self = this;
+        if (g in self) {
+            clearTimeout(self[g]);
+        }
+        self[g] = setTimeout(function() {
+            delete self[g];
+            f();
+        }, t);
+    },
+    remove: function(g) {
+        clearTimeout(this[g]);
+        delete this[g];
+    }
+};
+
 GameSchema.methods.beginSinglePlayer = function() {
     var game = this;
     game.setStatus('waiting');
@@ -391,77 +408,111 @@ GameSchema.methods.beginMultiPlayer = function() {
     game.isSinglePlayer = false;
 };
 
-GameSchema.methods.updateGameStatus = function(callback) {
+GameSchema.methods.updateGameState = function(callback) {
+    callback = callback || function() {};
+
     var game = this;
-    game.setGameStatus();
+    game.deduceGameState();
+
+    var wasNew = game.isNew;
     var wasModified = game.isModified();
     game.save(function(err, game) {
         if (err) {
             console.log(err);
             return callback('error saving user');
         }
-        if (wasModified) {
+        if (wasNew) {
+            enet.emit('games:new', game);
+        } else if (game.isComplete) {
+            enet.emit('games:remove', game);
+        } else if (wasModified) {
             enet.emit('games:update', game);
         }
         return callback(null, game);
     });
 };
 
-GameSchema.methods.setGameStatus = function() {
+GameSchema.methods.deduceGameState = function() {
     var game = this;
 
+    if (game.numPlayers === 0) {
+        return game.finish();
+    }
     if (game.numPlayers === game.maxPlayers) {
         game.isJoinable = false;
     }
 
     if (game.isSinglePlayer) {
-        game.setGameStatusSinglePlayer();
+        game.deduceGameStateSinglePlayer();
     } else {
-        game.setGameStatusMultiPlayer();
+        game.deduceGameStateMultiPlayer();
     }
 };
 
-GameSchema.methods.setGameStatusSinglePlayer = function() {
+GameSchema.methods.deduceGameStateSinglePlayer = function() {
     var game = this;
-    if (!game.starting) {
-        game.starting = true;
-        game.startTime = moment().add(GAME_SINGLE_PLAYER_WAIT_TIME, 'seconds').toDate();
-    } else {
-        game.updateTime();
-    }
-};
-
-GameSchema.methods.setGameStatusMultiPlayer = function() {
-    var game = this;
-
-    if (game.started) {
-        game.updateTime();
-    } else if (game.starting) {
-        // Starting interrupt condition
-        if (game.numPlayers < 2) {
-            game.starting = false;
-            game.startTime = undefined;
-            game.isJoinable = true;
-        } else {
-            game.updateTime();
-        }
-    } else {
-        if (game.numPlayers > 1) {
+    if (!game.started) {
+        if (!game.starting) {
             game.starting = true;
-            game.startTime = moment().add(GAME_MULTI_PLAYER_WAIT_TIME, 'seconds').toDate();
+            game.startTime = moment().add(GAME_SINGLE_PLAYER_WAIT_TIME, 'seconds').toDate();
+        }
+        game.setupTiming();
+    }
+};
+
+GameSchema.methods.deduceGameStateMultiPlayer = function() {
+    var game = this;
+
+    if (!game.started) {
+        if (game.starting) {
+            // Starting interrupt condition
+            if (game.numPlayers < 2) {
+                game.starting = false;
+                game.startTime = undefined;
+                game.isJoinable = true;
+                gameTimeouts.remove(game.id);
+            } else {
+                game.setupTiming();
+            }
+        } else {
+            if (game.numPlayers > 1) {
+                game.starting = true;
+                game.startTime = moment().add(GAME_MULTI_PLAYER_WAIT_TIME, 'seconds').toDate();
+                game.setupTiming();
+            }
         }
     }
 };
 
-GameSchema.methods.updateTime = function() {
+GameSchema.methods.setupTiming = function() {
     var game = this;
     var timeLeft = moment(game.startTime).diff(moment());
-    if (game.isJoinable && !game.started) {
-        if (timeLeft < GAME_TIME_JOIN_CUTOFF_MS) {
+    if (game.isJoinable) {
+        if (timeLeft > GAME_TIME_JOIN_CUTOFF_MS) {
+            gameTimeouts.create(game.id, timeLeft - GAME_TIME_JOIN_CUTOFF_MS + 1, function() {
+                Game.findById(game.id, function(err, game) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    game.isJoinable = false;
+                    game.updateGameState();
+                });
+            });
+        } else {
             game.isJoinable = false;
         }
-    } else if (timeLeft < 0) {
-        if (timeLeft < 0) {
+    } else {
+        if (timeLeft > 0) {
+            gameTimeouts.create(game.id, timeLeft + 1, function() {
+                Game.findById(game.id, function(err, game) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    game.start();
+                    game.updateGameState();
+                });
+            });
+        } else {
             game.start();
         }
     }
@@ -484,24 +535,10 @@ GameSchema.methods.checkJoinable = function(player) {
 GameSchema.methods.addPlayer = function(player, callback) {
     var game = this;
 
-    var wasNew = game.isNew;
     game.players.push(player._id);
     game.playerNames.push(player.username);
     game.numPlayers += 1;
-
-    game.save(function(err, game) {
-        if (err) {
-            console.log(err);
-            return callback('error saving game', false);
-        }
-        if (wasNew) {
-            enet.emit('games:new', game);
-        } else {
-            enet.emit('games:update', game);
-        }
-
-        return callback(null, game);
-    });
+    game.updateGameState(callback);
 };
 
 GameSchema.methods.removePlayer = function(player, callback) {
@@ -509,24 +546,7 @@ GameSchema.methods.removePlayer = function(player, callback) {
     game.players.remove(player._id);
     game.playerNames.remove(player.username);
     game.numPlayers = game.numPlayers <= 0 ? 0 : game.numPlayers - 1;
-
-    if (game.numPlayers === 0) {
-        game.finish();
-    }
-
-    game.save(function(err) {
-        if (err) {
-            console.log(err);
-            return callback('error saving game');
-        }
-        if (game.isComplete) {
-            enet.emit('games:remove', game);
-        } else {
-            enet.emit('games:update', game);
-        }
-
-        return callback(null, game);
-    });
+    game.updateGameState(callback);
 };
 
 GameSchema.methods.start = function() {
