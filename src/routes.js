@@ -1,5 +1,6 @@
 'use strict';
 
+var util = require('util');
 var _ = require('lodash');
 var models = require('./models');
 
@@ -35,7 +36,7 @@ exports.playnow = function(req, res) {
         });
         user.save(function(err, user) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return maybeGenerateAnonymous();
             }
             req.logIn(user, function(err) {
@@ -54,8 +55,8 @@ exports.playnow = function(req, res) {
 exports.lobby = function(req, res) {
     models.Lang.find({}, 'key name', function(err, docs) {
         if (err) {
-            console.log(err);
-            console.log('Langs not found'); return;
+            util.log(err);
+            util.log('Langs not found'); return;
         }
         res.render('lobby', {
             title: 'Lobby',
@@ -89,8 +90,8 @@ exports.game = function(req, res) {
 exports.about = function(req, res) {
     models.Project.find({}, null, { sort: { name: 1 } }, function(err, docs) {
         if (err) {
-            console.log(err);
-            console.log('Projects not found'); return;
+            util.log(err);
+            util.log('Projects not found'); return;
         }
         res.render('about', {
             title: 'About',
@@ -137,7 +138,7 @@ exports.createAccount = function(req, res) {
 
     models.User.findOne({ username: username }, function(err, user) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return reportError('An error occurred on the server.');
         }
         // Create a new user if none exists
@@ -254,8 +255,8 @@ exports.addLang = function(req, res) {
 
         models.Project.create(projects, function(err) {
             if (err) {
-                console.log(err);
-                console.log('addLang error');
+                util.log(err);
+                util.log('addLang error');
                 return done(err);
             }
 
@@ -267,8 +268,8 @@ exports.addLang = function(req, res) {
 
             models.Exercise.create(exercises, function(err) {
                 if (err) {
-                    console.log(err);
-                    console.log('addLang error');
+                    util.log(err);
+                    util.log('addLang error');
                     return done(err);
                 }
                 _.each(Array.prototype.slice.call(arguments, 1), function(exercise) {
@@ -291,18 +292,17 @@ exports.addLang = function(req, res) {
 
 exports.reinitExercises = function(req, res) {
     var done = function(err) {
-        var result = { success: true };
-        if (err) {
-            result.success = false;
-        }
+        var result = {
+            success: !err
+        };
         res.write(JSON.stringify(result));
         res.end();
     };
 
     models.Exercise.find({}, function(err, exercises) {
         if (err) {
-            console.log(err);
-            console.log('reinitLang error');
+            util.log(err);
+            util.log('reinitLang error');
             return done(err);
         }
         var total = exercises.length,
@@ -312,8 +312,8 @@ exports.reinitExercises = function(req, res) {
             exercise.initialize();
             exercise.save(function(err, saved) {
                 if (err) {
-                    console.log(err);
-                    console.log('reinitLang error');
+                    util.log(err);
+                    util.log('reinitLang error');
                 }
                 saveCount++;
                 if (saveCount === total) {

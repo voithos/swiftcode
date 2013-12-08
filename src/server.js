@@ -7,6 +7,7 @@ var http = require('http');
 var helmet = require('helmet');
 
 var path = require('path');
+var util = require('util');
 var _ = require('lodash');
 var fs = require('fs');
 
@@ -67,7 +68,7 @@ var SwiftCODE = function() {
         self.server.listen(self.config.port, self.config.ipaddress);
         self.sockets.listen(self.io);
 
-        console.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
+        util.log('Listening at ' + self.config.ipaddress + ':' + self.config.port);
     };
 
     self._initialize = function() {
@@ -110,7 +111,7 @@ var SwiftCODE = function() {
         passport.use(new LocalStrategy(function(username, password, done) {
             models.User.findOne({ username: username }, function(err, user) {
                 if (err) {
-                    console.log(err);
+                    util.log(err);
                     return done(err);
                 }
                 // Respond with a message if no such user exists
@@ -120,7 +121,7 @@ var SwiftCODE = function() {
                 // Otherwise check the password
                 user.comparePassword(password, function(err, isMatch) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                         return done(err);
                     }
                     if (!isMatch) {
@@ -254,7 +255,7 @@ var SwiftCODE = function() {
             if (deletionId) {
                 models.User.remove({ _id: deletionId }, function(err) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                     }
                 });
             }

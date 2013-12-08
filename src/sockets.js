@@ -2,6 +2,7 @@
 
 var io = require('socket.io');
 var moment = require('moment');
+var util = require('util');
 
 var models = require('./models');
 var enet = require('./eventnet');
@@ -31,15 +32,15 @@ var SwiftCODESockets = function() {
             socket.on('games:join', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
-                        console.log(err);
-                        console.log('games:join error'); return;
+                        util.log(err);
+                        util.log('games:join error'); return;
                     }
                     if (user) {
                         user.prepareIngameAction('join', {
                             game: data.game
                         }, function(err) {
                             if (err) {
-                                console.log(err);
+                                util.log(err);
                             }
                             socket.emit('games:join:res', { success: !err });
                         });
@@ -50,8 +51,8 @@ var SwiftCODESockets = function() {
             socket.on('games:createnew', function(data) {
                 models.User.findById(data.player, function(err, user) {
                     if (err) {
-                        console.log(err);
-                        console.log('games:join error'); return;
+                        util.log(err);
+                        util.log('games:join error'); return;
                     }
                     if (user) {
                         user.prepareIngameAction('createnew', {
@@ -59,7 +60,7 @@ var SwiftCODESockets = function() {
                             isSinglePlayer: data.gameType === 'single'
                         }, function(err) {
                             if (err) {
-                                console.log(err);
+                                util.log(err);
                             }
                             socket.emit('games:createnew:res', { success: !err });
                         });
@@ -74,8 +75,8 @@ var SwiftCODESockets = function() {
                 socket.set('player', data.player, function() {
                     models.User.findById(data.player, function(err, user) {
                         if (err) {
-                            console.log(err);
-                            console.log('ingame:ready error');
+                            util.log(err);
+                            util.log('ingame:ready error');
                             return socket.emit('ingame:ready:res', {
                                 success: false,
                                 err: err
@@ -104,7 +105,7 @@ var SwiftCODESockets = function() {
                                             nonTypeables: models.NON_TYPEABLE_CLASSES
                                         });
                                     } else {
-                                        console.log('exercise not found');
+                                        util.log('exercise not found');
                                         socket.emit('ingame:ready:res', {
                                             success: false,
                                             err: 'exercise not found'
@@ -120,12 +121,12 @@ var SwiftCODESockets = function() {
             socket.on('ingame:complete', function(data) {
                 socket.get('player', function(err, player) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                         return;
                     }
                     socket.get('game', function(err, game) {
                         if (err) {
-                            console.log(err);
+                            util.log(err);
                             return;
                         }
                         
@@ -139,7 +140,7 @@ var SwiftCODESockets = function() {
 
                         stats.updateStatistics(function(err, stats, user, game) {
                             if (err) {
-                                console.log(err);
+                                util.log(err);
                                 return;
                             }
                             socket.emit('ingame:complete:res', {
@@ -170,24 +171,24 @@ var SwiftCODESockets = function() {
             socket.on('disconnect', function() {
                 socket.get('game', function(err, game) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                         return;
                     }
                     socket.get('player', function(err, player) {
                         if (err) {
-                            console.log(err);
+                            util.log(err);
                             return;
                         }
                         models.User.findById(player, function(err, user) {
                             if (err) {
-                                console.log(err);
-                                console.log('ingame:exit error'); return;
+                                util.log(err);
+                                util.log('ingame:exit error'); return;
                             }
                             if (user) {
                                 user.quitCurrentGame(function(err, game) {
                                     if (err) {
-                                        console.log(err);
-                                        console.log('ingame:exit error'); return;
+                                        util.log(err);
+                                        util.log('ingame:exit error'); return;
                                     }
                                 });
                             }

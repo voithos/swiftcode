@@ -1,5 +1,6 @@
 'use strict';
 
+var util = require('util');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
@@ -21,6 +22,9 @@ var GAME_DEFAULT_MAX_PLAYERS = 4;
 var CHARACTERS_PER_WORD = 5;
 var MILLISECONDS_PER_MINUTE = 60000;
 var STATISTICS_VALIDATION_THRESHOLD_MS = 100;
+
+var NON_TYPEABLES = ['comment', 'template_comment', 'diff', 'javadoc', 'phpdoc'];
+var NON_TYPEABLE_CLASSES = _.map(NON_TYPEABLES, function(c) { return '.' + c; }).join(',');
 
 // Anonymous ID
 var anonymousId = 0;
@@ -52,12 +56,12 @@ UserSchema.pre('save', function(next) {
     }
     bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return next(err);
         }
         bcrypt.hash(user.password, salt, function(err, hash) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return next(err);
             }
             user.password = hash;
@@ -69,7 +73,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.methods.comparePassword = function(candidate, callback) {
     bcrypt.compare(candidate, this.password, function(err, isMatch) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return callback(err);
         }
         return callback(null, isMatch);
@@ -91,14 +95,14 @@ UserSchema.methods.performIngameAction = function(callback) {
     if (user.ingameAction === 'join') {
         Game.findById(user.ingameArgs.game, function(err, game) {
             if (err) {
-                console.log(err);
-                console.log('games:join error');
+                util.log(err);
+                util.log('games:join error');
                 return callback(err, false);
             }
             user.joinGame(game, function(err, success, game) {
                 if (err) {
-                    console.log(err);
-                    console.log('games:join error');
+                    util.log(err);
+                    util.log('games:join error');
                     return callback(err, false);
                 }
                 return callback(err, success, game);
@@ -114,14 +118,14 @@ UserSchema.methods.performIngameAction = function(callback) {
                     isSinglePlayer: user.ingameArgs.isSinglePlayer
                 }, function(err, success, game) {
                     if (err) {
-                        console.log(err);
-                        console.log('games:createnew error');
+                        util.log(err);
+                        util.log('games:createnew error');
                         return callback(err, false);
                     }
                     return callback(err, success, game);
                 });
             } else {
-                console.log('No such game type: ' + user.ingameArgs.lang);
+                util.log('No such game type: ' + user.ingameArgs.lang);
                 return callback('No such game type: ' + user.ingameArgs.lang, false);
             }
         });
@@ -140,12 +144,12 @@ UserSchema.methods.joinGame = function(game, callback) {
     user.currentGame = game._id;
     game.addPlayer(user, function(err) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return callback('error joining game', false);
         }
         user.save(function(err) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return callback('error saving user', false);
             }
             enet.emit('users:update', user);
@@ -182,19 +186,19 @@ UserSchema.methods.quitCurrentGame = function(callback) {
     if (user.currentGame) {
         Game.findById(user.currentGame, function(err, game) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return callback('error retrieving game');
             }
             if (game) {
                 game.removePlayer(user, function(err) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                         return callback(err);
                     }
                     user.currentGame = undefined;
                     user.save(function(err) {
                         if (err) {
-                            console.log(err);
+                            util.log(err);
                             return callback('error saving user');
                         }
                         return callback(null, game);
@@ -223,7 +227,7 @@ UserSchema.methods.updateStatistics = function(stats, game, callback) {
 
     user.save(function(err) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return callback('error saving user');
         }
         return callback(null, user);
@@ -240,9 +244,9 @@ UserSchema.statics.resetCurrentGames = function() {
         multi: true
     }, function(err) {
         if (err) {
-            console.log(err);
+            util.log(err);
         }
-        console.log('users reset');
+        util.log('users reset');
     });
 };
 
@@ -250,9 +254,9 @@ UserSchema.statics.resetAnonymous = function() {
     var users = this;
     users.remove({ isAnonymous: true }, function(err) {
         if (err) {
-            console.log(err);
+            util.log(err);
         }
-        console.log('anonymous reset');
+        util.log('anonymous reset');
     });
 };
 
@@ -300,9 +304,6 @@ var ExerciseSchema = new Schema({
     typeables: { type: Number },
     highlightingErrorReports: { type: Number, default: 0 }
 });
-
-var NON_TYPEABLES = ['comment', 'template_comment', 'diff', 'javadoc', 'phpdoc'];
-var NON_TYPEABLE_CLASSES = _.map(NON_TYPEABLES, function(c) { return '.' + c; }).join(',');
 
 ExerciseSchema.pre('save', function(next) {
     var exercise = this;
@@ -371,6 +372,10 @@ var GameSchema = new Schema({
     wasReset: { type: Boolean, default: false }
 });
 
+/**
+ * Server-side object that holds timeoutIds for the
+ * timing operations of SwiftCODE.
+ */
 var gameTimeouts = {
     create: function(g, t, f) {
         var self = this;
@@ -418,7 +423,7 @@ GameSchema.methods.updateGameState = function(callback) {
     var wasModified = game.isModified();
     game.save(function(err, game) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return callback('error saving user');
         }
         if (wasNew) {
@@ -492,7 +497,7 @@ GameSchema.methods.setupTiming = function() {
             gameTimeouts.create(game.id, timeLeft - GAME_TIME_JOIN_CUTOFF_MS + 1, function() {
                 Game.findById(game.id, function(err, game) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                     }
                     game.isJoinable = false;
                     game.updateGameState();
@@ -506,7 +511,7 @@ GameSchema.methods.setupTiming = function() {
             gameTimeouts.create(game.id, timeLeft + 1, function() {
                 Game.findById(game.id, function(err, game) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                     }
                     game.start();
                     game.updateGameState();
@@ -576,7 +581,7 @@ GameSchema.methods.updateStatistics = function(stats, callback) {
 
         game.save(function(err) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return callback('error saving game');
             }
             return callback(null, game);
@@ -601,9 +606,9 @@ GameSchema.statics.resetIncomplete = function() {
         multi: true
     }, function(err) {
         if (err) {
-            console.log(err);
+            util.log(err);
         }
-        console.log('games reset');
+        util.log('games reset');
     });
 };
 
@@ -623,18 +628,18 @@ StatsSchema.methods.updateStatistics = function(callback) {
 
     User.findById(stats.player, function(err, user) {
         if (err) {
-            console.log(err);
+            util.log(err);
             return callback(err);
         }
         Game.findById(stats.game, function(err, game) {
             if (err) {
-                console.log(err);
+                util.log(err);
                 return callback(err);
             }
             if (game) {
                 Exercise.findById(game.exercise, function(err, exercise) {
                     if (err) {
-                        console.log(err);
+                        util.log(err);
                         return callback(err);
                     }
 
@@ -652,17 +657,17 @@ StatsSchema.methods.updateStatistics = function(callback) {
 
                     stats.save(function(err) {
                         if (err) {
-                            console.log(err);
+                            util.log(err);
                         }
                     });
                     game.updateStatistics(stats, function(err) {
                         if (err) {
-                            console.log(err);
+                            util.log(err);
                             return callback(err);
                         }
                         user.updateStatistics(stats, game, function(err) {
                             if (err) {
-                                console.log(err);
+                                util.log(err);
                                 return callback(err);
                             }
                             return callback(null, stats, user, game);
