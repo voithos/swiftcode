@@ -28,15 +28,23 @@ exports.playnow = function(req, res) {
         return;
     }
 
-    var user = new models.User({
-        isAnonymous: true,
-        username: models.User.generateAnonymousUsername()
-    });
-    user.save(function(err, saved) {
-        req.logIn(user, function(err) {
-            return res.redirect('/lobby');
+    var maybeGenerateAnonymous = function() {
+        var user = new models.User({
+            isAnonymous: true,
+            username: models.User.generateAnonymousUsername()
         });
-    });
+        user.save(function(err, user) {
+            if (err) {
+                console.log(err);
+                return maybeGenerateAnonymous();
+            }
+            req.logIn(user, function(err) {
+                return res.redirect('/lobby');
+            });
+        });
+    };
+
+    maybeGenerateAnonymous();
 };
 
 /*

@@ -12,6 +12,8 @@ var enet = require('./eventnet');
 
 // Constant configs
 var SALT_WORK_FACTOR = 10;
+var ANONYMOUS_ID_MIN = 1000;
+var ANONYMOUS_ID_MAX = 10000;
 var GAME_TIME_JOIN_CUTOFF_MS = 5000;
 var GAME_SINGLE_PLAYER_WAIT_TIME = 5;
 var GAME_MULTI_PLAYER_WAIT_TIME = 20;
@@ -253,14 +255,8 @@ UserSchema.statics.resetAnonymous = function() {
 };
 
 UserSchema.statics.setupAnonymous = function() {
-    var users = this;
-    users.count({}, function(err, count) {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        anonymousId = count;
-    });
+    anonymousId = Math.floor(Math.random() *
+        (ANONYMOUS_ID_MAX - ANONYMOUS_ID_MIN)) + ANONYMOUS_ID_MIN;
 };
 
 UserSchema.statics.generateAnonymousUsername = function() {
