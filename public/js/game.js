@@ -698,10 +698,12 @@
     });
 
     socket.on('ingame:join', function(data) {
+        console.log('received ingame:join');
         addOpponent(data.player._id, data.player.username);
     });
 
     socket.on('ingame:leave', function(data) {
+        console.log('received ingame:leave');
         removeOpponent(data.player);
     });
 

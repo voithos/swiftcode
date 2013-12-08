@@ -90,7 +90,7 @@ var SwiftCODESockets = function() {
                                     });
                                 }
 
-                                socket.set('game', game);
+                                socket.set('game', game.id);
                                 models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
                                     if (exercise) {
                                         // Join a room and broadcast join
