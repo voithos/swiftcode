@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 var forever = require('forever-monitor');
 
-// TODO: Use official forever repo as dependency once
-// ignorePattern bug has been fixed
 var server = new forever.Monitor('src/server.js', {
     options: process.argv.slice(2),
     watch: true,

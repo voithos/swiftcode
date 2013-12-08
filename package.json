@@ -40,9 +40,9 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.6.3",
-    "forever-monitor": "git://github.com/voithos/forever-monitor#master",
     "grunt-contrib-watch": "~0.5.2",
-    "prompt": "~0.2.11"
+    "prompt": "~0.2.11",
+    "forever-monitor": "~1.2.3"
   },
   "bundleDependencies": [],
   "private": true,
