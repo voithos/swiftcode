@@ -176,6 +176,8 @@ UserSchema.methods.createGame = function(opts, callback) {
 };
 
 UserSchema.methods.quitCurrentGame = function(callback) {
+    callback = callback || function() {};
+
     var user = this;
     if (user.currentGame) {
         Game.findById(user.currentGame, function(err, game) {
