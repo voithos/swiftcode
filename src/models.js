@@ -385,8 +385,10 @@ var gameTimeouts = {
         }, t);
     },
     remove: function(g) {
-        clearTimeout(this[g]);
-        delete this[g];
+        if (g in this) {
+            clearTimeout(this[g]);
+            delete this[g];
+        }
     }
 };
 
@@ -562,6 +564,7 @@ GameSchema.methods.finish = function() {
     game.isComplete = true;
     game.isViewable = false;
     game.isJoinable = false;
+    gameTimeouts.remove(game.id);
 };
 
 GameSchema.methods.updateStatistics = function(stats, callback) {
