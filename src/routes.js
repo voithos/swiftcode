@@ -53,7 +53,7 @@ exports.playnow = function(req, res) {
  */
 
 exports.lobby = function(req, res) {
-    models.Lang.find({}, 'key name', function(err, docs) {
+    models.Lang.find({}, 'key name', { sort: { order: 1 } }, function(err, docs) {
         if (err) {
             util.log(err);
             util.log('Langs not found'); return;
