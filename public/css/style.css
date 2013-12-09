@@ -162,6 +162,12 @@
     text-align: center;
 }
 
+.join-choice[disabled] {
+    background-color: #13987e;
+    border-color: #11866f;
+    opacity: 1.0;
+}
+
 .loading-container {
     display: block;
     height: 300px;
@@ -185,6 +191,12 @@
 .lang {
     width: 90%;
     margin: 0 auto;
+}
+
+.lang-choice[disabled] {
+    background-color: #df2e1b;
+    border-color: #cd2a19;
+    opacity: 1.0;
 }
 
 /* Game page */

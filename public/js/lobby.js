@@ -32,11 +32,17 @@
             return bindings[this.status()];
         }, this);
         this.isJoinable = ko.observable(opts.isJoinable);
+        this.joinCss = ko.observable();
 
         this.join = function() {
+            $('button.join-btn').attr('disabled', 'disabled');
+            $('button.game-type').attr('disabled', 'disabled');
+            $('button.back-btn').attr('disabled', 'disabled');
+            $('button.lang').attr('disabled', 'disabled');
+            this.joinCss('join-choice');
+
             console.log('emit games:join');
             socket.emit('games:join', { game: this._id, player: user._id });
-            this.isJoinable(false);
         }.bind(this);
 
         this.update = function(item) {
@@ -71,6 +77,11 @@
             $('.gametype-container').show('slide', { direction: 'left' });
         },
         newGame: function(key) {
+            $('button.back-btn').attr('disabled', 'disabled');
+            $('button.lang').attr('disabled', 'disabled');
+            $('button.join-btn').attr('disabled', 'disabled');
+            $('button.lang-' + key).addClass('lang-choice');
+
             console.log('emit games:createnew');
             socket.emit('games:createnew', {
                 key: key,
