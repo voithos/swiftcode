@@ -245,9 +245,8 @@ var SwiftCODE = function() {
             if (req.user) {
                 if (req.user.isAnonymous) {
                     deletionId = req.user._id;
-                } else {
-                    req.user.quitCurrentGame();
                 }
+                req.user.quitCurrentGame();
             }
 
             req.logout();
