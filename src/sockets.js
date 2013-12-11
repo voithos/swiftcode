@@ -21,6 +21,8 @@ var SwiftCODESockets = function() {
      * Setup socket listeners
      */
     self.setupListeners = function() {
+        var lobbyCount = 0;
+
         var lobbySockets = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
@@ -67,6 +69,14 @@ var SwiftCODESockets = function() {
                     }
                 });
             });
+
+            socket.on('disconnect', function() {
+                lobbyCount--;
+                lobbySockets.emit('lobbycount', { count: lobbyCount });
+            });
+
+            lobbyCount++;
+            lobbySockets.emit('lobbycount', { count: lobbyCount });
         });
 
         var gameSockets = self.io.of('/game')

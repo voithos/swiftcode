@@ -61,6 +61,7 @@
 
     var viewModel = {
         games: ko.observableArray(),
+        lobbycount: ko.observable(0),
         loading: ko.observable(false),
         loaded: ko.observable(false),
         newGameType: ko.observable(''),
@@ -141,6 +142,11 @@
         if (match) {
             viewModel.games.remove(match);
         }
+    });
+
+    socket.on('lobbycount', function(data) {
+        console.log('received lobbycount');
+        viewModel.lobbycount(data.count);
     });
 
     console.log('emit games:fetch');

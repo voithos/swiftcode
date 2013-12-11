@@ -15,6 +15,10 @@ block content
                         legend Join Game
                         .panel.panel-primary.lobby
                             .panel-heading Lobby
+                                span.pull-right(data-bind="template: 'lobbycountTemplate'")
+                                script(id='lobbycountTemplate', type='text/html')
+                                    span.badge(data-bind='text: lobbycount')
+                                    span(data-bind="text: lobbycount() === 1 ? ' player' : ' players'")
                             .panel-body(data-bind="template: 'lobbyTemplate'")
                             script(id='lobbyTemplate', type='text/html')
                                 table.table.table-striped.table-hover
