@@ -4,12 +4,12 @@
     $(document).ready(function() {
         $('.panel-body').slimScroll({
             color: '#2c3e50',
-            height: '400px'
+            height: '386px'
         });
 
         $('.language-list').slimScroll({
             color: '#2c3e50',
-            height: '444px'
+            height: '430px'
         });
     });
 
