@@ -3,7 +3,6 @@
 ### Core features
 * Spam protection in login process
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
-* Propagate keystrokes even if they were mistakes
 * Give a more descriptive error message if the game is full, or if it doesn't exist
 * Better anti-cheat
 * Add method to kick out inactive users

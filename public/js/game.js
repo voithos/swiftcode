@@ -89,8 +89,11 @@
         this.mistakes = 0;
         this.mistakePositions = [];
 
+        this.isMainPlayer = cfg.isMainPlayer || false;
+
         this.onCorrectKey = cfg.onCorrectKey || function() {};
         this.onAdvanceCursor = cfg.onAdvanceCursor || function() {};
+        this.onRetreatCursor = cfg.onRetreatCursor || function() {};
         this.onGameComplete = cfg.onGameComplete || function() {};
 
         this.cursor.addClass(this.playerName);
@@ -113,8 +116,13 @@
     CodeCursor.prototype.advanceCursorWithClass = function(curClass, trailingClass) {
         this.keystrokes++;
         this.pos++;
-        this.cursor.removeClass('untyped').removeClass(curClass);
-        this.cursor.addClass('typed').addClass(trailingClass);
+
+        this.cursor.removeClass(curClass);
+        if (this.isMainPlayer) {
+            this.cursor.removeClass('untyped');
+            this.cursor.addClass('typed');
+        }
+        this.cursor.addClass(trailingClass);
 
         this.cursor = this.cursor.nextAll('.code-char').first();
         this.cursor.addClass(curClass);
@@ -122,7 +130,11 @@
         this.onAdvanceCursor.call(this, this);
     };
 
-    CodeCursor.prototype.retreatCursor = function(curClass, trailingClass) {
+    CodeCursor.prototype.retreatCursor = function() {
+        this.retreatCursorWithClass(this.playerName);
+    };
+
+    CodeCursor.prototype.retreatCursorWithClass = function(curClass, trailingClass) {
         this.keystrokes++;
         this.pos--;
         this.mistakePathLength--;
@@ -130,14 +142,20 @@
         this.cursor.removeClass(curClass);
         this.cursor = this.cursor.prevAll('.code-char').first();
 
-        this.cursor.removeClass('typed').removeClass(trailingClass);
-        this.cursor.addClass('untyped').addClass(curClass);
+        this.cursor.removeClass(trailingClass);
+        if (this.isMainPlayer) {
+            this.cursor.removeClass('typed');
+            this.cursor.addClass('untyped');
+        }
+        this.cursor.addClass(curClass);
+
+        this.onRetreatCursor.call(this, this);
     };
 
     CodeCursor.prototype.correctKey = function() {
         this.advanceCursorWithClass(this.playerName);
 
-        this.onCorrectKey.call(this);
+        this.onCorrectKey.call(this, this);
         if (this.pos === this.codeLength) {
             this.onGameComplete.call(this, this);
         }
@@ -169,7 +187,7 @@
 
     CodeCursor.prototype.backspaceKey = function() {
         if (this.isMistaken) {
-            this.retreatCursor(this.playerName + ' mistaken', 'mistake-path mistake');
+            this.retreatCursorWithClass(this.playerName + ' mistaken', 'mistake-path mistake');
 
             if (this.mistakePathLength === 0) {
                 this.isMistaken = false;
@@ -429,12 +447,13 @@
         updateTime();
         if (!state.playerCursor) {
             state.playerCursor = new CodeCursor({
+                isMainPlayer: true,
                 playerId: user._id,
                 playerName: 'player',
                 cursor: $gamecode.find('.code-char').first(),
                 code: state.code,
-                onCorrectKey: emitCursorAdvancement,
                 onAdvanceCursor: onPlayerAdvanceCursor,
+                onRetreatCursor: emitCursorRetreat,
                 onGameComplete: completeGame
             });
         }
@@ -496,6 +515,7 @@
     var onPlayerAdvanceCursor = function(cursor) {
         scrollToCursor(cursor);
         updatePlayerProgress(cursor);
+        emitCursorAdvance();
     };
 
     var scrollToCursor = function(cursor) {
@@ -520,8 +540,15 @@
         viewModel.game.players.push(new Player(user._id, 0, user.username));
     };
 
-    var emitCursorAdvancement = function() {
+    var emitCursorAdvance = function() {
         socket.emit('ingame:advancecursor', {
+            game: game._id,
+            player: user._id
+        });
+    };
+
+    var emitCursorRetreat = function() {
+        socket.emit('ingame:retreatcursor', {
             game: game._id,
             player: user._id
         });
@@ -709,6 +736,13 @@
         var opponent = data.player;
         if (opponent in state.opponentCursors) {
             state.opponentCursors[opponent].advanceCursor();
+        }
+    });
+
+    socket.on('ingame:retreatcursor', function(data) {
+        var opponent = data.player;
+        if (opponent in state.opponentCursors) {
+            state.opponentCursors[opponent].retreatCursor();
         }
     });
 

@@ -169,6 +169,13 @@ var SwiftCODESockets = function() {
                 });
             });
 
+            socket.on('ingame:retreatcursor', function(data) {
+                socket.broadcast.to('game-' + data.game).emit('ingame:retreatcursor', {
+                    player: data.player,
+                    game: data.game
+                });
+            });
+
             socket.on('report:highlightingerror', function(data) {
                 models.Exercise.findById(data.exercise, function(err, exercise) {
                     if (exercise) {
