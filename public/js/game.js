@@ -65,7 +65,6 @@
         }
     };
 
-    swiftcode.viewModel = viewModel;
     ko.applyBindings(viewModel);
 
     var $gamecode = null;
@@ -187,7 +186,7 @@
     /**
      * Current game state
      */
-    var state = swiftcode.state = {
+    var state = {
         time: null,
         startTime: null,
         code: null,
@@ -528,7 +527,7 @@
         });
     };
 
-    var completeGame = swiftcode.completeGame = function(cursor) {
+    var completeGame = function(cursor) {
         game.isComplete = true;
         clearTimeout(timeId);
         lastTimestamp = null;
@@ -626,8 +625,8 @@
             return;
         }
 
-        game = swiftcode.game = data.game;
-        exercise = swiftcode.exercise = data.exercise;
+        game = data.game;
+        exercise = data.exercise;
         state.code = data.exercise.typeableCode;
         state.time = data.timeLeft;
         nonTypeables = data.nonTypeables;
@@ -647,14 +646,14 @@
 
     socket.on('ingame:update', function(data) {
         console.log('received ingame:update');
-        game = swiftcode.game = data.game;
+        game = data.game;
         state.time = data.timeLeft;
         checkGameState();
     });
 
     socket.on('ingame:complete:res', function(data) {
         console.log('received ingame:complete:res');
-        game = swiftcode.game = data.game;
+        game = data.game;
 
         var message;
 

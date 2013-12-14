@@ -92,7 +92,6 @@
         }
     };
 
-    swiftcode.viewModel = viewModel;
     ko.applyBindings(viewModel);
 
     socket.on('games:fetch:res', function(data) {

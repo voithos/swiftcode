@@ -6,6 +6,7 @@
 * Propagate keystrokes even if they were mistakes
 * Give a more descriptive error message if the game is full, or if it doesn't exist
 * Better anti-cheat
+* Add method to kick out inactive users
 
 ### Bugs
 * Error occurs after unjoining (playerCursor set to null, never set back?)
