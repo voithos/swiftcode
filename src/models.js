@@ -101,8 +101,6 @@ UserSchema.methods.performIngameAction = function(callback) {
             }
             user.joinGame(game, function(err, success, game) {
                 if (err) {
-                    util.log(err);
-                    util.log('games:join error');
                     return callback(err, false);
                 }
                 return callback(err, success, game);
@@ -118,8 +116,6 @@ UserSchema.methods.performIngameAction = function(callback) {
                     isSinglePlayer: user.ingameArgs.isSinglePlayer
                 }, function(err, success, game) {
                     if (err) {
-                        util.log(err);
-                        util.log('games:createnew error');
                         return callback(err, false);
                     }
                     return callback(err, success, game);
@@ -137,8 +133,9 @@ UserSchema.methods.performIngameAction = function(callback) {
 UserSchema.methods.joinGame = function(game, callback) {
     var user = this;
 
-    if (!game.checkJoinable(user._id)) {
-        return callback('game is not joinable by this user', false);
+    var error = game.getJoinError(user._id);
+    if (error) {
+        return callback(error, false);
     }
 
     user.currentGame = game._id;
@@ -532,9 +529,15 @@ GameSchema.methods.setStatus = function(status) {
     this.statusText = bindings[status];
 };
 
-GameSchema.methods.checkJoinable = function(player) {
+GameSchema.methods.getJoinError = function(player) {
     var game = this;
-    return (game.isJoinable || game.isSinglePlayer) && !_.contains(game.players, player);
+    if (!game.isJoinable && !game.isSinglePlayer) {
+        return 'this game is full, or has been removed';
+    }
+    if (_.contains(game.players, player)) {
+        return 'you are already inside another game!';
+    }
+    return undefined;
 };
 
 GameSchema.methods.addPlayer = function(player, callback) {
