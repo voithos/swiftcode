@@ -51,6 +51,9 @@
             mistakes: ko.observable(0)
         },
         game: new GameState(),
+        hideCompletionDialog: function() {
+            $('#completion-dialog').modal('hide');
+        },
         submitHighlightingReport: function() {
             console.log('emit report:highlightingerror');
             socket.emit('report:highlightingerror', {

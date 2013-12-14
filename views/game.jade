@@ -101,3 +101,6 @@ block content
                         .clearfix
                     .modal-footer
                         a.btn.btn-primary(href='/lobby') Back to lobby
+                        // ko if: game.isMultiplayer
+                        a.btn.btn-default(data-bind='click: hideCompletionDialog') Continue watching
+                        // /ko
