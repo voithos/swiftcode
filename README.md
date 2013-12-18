@@ -81,6 +81,7 @@ place).
 
     grunt add-admin
 
+The following prompt is for a username and a password (must be >= 8 characters).
 Once an admin user has been added, the admin interface can be accessed after
 logging in, using the link in the drop-down in the top-right corner of the
 page.
