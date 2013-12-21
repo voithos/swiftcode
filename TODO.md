@@ -6,6 +6,7 @@
 * Better anti-cheat
 * Add method to kick out inactive users
 * Figure out a proper ordering for the lobby games
+* Allow single user to play multi-player, to allow multi-player to get started when few users are online.
 
 ### Bugs
 * Error occurs after unjoining (playerCursor set to null, never set back?)
