@@ -5,7 +5,6 @@
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 * Better anti-cheat
 * Add method to kick out inactive users
-* Figure out a proper ordering for the lobby games
 * Allow single user to play multi-player, to allow multi-player to get started when few users are online.
 
 ### Bugs

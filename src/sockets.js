@@ -26,7 +26,7 @@ var SwiftCODESockets = function() {
         var lobbySockets = self.io.of('/lobby')
         .on('connection', function(socket) {
             socket.on('games:fetch', function(data) {
-                models.Game.find({ isViewable: true }, function(err, docs) {
+                models.Game.find({ isViewable: true }, null, { sort: { isJoinable: -1 } }, function(err, docs) {
                     socket.emit('games:fetch:res', docs);
                 });
             });

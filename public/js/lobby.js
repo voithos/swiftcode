@@ -123,7 +123,7 @@
 
     socket.on('games:new', function(data) {
         console.log('received games:new');
-        viewModel.games.push(new Game(data));
+        viewModel.games.unshift(new Game(data));
     });
 
     socket.on('games:createnew:res', function(data) {
