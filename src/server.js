@@ -261,8 +261,20 @@ var SwiftCODE = function() {
             res.redirect('/');
         });
 
+        self.app.get('/', function(req, res) {
+            if (req.isAuthenticated()) {
+                res.redirect('/lobby');
+                return;
+            }
 
-        self.app.get('/', routes.index);
+            res.render('index', {
+                title: 'Home',
+                error: req.flash('error'),
+                addthis: self.config.addthis
+            });
+        });
+
+
         self.app.get('/signup', routes.signup);
         self.app.get('/playnow', routes.playnow);
         self.app.post('/create-account', routes.createAccount);

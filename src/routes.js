@@ -5,22 +5,6 @@ var _ = require('lodash');
 var models = require('./models');
 
 /*
- * GET home page.
- */
-
-exports.index = function(req, res) {
-    if (req.isAuthenticated()) {
-        res.redirect('/lobby');
-        return;
-    }
-
-    res.render('index', {
-        title: 'Home',
-        error: req.flash('error')
-    });
-};
-
-/*
  * GET playnow.
  */
 exports.playnow = function(req, res) {

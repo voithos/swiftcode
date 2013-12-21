@@ -5,6 +5,7 @@
 * Add automated tests to compare server-side typeable-detection with client-side typeable-to-DOM matching algorithm
 * Better anti-cheat
 * Add method to kick out inactive users
+* Figure out a proper ordering for the lobby games
 
 ### Bugs
 * Error occurs after unjoining (playerCursor set to null, never set back?)
@@ -20,3 +21,4 @@
 * Training mode? ("beat your own time")
 * Dynamic favicon update in lobby page, when people login / logout (know how many people are in lobby)
 * Badges / leaderboard?
+* Show statistics of opponents, after they win?
