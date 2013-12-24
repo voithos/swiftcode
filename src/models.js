@@ -313,6 +313,7 @@ ExerciseSchema.pre('save', function(next) {
 ExerciseSchema.methods.initialize = function() {
     var exercise = this;
     exercise.normalizeNewlines();
+    exercise.tabsToSpaces();
     exercise.countTypeables();
     exercise.isInitialized = true;
 };
@@ -320,6 +321,11 @@ ExerciseSchema.methods.initialize = function() {
 ExerciseSchema.methods.normalizeNewlines = function() {
     var exercise = this;
     exercise.code = exercise.code.replace(/\r\n|\n\r|\r|\n/g, '\n');
+};
+
+ExerciseSchema.methods.tabsToSpaces = function() {
+    var exercise = this;
+    exercise.code = exercise.code.replace(/\t/g, '    ');
 };
 
 ExerciseSchema.methods.countTypeables = function() {
