@@ -90,7 +90,7 @@ var SwiftCODESockets = function() {
                             return socket.emit('ingame:ready:res', {
                                 success: false,
                                 err: err
-                            });;
+                            });
                         }
                         if (user) {
                             user.performIngameAction(function(err, success, game) {
