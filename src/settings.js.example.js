@@ -16,10 +16,6 @@ settings.port = 8080;
 // to have it be auto-generated on startup.
 settings.sessionSecret = '<Change this to a secret string>';
 
-// The ID for the AddThis widget. Leave null if you don't want
-// it to pop up.
-settings.addthis = null;
-
 // Database settings
 settings.dbname = 'swiftcode';
 settings.dbhost = 'localhost';

@@ -269,8 +269,7 @@ var SwiftCODE = function() {
 
             res.render('index', {
                 title: 'Home',
-                error: req.flash('error'),
-                addthis: self.config.addthis
+                error: req.flash('error')
             });
         });
 

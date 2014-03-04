@@ -1,16 +1,6 @@
 extends layout
 
 block content
-    if addthis
-        script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=#{addthis}')
-        script(type='text/javascript').
-            addthis.layers({
-                'theme' : 'transparent',
-                'share' : {
-                    'position' : 'left',
-                    'numPreferredServices' : 4
-                }
-            });
     .banner
         .container
             .row

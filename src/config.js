@@ -34,9 +34,6 @@ var SwiftCODEConfig = function() {
     self.sessionSecret = process.env.SWIFTCODE_SESSION_SECRET ||
         settings.sessionSecret || genSalt(SALT_LENGTH);
 
-    self.addthis = process.env.SWIFTCODE_ADDTHIS ||
-        settings.addthis || null;
-
     self.ipaddress = process.env.SWIFTCODE_NODEJS_IP ||
         settings.ipaddress || '0.0.0.0';
     self.port = process.env.SWIFTCODE_NODEJS_PORT ||
