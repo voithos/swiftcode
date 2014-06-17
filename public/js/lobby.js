@@ -145,7 +145,8 @@
 
     socket.on('lobbycount', function(data) {
         console.log('received lobbycount');
-        viewModel.lobbycount(data.count);
+        // Don't include the current user as part of the count
+        viewModel.lobbycount(data.count - 1);
     });
 
     console.log('emit games:fetch');
