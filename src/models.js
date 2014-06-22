@@ -133,7 +133,7 @@ UserSchema.methods.performIngameAction = function(callback) {
 UserSchema.methods.joinGame = function(game, callback) {
     var user = this;
 
-    var error = game.getJoinError(user._id);
+    var error = game.getJoinError(user);
     if (error) {
         return callback(error, false);
     }
@@ -160,7 +160,7 @@ UserSchema.methods.createGame = function(opts, callback) {
 
     // User cannot create a game when he is already in one
     if (user.currentGame) {
-        return callback('already in a game', false);
+        return callback('you are already inside another game!', false);
     }
 
     var game = new Game();
@@ -540,7 +540,10 @@ GameSchema.methods.getJoinError = function(player) {
     if (!game.isJoinable && !game.isSinglePlayer) {
         return 'this game is full, or has been removed';
     }
-    if (_.contains(game.players, player)) {
+    var playerIds = _.map(game.players, function(p) {
+        return p.toHexString();
+    });
+    if (_.contains(playerIds, player.id)) {
         return 'you are already inside another game!';
     }
     return undefined;
