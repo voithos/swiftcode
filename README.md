@@ -115,5 +115,6 @@ order:
 - Cheerio
 - Helmet
 - Alertify
+- Favico.js
 - Mousetrap
 - And of course, HTML5 itself!

@@ -50,9 +50,15 @@ $(document).ready(function() {
 // Initialize automatic page refresh alert
 if (typeof user != 'undefined') {
     (function() {
-        var alertTimeout = 600 * 1000; // 600 seconds, or 10 minutes
+        var alertTimeout = 55 * 60 * 1000; // 55 minutes
 
         var showTimeoutAlert = function() {
+            var redirectTimeout = 5 * 60 * 1000;
+
+            var redirectId = setTimeout(function() {
+                window.location = '/';
+            }, redirectTimeout);
+
             alertify.set({
                 labels: {
                     ok: 'Yes'
@@ -60,6 +66,7 @@ if (typeof user != 'undefined') {
             });
 
             alertify.alert("You haven't changed pages in a while. Are you still there?", function() {
+                clearTimeout(redirectId);
                 $.ajax({
                     type: 'GET',
                     url: '/'
@@ -68,7 +75,7 @@ if (typeof user != 'undefined') {
             });
         };
 
-        setTimeout(showTimeoutAlert, alertTimeout); // 600 seconds, or 10 minutes
+        setTimeout(showTimeoutAlert, alertTimeout);
     })();
 }
 

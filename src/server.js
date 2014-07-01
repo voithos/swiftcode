@@ -181,7 +181,7 @@ var SwiftCODE = function() {
                 store: self.sessionstore,
                 secret: self.config.sessionSecret,
                 cookie: {
-                    maxAge: 900 * 1000 // 15 minutes or 900 seconds
+                    maxAge: 60 * 60 * 1000 // 1 hour
                 }
             }));
             self.app.use(flash());

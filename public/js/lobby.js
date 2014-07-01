@@ -94,6 +94,16 @@
 
     ko.applyBindings(viewModel);
 
+    // Favicon updates
+    var favico = new Favico({
+        position: 'left',
+        animation: 'fade'
+    });
+
+    viewModel.lobbycount.subscribe(function(count) {
+        favico.badge(count);
+    });
+
     socket.on('games:fetch:res', function(data) {
         console.log('received games:fetch:res');
         var games = _.map(data, function(v) {
