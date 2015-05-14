@@ -1,5 +1,6 @@
 'use strict';
 
+var path = require('path');
 var settings;
 try {
     settings = require('./settings');
@@ -29,14 +30,15 @@ var SwiftCODEConfig = function() {
     // Setup configuration from the environment
     var self = this;
 
-    self.repo = process.env.SWIFTCODE_REPO_DIR || './';
+    self.repo = process.env.SWIFTCODE_REPO_DIR ||
+        path.join(__dirname, '..');
 
     self.sessionSecret = process.env.SWIFTCODE_SESSION_SECRET ||
         settings.sessionSecret || genSalt(SALT_LENGTH);
 
     self.ipaddress = process.env.SWIFTCODE_NODEJS_IP ||
         settings.ipaddress || '0.0.0.0';
-    self.port = process.env.SWIFTCODE_NODEJS_PORT ||
+    self.port = process.env.SWIFTCODE_NODEJS_PORT || process.env.PORT ||
         settings.port || 8080;
 
     self.dbconnectionstring = process.env.SWIFTCODE_DB_CONNECTIONSTRING ||
