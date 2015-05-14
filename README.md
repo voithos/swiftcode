@@ -45,12 +45,12 @@ player's screen.
 
 ### Requirements
 
-- Node.js and NPM
-- MongoDB
+- Node.js and NPM (v0.10)
+- MongoDB (v2.4)
 
 ### Download
 
-Grab the source code and the dependencies.
+Grab the source code and the NPM dependencies.
 
     git clone https://github.com/voithos/swiftcode.git
     cd swiftcode
