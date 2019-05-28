@@ -45,7 +45,7 @@ var UserSchema = new Schema({
     ingameAction: { type: String },
     ingameArgs: { type: Schema.Types.Mixed },
     currentGame: { type: Schema.ObjectId }
-});
+}, { usePushEach: true });
 
 // TODO: Look into using async library to avoid the spaghetti nesting
 UserSchema.pre('save', function(next) {
@@ -272,7 +272,7 @@ var LangSchema = new Schema({
     name: { type: String },
     order: { type: Number },
     exercises: [Schema.ObjectId]
-});
+}, { usePushEach: true });
 
 LangSchema.methods.randomExercise = function() {
     return this.exercises[Math.floor(Math.random() * this.exercises.length)];
@@ -286,7 +286,7 @@ var ProjectSchema = new Schema({
     licenseUrl: { type: String },
     lang: { type: String },
     langName: { type: String }
-});
+}, { usePushEach: true });
 
 var ExerciseSchema = new Schema({
     isInitialized: { type: Boolean },
@@ -300,7 +300,7 @@ var ExerciseSchema = new Schema({
     typeableCode: { type: String },
     typeables: { type: Number },
     highlightingErrorReports: { type: Number, default: 0 }
-});
+}, { usePushEach: true });
 
 ExerciseSchema.pre('save', function(next) {
     var exercise = this;
@@ -373,7 +373,7 @@ var GameSchema = new Schema({
     playerNames: [String],
     startingPlayers: [Schema.ObjectId],
     wasReset: { type: Boolean, default: false }
-});
+}, { usePushEach: true });
 
 /**
  * Server-side object that holds timeoutIds for the
@@ -633,7 +633,7 @@ var StatsSchema = new Schema({
     keystrokes: { type: Number },
     percentUnproductive: { type: Number },
     mistakes: { type: Number }
-});
+}, { usePushEach: true });
 
 StatsSchema.methods.updateStatistics = function(callback) {
     var stats = this;
