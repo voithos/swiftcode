@@ -82,82 +82,77 @@ var SwiftCODESockets = function() {
         var gameSockets = self.io.of('/game')
         .on('connection', function(socket) {
             socket.on('ingame:ready', function(data) {
-                socket.set('player', data.player, function() {
-                    models.User.findById(data.player, function(err, user) {
-                        if (err) {
-                            util.log(err);
-                            util.log('ingame:ready error');
-                            return socket.emit('ingame:ready:res', {
-                                success: false,
-                                err: err
-                            });
-                        }
-                        if (user) {
-                            user.performIngameAction(function(err, success, game) {
-                                if (!success) {
-                                    return socket.emit('ingame:ready:res', {
+                socket.player = data.player;
+                models.User.findById(data.player, function(err, user) {
+                    if (err) {
+                        util.log(err);
+                        util.log('ingame:ready error');
+                        return socket.emit('ingame:ready:res', {
+                            success: false,
+                            err: err
+                        });
+                    }
+                    if (user) {
+                        user.performIngameAction(function(err, success, game) {
+                            if (!success) {
+                                return socket.emit('ingame:ready:res', {
+                                    success: false,
+                                    err: err
+                                });
+                            }
+
+                            socket.game = game.id;
+                            models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
+                                if (exercise) {
+                                    // Join a room and broadcast join
+                                    socket.join('game-' + game.id);
+
+                                    socket.emit('ingame:ready:res', {
+                                        success: true,
+                                        game: game,
+                                        timeLeft: game.starting ? moment().diff(game.startTime) : undefined,
+                                        exercise: exercise,
+                                        nonTypeables: models.NON_TYPEABLE_CLASSES
+                                    });
+                                } else {
+                                    util.log('exercise not found');
+                                    socket.emit('ingame:ready:res', {
                                         success: false,
-                                        err: err
+                                        err: 'exercise not found'
                                     });
                                 }
-
-                                socket.set('game', game.id);
-                                models.Exercise.findById(game.exercise, 'code projectName typeableCode typeables', function(err, exercise) {
-                                    if (exercise) {
-                                        // Join a room and broadcast join
-                                        socket.join('game-' + game.id);
-
-                                        socket.emit('ingame:ready:res', {
-                                            success: true,
-                                            game: game,
-                                            timeLeft: game.starting ? moment().diff(game.startTime) : undefined,
-                                            exercise: exercise,
-                                            nonTypeables: models.NON_TYPEABLE_CLASSES
-                                        });
-                                    } else {
-                                        util.log('exercise not found');
-                                        socket.emit('ingame:ready:res', {
-                                            success: false,
-                                            err: 'exercise not found'
-                                        });
-                                    }
-                                });
                             });
-                        }
-                    });
+                        });
+                    }
                 });
             });
 
             socket.on('ingame:complete', function(data) {
-                socket.get('player', function(err, player) {
+                if (socket.player == undefined) {
+                    util.log('could not find player');
+                    return;
+                }
+                if (socket.game == undefined) {
+                    util.log('could not find game');
+                    return;
+                }
+                
+                var stats = new models.Stats({
+                    player: socket.player,
+                    game: socket.game,
+                    time: data.time,
+                    keystrokes: data.keystrokes,
+                    mistakes: data.mistakes
+                });
+
+                stats.updateStatistics(function(err, stats, user, game) {
                     if (err) {
                         util.log(err);
                         return;
                     }
-                    socket.get('game', function(err, game) {
-                        if (err) {
-                            util.log(err);
-                            return;
-                        }
-                        
-                        var stats = new models.Stats({
-                            player: player,
-                            game: game,
-                            time: data.time,
-                            keystrokes: data.keystrokes,
-                            mistakes: data.mistakes
-                        });
-
-                        stats.updateStatistics(function(err, stats, user, game) {
-                            if (err) {
-                                util.log(err);
-                                return;
-                            }
-                            socket.emit('ingame:complete:res', {
-                                stats: stats,
-                                game: game
-                            });
-                        });
+                    socket.emit('ingame:complete:res', {
+                        stats: stats,
+                        game: game
                     });
                 });
             });
@@ -186,31 +181,27 @@ var SwiftCODESockets = function() {
             });
 
             socket.on('disconnect', function() {
-                socket.get('game', function(err, game) {
+                if (socket.player == undefined) {
+                    util.log('could not find player');
+                    return;
+                }
+                if (socket.game == undefined) {
+                    util.log('could not find game');
+                    return;
+                }
+                models.User.findById(socket.player, function(err, user) {
                     if (err) {
                         util.log(err);
-                        return;
+                        util.log('ingame:exit error'); return;
                     }
-                    socket.get('player', function(err, player) {
-                        if (err) {
-                            util.log(err);
-                            return;
-                        }
-                        models.User.findById(player, function(err, user) {
+                    if (user) {
+                        user.quitCurrentGame(function(err, game) {
                             if (err) {
                                 util.log(err);
                                 util.log('ingame:exit error'); return;
                             }
-                            if (user) {
-                                user.quitCurrentGame(function(err, game) {
-                                    if (err) {
-                                        util.log(err);
-                                        util.log('ingame:exit error'); return;
-                                    }
-                                });
-                            }
                         });
-                    });
+                    }
                 });
             });
         });
