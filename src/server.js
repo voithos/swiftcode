@@ -64,7 +64,7 @@ var SwiftCODE = function() {
         // Socket.IO server needs to listen in the same block as the HTTP
         // server, or you'll get listen EACCES errors (due to Node's context
         // switching?)
-        self.io = io.listen(self.server);
+        self.io = io(self.server);
         self.server.listen(self.config.port, self.config.ipaddress);
         self.sockets.listen(self.io);
 
