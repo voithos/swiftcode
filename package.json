@@ -20,7 +20,7 @@
     "node": "8.x"
   },
   "dependencies": {
-    "bcrypt": "1.0.3",
+    "bcrypt": "5.0.0",
     "cheerio": "0.12.1",
     "connect": "2.10.1",
     "connect-flash": "0.1.1",
